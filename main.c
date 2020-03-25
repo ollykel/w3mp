@@ -5888,7 +5888,7 @@ set_buffer_environ(Buffer *buf)
 	else
 	    set_environ("W3M_CURRENT_FORM", "");
 	if (a)
-		set_environ("W3M_CURRENT_ANCHOR", a->target);
+		set_environ("W3M_CURRENT_ANCHOR", getAnchorText(buf, buf->href, a));
 	else
 		set_environ("W3M_CURRENT_ANCHOR", "");
 	set_environ("W3M_CURRENT_LINE", Sprintf("%ld",
