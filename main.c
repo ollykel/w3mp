@@ -5900,6 +5900,12 @@ set_buffer_environ(Buffer *buf)
 	char *s = GetWord(buf);
 	set_environ("W3M_CURRENT_WORD", s ? s : "");
 	a = retrieveCurrentAnchor(buf);
+	if (a)
+		char *t = getAnchorText(buf, buf->href, a);
+		t = t ? html_quote(t) : "";
+		set_environ("W3M_CURRENT_ANCHOR", t);
+	else
+		set_environ("W3M_CURRENT_ANCHOR", "");
 	if (a) {
 	    parseURL2(a->url, &pu, baseURL(buf));
 	    set_environ("W3M_CURRENT_LINK", parsedURL2Str(&pu)->ptr);
@@ -5918,10 +5924,6 @@ set_buffer_environ(Buffer *buf)
 	    set_environ("W3M_CURRENT_FORM", form2str((FormItemList *)a->url));
 	else
 	    set_environ("W3M_CURRENT_FORM", "");
-	if (a)
-		set_environ("W3M_CURRENT_ANCHOR", getAnchorText(buf, buf->href, a));
-	else
-		set_environ("W3M_CURRENT_ANCHOR", "");
 	set_environ("W3M_CURRENT_LINE", Sprintf("%ld",
 						l->real_linenumber)->ptr);
 	set_environ("W3M_CURRENT_COLUMN", Sprintf("%d",
