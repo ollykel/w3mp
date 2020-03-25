@@ -5900,10 +5900,11 @@ set_buffer_environ(Buffer *buf)
 	char *s = GetWord(buf);
 	set_environ("W3M_CURRENT_WORD", s ? s : "");
 	a = retrieveCurrentAnchor(buf);
-	if (a)
+	if (a) {
 		char *t = getAnchorText(buf, buf->href, a);
 		t = t ? html_quote(t) : "";
 		set_environ("W3M_CURRENT_ANCHOR", t);
+	}
 	else
 		set_environ("W3M_CURRENT_ANCHOR", "");
 	if (a) {
