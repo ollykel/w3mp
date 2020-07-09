@@ -6909,3 +6909,13 @@ DEFUN(redoPos, REDO, "Cancel the last undo")
     for (i = 0; i < PREC_NUM && b->next; i++, b = b->next) ;
     resetPos(b);
 }
+
+DEFUN(message, MESSAGE, "display a message at the bottom of the screen")
+{
+	char *msg = searchKeyData();
+	if (msg) {
+		disp_message(msg, TRUE);
+	} else {
+		displayBuffer(Currentbuf, B_NORMAL);
+	}
+}
