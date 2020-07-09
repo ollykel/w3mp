@@ -6975,7 +6975,7 @@ DEFUN(cursorBottom, CURSOR_BOTTOM, "Move cursor to the bottom of the screen")
     displayBuffer(Currentbuf, B_NORMAL);
 }
 
-DEFUN(message, MESSAGE, "display a message at the bottom of the screen")
+DEFUN(printMsg, MESSAGE, "display a message at the bottom of the screen")
 {
 	char *msg = searchKeyData();
 	if (msg) {

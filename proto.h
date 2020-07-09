@@ -102,6 +102,7 @@ extern void reshape(void);
 extern void chkURL(void);
 extern void chkURLBuffer(Buffer *buf);
 extern void chkWORD(void);
+extern void printMsg(void);
 #ifdef USE_NNTP
 extern void chkNMID(void);
 extern void chkNMIDBuffer(Buffer *buf);
