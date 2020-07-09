@@ -102,7 +102,6 @@ extern void reshape(void);
 extern void chkURL(void);
 extern void chkURLBuffer(Buffer *buf);
 extern void chkWORD(void);
-extern void printMsg(void);
 #ifdef USE_NNTP
 extern void chkNMID(void);
 extern void chkNMIDBuffer(Buffer *buf);
@@ -114,6 +113,7 @@ extern void extbrz(void);
 extern void linkbrz(void);
 extern void curlno(void);
 extern void execCmd(void);
+extern void printMsg(void);
 #ifdef USE_IMAGE
 extern void dispI(void);
 extern void stopI(void);
