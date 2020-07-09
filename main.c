@@ -6910,7 +6910,7 @@ DEFUN(redoPos, REDO, "Cancel the last undo")
     resetPos(b);
 }
 
-DEFUN(message, MESSAGE, "display a message at the bottom of the screen")
+DEFUN(printMsg, MESSAGE, "display a message at the bottom of the screen")
 {
 	char *msg = searchKeyData();
 	if (msg) {
