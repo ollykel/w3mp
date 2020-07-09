@@ -5864,6 +5864,8 @@ set_buffer_environ(Buffer *buf)
 		char keynum_buf[15];
 		snprintf(keynum_buf, 14, "%d", key_num);
 		set_environ("W3M_KEYNUM", keynum_buf);
+	} else {
+		set_environ("W3M_KEYNUM", "");
 	}
 #ifdef USE_M17N
 	set_environ("W3M_CHARSET", wc_ces_to_charset(buf->document_charset));
