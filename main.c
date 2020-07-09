@@ -5852,14 +5852,8 @@ set_buffer_environ(Buffer *buf)
 
     if (buf == NULL)
 	return;
-    if (buf != prev_buf) {
-	set_environ("W3M_SOURCEFILE", buf->sourcefile);
-	set_environ("W3M_FILENAME", buf->filename);
-	set_environ("W3M_TITLE", buf->buffername);
-	set_environ("W3M_URL", parsedURL2Str(&buf->currentURL)->ptr);
-	set_environ("W3M_TYPE", buf->real_type ? buf->real_type : "unknown");
 	// Feature in testing: reveal prec_num / searchKeyNum
-	int key_num = prec_num ? searchKeyNum() : 0;
+	int key_num = prec_num ? PREC_NUM : 0;
 	if (key_num) {
 		char keynum_buf[15];
 		snprintf(keynum_buf, 14, "%d", key_num);
@@ -5867,6 +5861,12 @@ set_buffer_environ(Buffer *buf)
 	} else {
 		set_environ("W3M_KEYNUM", "");
 	}
+    if (buf != prev_buf) {
+	set_environ("W3M_SOURCEFILE", buf->sourcefile);
+	set_environ("W3M_FILENAME", buf->filename);
+	set_environ("W3M_TITLE", buf->buffername);
+	set_environ("W3M_URL", parsedURL2Str(&buf->currentURL)->ptr);
+	set_environ("W3M_TYPE", buf->real_type ? buf->real_type : "unknown");
 #ifdef USE_M17N
 	set_environ("W3M_CHARSET", wc_ces_to_charset(buf->document_charset));
 #endif
