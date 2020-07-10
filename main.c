@@ -6137,7 +6137,11 @@ DEFUN(printMsg, MESSAGE, "display a message at the bottom of the screen")
 	if (msg) {
 		disp_message(msg, TRUE);
 	} else {
-		displayBuffer(Currentbuf, B_NORMAL);
+		msg = inputStrHist("(message):", NULL, TextHist);
+		if (msg)
+			disp_message(msg, TRUE);
+		else
+			displayBuffer(Currentbuf, B_NORMAL);
 	}
 }
 
