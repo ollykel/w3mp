@@ -60,6 +60,7 @@ MARK_URL	Turn URL-like strings into hyperlinks
 MARK_WORD	Turn current word into hyperlink
 MENU		Pop up menu
 MENU_MOUSE	Pop up menu at mouse pointer
+MESSAGE		Display message at bottom of screen
 MOUSE_TOGGLE	Toggle mouse support
 MOVE_DOWN	Cursor down
 MOVE_DOWN1	Cursor down. With edge touched, slide
