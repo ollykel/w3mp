@@ -48,6 +48,7 @@ Hist *SaveHist;
 Hist *URLHist;
 Hist *ShellHist;
 Hist *TextHist;
+Hist *SearchHist;
 
 typedef struct _Event {
     int cmd;
@@ -509,6 +510,7 @@ main(int argc, char **argv, char **envp)
     ShellHist = newHist();
     TextHist = newHist();
     URLHist = newHist();
+	SearchHist = newHist();
 
 #ifdef USE_M17N
     if (FollowLocale && Locale) {
@@ -5863,7 +5865,7 @@ execdict(char *word)
 
 DEFUN(dictword, DICT_WORD, "Execute dictionary command (see README.dict)")
 {
-    execdict(inputStrHist("(dictionary)!", NULL, TextHist));
+    execdict(inputStrHist("(dictionary)!", NULL, SearchHist));
 }
 
 DEFUN(dictwordat, DICT_WORD_AT,
