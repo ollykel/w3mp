@@ -235,6 +235,8 @@ typedef struct {
 #define HTML_N_FIGURE   142
 #define HTML_FIGCAPTION 143
 #define HTML_N_FIGCAPTION   144
+#define HTML_SECTION    145
+#define HTML_N_SECTION  146
 
    /* pseudo tag */
 #define HTML_SELECT_INT     160
@@ -318,6 +320,7 @@ typedef struct {
 #define ATTR_REV		48
 #define ATTR_TITLE		49
 #define ATTR_ACCESSKEY		50
+#define ATTR_PUBLIC		51
 
 /* Internal attribute */
 #define ATTR_XOFFSET		60

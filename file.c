@@ -1,4 +1,5 @@
 /* $Id: file.c,v 1.266 2012/05/22 09:45:56 inu Exp $ */
+/* vi: set sw=4 ts=8 ai sm noet : */
 #include "fm.h"
 #include <sys/types.h>
 #include "myctype.h"
@@ -4322,9 +4323,18 @@ process_idattr(struct readbuffer *obuf, int cmd, struct parsed_tag *tag)
       obuf->flag &= ~RB_P;\
     }
 
-#define CLOSE_A \
-    CLOSE_P; \
-    close_anchor(h_env, obuf);
+#define HTML5_CLOSE_A do { \
+	if (obuf->flag & RB_HTML5) { \
+	    close_anchor(h_env, obuf); \
+	} \
+    } while (0)
+
+#define CLOSE_A do { \
+	CLOSE_P; \
+	if (!(obuf->flag & RB_HTML5)) { \
+	    close_anchor(h_env, obuf); \
+	} \
+    } while (0)
 
 #define CLOSE_DT \
     if (obuf->flag & RB_IN_DT) { \
@@ -4487,9 +4497,27 @@ HTMLtagproc1(struct parsed_tag *tag, struct html_feed_environ *h_env)
 	HTMLlineproc1("</b>", h_env);
 	return 1;
     case HTML_Q:
+#ifdef USE_M17N
+#ifdef USE_UNICODE
+	if (DisplayCharset != WC_CES_US_ASCII) {
+	    HTMLlineproc1((obuf->q_level & 1 ? "&lsquo;": "&ldquo;"), h_env);
+	    obuf->q_level += 1;
+	}
+	else
+#endif
+#endif
 	HTMLlineproc1("`", h_env);
 	return 1;
     case HTML_N_Q:
+#ifdef USE_M17N
+#ifdef USE_UNICODE
+	if (DisplayCharset != WC_CES_US_ASCII) {
+	    obuf->q_level -= 1;
+	    HTMLlineproc1((obuf->q_level & 1 ? "&rsquo;": "&rdquo;"), h_env);
+	}
+	else
+#endif
+#endif
 	HTMLlineproc1("'", h_env);
 	return 1;
     case HTML_FIGURE:
@@ -4772,6 +4800,7 @@ HTMLtagproc1(struct parsed_tag *tag, struct html_feed_environ *h_env)
 	}
 	flushline(h_env, obuf, envs[h_env->envc].indent, 0, h_env->limit);
 	return 0;
+    case HTML_SECTION:
     case HTML_HR:
 	close_anchor(h_env, obuf);
 	tmp = process_hr(tag, h_env->limit, envs[h_env->envc].indent);
@@ -4930,6 +4959,8 @@ HTMLtagproc1(struct parsed_tag *tag, struct html_feed_environ *h_env)
 	close_anchor(h_env, obuf);
 	return 1;
     case HTML_IMG:
+	if (parsedtag_exists(tag, ATTR_USEMAP))
+	    HTML5_CLOSE_A;
 	tmp = process_img(tag, h_env->limit);
 	HTMLlineproc1(tmp->ptr, h_env);
 	return 1;
@@ -5125,6 +5156,7 @@ HTMLtagproc1(struct parsed_tag *tag, struct html_feed_environ *h_env)
            HTMLlineproc1(tmp->ptr, h_env);
        return 1;
     case HTML_BUTTON:
+       HTML5_CLOSE_A;
        tmp = process_button(tag);
        if (tmp)
            HTMLlineproc1(tmp->ptr, h_env);
@@ -5179,6 +5211,11 @@ HTMLtagproc1(struct parsed_tag *tag, struct html_feed_environ *h_env)
 			     "<input type=text name=\"\" accept></form>",
 			     NULL);
 	HTMLlineproc1(tmp->ptr, h_env);
+	return 1;
+    case HTML_DOCTYPE:
+	if (!parsedtag_exists(tag, ATTR_PUBLIC)) {
+	    obuf->flag |= RB_HTML5;
+	}
 	return 1;
     case HTML_META:
 	p = q = r = NULL;
@@ -5378,6 +5415,7 @@ HTMLtagproc1(struct parsed_tag *tag, struct html_feed_environ *h_env)
 	}
 	return 1;
     case HTML_EMBED:
+	HTML5_CLOSE_A;
 	if (view_unseenobject) {
 	    if (parsedtag_get_value(tag, ATTR_SRC, &p)) {
 		Str s;
