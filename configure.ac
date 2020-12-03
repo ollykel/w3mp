@@ -28,6 +28,7 @@ AC_PROG_RANLIB
 AC_PATH_PROGS(PERL, perl, /usr/local/bin/perl)
 AC_PATH_PROGS(NKF, nkf, /usr/local/bin/nkf)
 AC_PATH_PROGS(MAN, man, /usr/bin/man)
+AC_PATH_XTRA
 AC_CANONICAL_HOST
 
 AC_EXEEXT
@@ -161,7 +162,6 @@ case "$host_os" in
     AM_LANGINFO_CODESET
     ;;
 esac
-AC_W3M_SYS_ERRLIST
 AC_W3M_SIGSETJMP
 AC_W3M_SIGNAL
 

@@ -1,3 +1,116 @@
+2020-11-24  Tatsuya Kinoshita  <tats@debian.org>
+
+	* po/POTFILES.in, po/de.po, po/ja.po, po/w3m.pot, po/zh_CN.po:
+	* po/zh_TW.po: Update PO.
+
+	* configure: Update configure by autoconf 2.69.
+
+	* config.h.dist, config.h.in, configure, configure.ac:
+	Define X_DISPLAY_MISSING when configure --without-x for Imlib2.
+	cf. https://github.com/NixOS/nixpkgs/commit/3cad8fba2958981307f94b865c2b970b95e10789
+
+2020-11-22  Tatsuya Kinoshita  <tats@debian.org>
+
+	* gitlog2changelog: Update example to use UTC for gitlog2changelog.
+
+	* acinclude.m4, config.h.dist, config.h.in, configure, configure.ac:
+	Drop HAVE_SYS_ERRLIST.
+
+2020-11-22  Parag A Nemade  <pnemade@fedoraproject.org>
+
+	* config.h.in:
+	Fix compilation error "too few arguments to function 'longjmp'".
+	Origin: https://src.fedoraproject.org/rpms/w3m/c/e7a12fa28cfbfbb0115ec74994092c1d3b8351d8?branch=master
+	Bug-MacPorts: https://trac.macports.org/ticket/61356
+
+2020-11-22  Parag Nemade  <pnemade@redhat.com>
+
+	* etc.c, main.c: Fix FTBFS due to redefinition of sys_errlist.
+	Origin: https://src.fedoraproject.org/rpms/w3m/c/99f30870caac12a3949b6736aa70b7233f4414d5?branch=master
+	Bug-Fedora: https://bugzilla.redhat.com/show_bug.cgi?id=1038009
+	Bug-MacPorts: https://trac.macports.org/ticket/61356
+
+2020-11-15  Tatsuya Kinoshita  <tats@debian.org>
+
+	* gitlog2changelog:
+	Include gitlog2changelog to easily generate ChangeLog.
+
+	* Makefile.in: Use xz instead of gzip for the dist target.
+
+2020-11-12  Tatsuya Kinoshita  <tats@debian.org>
+
+	* Makefile.in: Update the dist target to use git archive.
+
+	* Bonus/README, Bonus/README.eng: Update examples for 2ch.cgi.
+
+	* Bonus/2ch.cgi: Add charset=Shift_JIS to 2ch.cgi.
+
+2020-11-11  Tatsuya Kinoshita  <tats@debian.org>
+
+	* file.c, proto.h:
+	Fix compilation errors when USE_GOPHER and not USE_M17N.
+
+2020-11-11  bptato  <nincsnevem662@gmail.com>
+
+	Support Gopher search and binary files.
+	Origin: https://github.com/tats/w3m/pull/154
+
+	* url.c: Remove useless loop.
+
+	* file.c: Remove unnecessary file_unquote call.
+
+	* url.c: Remove unnecessary variable assignment.
+
+	* file.c, proto.h, url.c:
+	Support Gopher items search (7) and binary file (9).
+
+2020-10-24  Tatsuya Kinoshita  <tats@debian.org>
+
+	* acinclude.m4, configure: Enable Gopher support by default.
+
+2020-10-24  bptato  <nincsnevem662@gmail.com>
+
+	Fix broken Gopher support.
+	Origin: https://github.com/tats/w3m/pull/152
+	Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=742455
+
+	* file.c, url.c:
+	Moved back filetype indicator to the beginning of file names.
+
+	* file.c: Improved gopher directory display.
+
+	* file.c, url.c: Improved gopher support.
+
+2020-09-28  Tatsuya Kinoshita  <tats@debian.org>
+
+	* scripts/w3mman/w3mman.in: Accept section "l" for w3mman.
+
+2020-09-25  Tatsuya Kinoshita  <tats@debian.org>
+
+	* scripts/w3mman/w3mman.in:
+	Assume a local file if the argument contains slash for w3mman.
+
+2020-09-25  Dustin Boyd  <memreflect@pm.me>
+
+	* scripts/w3mman/w3mman2html.cgi.in: Remove -l flag in CGI script.
+	Origin: https://bugs.freebsd.org/bugzilla/attachment.cgi?id=217947&action=diff
+	Bug-FreeBSD: https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=249305
+
+2020-09-15  Tatsuya Kinoshita  <tats@debian.org>
+
+	* .cvsignore, libwc/.cvsignore, po/.cvsignore, scripts/.cvsignore:
+	* scripts/multipart/.cvsignore, scripts/w3mman/.cvsignore:
+	* w3mimg/.cvsignore, w3mimg/fb/.cvsignore, w3mimg/win/.cvsignore:
+	* w3mimg/x11/.cvsignore: Remove .cvsignore.
+
+	* .gitignore: Add .gitignore.
+
+2020-09-15  Bruno Haible  <bruno@clisp.org>
+
+	* url.c: Add support for file://hostname/... URLs.
+	Origin: https://github.com/tats/w3m/files/3488813/file-hostname-support.diff.gz
+	Bug-Debian: https://github.com/tats/w3m/issues/120
+
 2020-09-06  Tatsuya Kinoshita  <tats@debian.org>
 
 	* README, doc-jp/README, doc/README: Mention forked version.

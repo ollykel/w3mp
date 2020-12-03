@@ -22,13 +22,16 @@ while (@ARGV) {
     @ARGV || &usage();
     if ( $query eq "" ) { $query = "?quit=ok"; }
     $query .= "&keyword=" . &form_encode(shift @ARGV);
-  } elsif (/^-l$/) {
-    @ARGV || &usage(); 
-    $query = "?quit=ok&local=" . &form_encode(shift @ARGV);
+  } elsif (/^-l$/ || /\//) {
+    if (/^-l$/) {
+      @ARGV || &usage(); 
+      $_ = shift @ARGV;
+    }
+    $query = "?quit=ok&local=" . &form_encode($_);
     $query .= "&pwd=" . &form_encode($ENV{'PWD'});
   } elsif (/^-/) {
     &usage();
-  } elsif (/^\d/ || $_ eq 'n') {
+  } elsif (/^\d/ || $_ eq 'n' || $_ eq 'l') {
     if ( $query eq "" ) { $query = "?quit=ok"; }
     $query .= "&section=" . &form_encode($_);
   } else {

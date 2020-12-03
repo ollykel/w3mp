@@ -125,8 +125,8 @@ AC_DEFUN([AC_W3M_GOPHER],
 [AC_SUBST(USE_GOPHER)
  AC_MSG_CHECKING(if gopher is enabled)
  AC_ARG_ENABLE(gopher,
-  [  --enable-gopher		enable GOPHER],,
-  [enable_gopher="no"])
+  [  --disable-gopher		disable GOPHER],,
+  [enable_gopher="yes"])
  test x"$enable_gopher" = xyes &&  AC_DEFINE(USE_GOPHER)
  AC_MSG_RESULT($enable_gopher)])
 #
@@ -858,21 +858,6 @@ if test x"$enable_ipv6" = xyes; then
     AC_DEFINE(INET6)
  fi
 fi])
-#
-# ----------------------------------------------------------------
-# AC_W3M_SYS_ERRLIST
-# ----------------------------------------------------------------
-AC_DEFUN([AC_W3M_SYS_ERRLIST],
-[AC_SUBST(HAVE_SYS_ERRLIST)
-AC_MSG_CHECKING(for sys_errlist)
-AC_TRY_COMPILE(
-changequote(<<,>>)dnl
-<<extern char *sys_errlist[];>>,
-<<printf("%s", sys_errlist[0]);>>,
-changequote([,])dnl
-[have_sys_errlist="yes"; AC_DEFINE(HAVE_SYS_ERRLIST)],
-[have_sys_errlist="no"])
-AC_MSG_RESULT($have_sys_errlist)])
 #
 # ----------------------------------------------------------------
 # AC_W3M_SIGSETJMP

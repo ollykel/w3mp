@@ -1,6 +1,7 @@
 /* $Id: url.c,v 1.100 2010/12/15 10:50:24 htrb Exp $ */
 #include "fm.h"
 #ifndef __MINGW32_VERSION
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -38,6 +39,10 @@
 #ifdef __MINGW32_VERSION
 #define	write(a,b,c)	send(a,b,c, 0)
 #define close(fd)	closesocket(fd)
+#endif
+
+#ifndef HOST_NAME_MAX
+#define HOST_NAME_MAX 64
 #endif
 
 #ifdef INET6
@@ -720,13 +725,34 @@ parseURL(char *url, ParsedURL *p_url, ParsedURL *current)
 	    copyParsedURL(p_url, current);
 	goto do_label;
     }
+    if (!strncasecmp(url, "file://", 7)) {
 #if defined( __EMX__ ) || defined( __CYGWIN__ )
-    if (!strncasecmp(url, "file://localhost/", 17)) {
-	p_url->scheme = SCM_LOCAL;
-	p += 17 - 1;
-	url += 17 - 1;
-    }
+	if (!strncasecmp(url + 7, "localhost/", 10)) {
+	    p_url->scheme = SCM_LOCAL;
+	    p += 7 + 10 - 1;
+	    url += 7 + 10 - 1;
+	} else
 #endif
+	{
+	    /* Recognize the machine's host name.  This is necessary for URLs
+	     * produced by 'ls --hyperlink' or similar.  */
+	    char hostname[HOST_NAME_MAX + 2];
+	    if (gethostname (hostname, HOST_NAME_MAX + 2) == 0) {
+		size_t hostname_len;
+		/* Don't use hostname if it is truncated.  */
+		hostname[HOST_NAME_MAX + 1] = '\0';
+		hostname_len = strlen (hostname);
+		if (hostname_len <= HOST_NAME_MAX) {
+		    if (!strncasecmp(url + 7, hostname, hostname_len)
+			&& *(url + 7 + hostname_len) == '/') {
+			p_url->scheme = SCM_LOCAL;
+			p += 7 + hostname_len;
+			url += 7 + hostname_len;
+		    }
+		}
+	    }
+	}
+    }
 #ifdef SUPPORT_DOS_DRIVE_PREFIX
     if (IS_ALPHA(*p) && (p[1] == ':' || p[1] == '|')) {
 	p_url->scheme = SCM_LOCAL;
@@ -1544,6 +1570,11 @@ openURL(char *url, ParsedURL *pu, ParsedURL *current,
     Str tmp;
     int sock, scheme;
     char *p, *q, *u;
+#ifdef USE_GOPHER
+    Str gophertmp;
+    char type;
+    int n;
+#endif
     URLFile uf;
     HRequest hr0;
 #ifdef USE_SSL
@@ -1807,6 +1838,41 @@ openURL(char *url, ParsedURL *pu, ParsedURL *current,
 	break;
 #ifdef USE_GOPHER
     case SCM_GOPHER:
+	p = pu->file;
+	n = 0;
+	while(*p == '/') {
+	  ++p;
+	  ++n;
+	}
+	if(*p != '\0') {
+	  type = pu->file[n];
+	  switch(type) {
+	    case '0':
+	    case '1':
+	    case 'm':
+	    case 's':
+	    case 'g':
+	    case 'h':
+	    case '7':
+	    case '9':
+	      tmp = Strnew_charp(pu->file);
+	      gophertmp = Strdup(tmp);
+	      Strdelete(tmp, n, 1);
+	      pu->file = tmp->ptr;
+	      break;
+	    default:
+	      type = '\0';
+	      break;
+	  }
+	} else {
+	  type = '\0';
+	}
+	if(pu->query != NULL) {
+	  tmp = Strnew_charp(pu->file);
+	  Strcat_char(tmp, '\t');
+	  Strcat_charp(tmp, pu->query);
+	  pu->file = tmp->ptr;
+	}
 	if (non_null(GOPHER_proxy) &&
 	    !Do_not_use_proxy &&
 	    pu->host != NULL && !check_no_proxy(pu->host)) {
@@ -1829,6 +1895,9 @@ openURL(char *url, ParsedURL *pu, ParsedURL *current,
 	    Strcat_char(tmp, '\n');
 	}
 	write(sock, tmp->ptr, tmp->length);
+	if(type != '\0') {
+	  pu->file = gophertmp->ptr;
+	}
 	break;
 #endif				/* USE_GOPHER */
 #ifdef USE_NNTP

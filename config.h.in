@@ -75,6 +75,7 @@
 #undef USE_IMLIB
 #undef USE_GDKPIXBUF
 #undef USE_GTK2
+#undef X_DISPLAY_MISSING
 #undef USE_IMLIB2
 #undef USE_XFACE
 #undef USE_DICT
@@ -127,7 +128,6 @@ typedef long clen_t;
 #undef HAVE_STRCASESTR
 #undef HAVE_STRCHR
 #undef HAVE_STRERROR
-#undef HAVE_SYS_ERRLIST
 #undef HAVE_BCOPY
 #undef HAVE_WAITPID
 #undef HAVE_WAIT3
@@ -181,7 +181,7 @@ typedef RETSIGTYPE MySignalHandler;
 #endif /* __MINGW32_VERSION */
 #else
 # define SETJMP(env) setjmp(env)
-# define LONGJMP(env,val) longjmp(env)
+# define LONGJMP(env,val) longjmp(env, val)
 # define JMP_BUF jmp_buf
 #endif
 
