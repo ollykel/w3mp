@@ -61,7 +61,17 @@ searchMailcap(struct mailcap *table, char *type)
 	    if (table->test) {
 		Str command =
 		    unquote_mailcap(table->test, type, NULL, NULL, NULL);
-		if (system(command->ptr) != 0)
+		// TODO: this is an ugly workaround; get to the root of the problem (system() returns -1 inconsistently) and fix it
+		int test_status = 0;
+		// test repeatedly until process exit status can be retrieved (system returns -1 if status cannot be retrieved)
+		for (int i = 0; i < 10; i++) {
+			test_status = system(command->ptr);
+			if (test_status == -1) {
+				continue;
+			}// end if test_status == -1
+			break;
+		}// end for i = 0; i < 10; i++
+		if (test_status != 0)
 		    continue;
 	    }
 	    level = i;
