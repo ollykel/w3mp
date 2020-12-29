@@ -336,7 +336,9 @@ openSSLHandle(int sock, char *hostname, char **p_cert)
 #endif
 	if (!(ssl_ctx = SSL_CTX_new(SSLv23_client_method())))
 	    goto eend;
+#if (OPENSSL_VERSION_NUMBER < 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
 	SSL_CTX_set_cipher_list(ssl_ctx, "DEFAULT:!LOW:!RC4:!EXP");
+#endif
 	option = SSL_OP_ALL;
 	if (ssl_forbid_method) {
 	    if (strchr(ssl_forbid_method, '2'))
@@ -1853,6 +1855,8 @@ openURL(char *url, ParsedURL *pu, ParsedURL *current,
 	    case 's':
 	    case 'g':
 	    case 'h':
+	    case 'I':
+	    case '5':
 	    case '7':
 	    case '9':
 	      tmp = Strnew_charp(pu->file);

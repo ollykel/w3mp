@@ -19,10 +19,10 @@ The last match wins.
 
 ===== Examples =====
 
-url "https://twitter.com/"
-substitute_url "https://mobile.twitter.com/"
+url m!^https?://([a-z]+\.)?twitter\.com/!
+substitute_url "https://nitter.net/"
 
-This forwards the twitter.com to its mobile site.
+This forwards twitter.com to the alternative site.
 
 url "http://your.bookmark.net/"
 no_referer_from on
@@ -46,6 +46,12 @@ user_agent "Lynx/2.8.8dev.3 libwww-FM/2.14 SSL-MM/1.4.1"
 
 Tell Google we're actually Lynx. (So they send us a text-browser friendly
 results page.)
+
+url m!^https?://([a-z]+\.)?twitter\.com/!
+user_agent "Googlebot/2.1"
+
+Tell Twitter we're actually Googlebot. (So they send us a page without
+rejection of a JavaScript disabled browser.)
 
 ===== Regular expressions notes =====
 
