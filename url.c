@@ -1362,7 +1362,7 @@ otherinfo(ParsedURL *target, ParsedURL *current, char *referer)
     const int *no_referer_ptr;
     int no_referer;
     const char* url_user_agent = query_SCONF_USER_AGENT(target);
-	const char *url_accept_encoding = query_SCONF_USER_AGENT(target);
+	const char *url_accept_encoding = query_SCONF_ACCEPT_ENCODING(target);
 	const char *accept_encoding = url_accept_encoding ? url_accept_encoding :
 		AcceptEncoding ? AcceptEncoding : "identity";
 
