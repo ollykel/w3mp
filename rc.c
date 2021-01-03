@@ -1606,6 +1606,7 @@ helpFile(char *base)
  * no_referer_from on|off
  * no_referer_to on|off
  * user_agent "<string>"
+ * accept_encoding "<string>"
  * 
  * The last match wins.
  */
@@ -1619,6 +1620,7 @@ struct siteconf_rec {
 
     char *substitute_url;
     char *user_agent;
+	char *accept_encoding;
 #ifdef USE_M17N
     wc_ces url_charset;
 #endif
@@ -1646,6 +1648,7 @@ newSiteconfRec(void)
 
     ent->substitute_url = NULL;
     ent->user_agent = NULL;
+	ent->accept_encoding = NULL;
 #ifdef USE_M17N
     ent->url_charset = 0;
 #endif
@@ -1727,6 +1730,10 @@ loadSiteconf(void)
 	if (strcmp(s, "user_agent") == 0) {
 	    ent->user_agent = getQWord(&p);
 	    SCONF_SET(ent, SCONF_USER_AGENT);
+	}
+	if (strcmp(s, "accept_encoding") == 0) {
+	    ent->accept_encoding = getQWord(&p);
+	    SCONF_SET(ent, SCONF_ACCEPT_ENCODING);
 	}
 #ifdef USE_M17N
 	else if (strcmp(s, "url_charset") == 0) {
@@ -1811,6 +1818,11 @@ url_found:
 	if (ent->user_agent && *ent->user_agent) {
 	    return ent->user_agent;
 	}
+	return NULL;
+	case SCONF_ACCEPT_ENCODING:
+	if (ent->accept_encoding && *ent->accept_encoding) {
+		return ent->accept_encoding;
+	}// end if ent->accept_encoding && *ent->accept_encoding
 	return NULL;
 #ifdef USE_M17N
     case SCONF_URL_CHARSET:
