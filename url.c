@@ -1362,6 +1362,9 @@ otherinfo(ParsedURL *target, ParsedURL *current, char *referer)
     const int *no_referer_ptr;
     int no_referer;
     const char* url_user_agent = query_SCONF_USER_AGENT(target);
+	const char *url_accept_encoding = query_SCONF_USER_AGENT(target);
+	const char *accept_encoding = url_accept_encoding ? url_accept_encoding :
+		AcceptEncoding ? AcceptEncoding : "identity";
 
     if (!override_user_agent) {
         Strcat_charp(s, "User-Agent: ");
@@ -1375,7 +1378,7 @@ otherinfo(ParsedURL *target, ParsedURL *current, char *referer)
     }
 
     Strcat_m_charp(s, "Accept: ", AcceptMedia, "\r\n", NULL);
-    Strcat_m_charp(s, "Accept-Encoding: ", AcceptEncoding, "\r\n", NULL);
+    Strcat_m_charp(s, "Accept-Encoding: ", accept_encoding, "\r\n", NULL);
     Strcat_m_charp(s, "Accept-Language: ", AcceptLang, "\r\n", NULL);
 
     if (target->host) {
