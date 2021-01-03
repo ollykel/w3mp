@@ -277,7 +277,8 @@ extern int REV_LB[];
 #define SCONF_NO_REFERER_FROM	3
 #define SCONF_NO_REFERER_TO	4
 #define SCONF_USER_AGENT	5
-#define SCONF_N_FIELD		6
+#define SCONF_ACCEPT_ENCODING	6
+#define SCONF_N_FIELD		7
 #define query_SCONF_SUBSTITUTE_URL(pu) ((const char *)querySiteconf(pu, SCONF_SUBSTITUTE_URL))
 #define query_SCONF_USER_AGENT(pu) ((const char *)querySiteconf(pu, SCONF_USER_AGENT))
 #define query_SCONF_URL_CHARSET(pu) ((const wc_ces *)querySiteconf(pu, SCONF_URL_CHARSET))
