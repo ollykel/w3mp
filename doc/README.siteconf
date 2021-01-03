@@ -14,6 +14,7 @@ url_charset <charset>
 no_referer_from on|off
 no_referer_to on|off
 user_agent "string"
+accept_encoding "string"
 
 The last match wins.
 
