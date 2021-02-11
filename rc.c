@@ -1336,11 +1336,20 @@ init_rc(void)
 	goto rc_dir_err;
     }
     if (!(st.st_mode & S_IWUSR)) {
-	/* fprintf(stderr, "%s is not writable!\n", rc_dir); */
-	goto rc_dir_err;
+		/* fprintf(stderr, "%s is not writable!\n", rc_dir); */
+		goto rc_dir_err;
     }
     no_rc_dir = FALSE;
-    tmp_dir = rc_dir;
+	create_tmp_dir:
+    if (((tmp_dir = getenv("TMPDIR")) == NULL || *tmp_dir == '\0') &&
+	((tmp_dir = getenv("TMP")) == NULL || *tmp_dir == '\0') &&
+	((tmp_dir = getenv("TEMP")) == NULL || *tmp_dir == '\0'))
+	tmp_dir = "/tmp";
+#ifdef HAVE_MKDTEMP
+    tmp_dir = mkdtemp(Strnew_m_charp(tmp_dir, "/w3m-XXXXXX", NULL)->ptr);
+    if (tmp_dir == NULL)
+	tmp_dir = rc_dir;
+#endif
 
     if (config_file == NULL)
 	config_file = rcFile(CONFIG_FILE);
@@ -1365,17 +1374,7 @@ init_rc(void)
 
   rc_dir_err:
     no_rc_dir = TRUE;
-    if (((tmp_dir = getenv("TMPDIR")) == NULL || *tmp_dir == '\0') &&
-	((tmp_dir = getenv("TMP")) == NULL || *tmp_dir == '\0') &&
-	((tmp_dir = getenv("TEMP")) == NULL || *tmp_dir == '\0'))
-	tmp_dir = "/tmp";
-#ifdef HAVE_MKDTEMP
-    tmp_dir = mkdtemp(Strnew_m_charp(tmp_dir, "/w3m-XXXXXX", NULL)->ptr);
-    if (tmp_dir == NULL)
-	tmp_dir = rc_dir;
-#endif
-    create_option_search_table();
-    goto open_rc;
+    goto create_tmp_dir;
 }
 
 
