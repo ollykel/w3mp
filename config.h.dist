@@ -1,5 +1,5 @@
 /*
- * Configuration for w3m
+ * Configuration for w3mp
  * This is sample.  ./configure will generate config.h for you.
  */
 
@@ -10,7 +10,7 @@
 
 /* 
    If you define USE_DICT, you can use dictionary look-up function
-   in w3m. See README.dict for detail.
+   in w3mp. See README.dict for detail.
 */
 #define USE_DICT
 
@@ -20,7 +20,7 @@
 #define USE_HISTORY
 
 /*
-   USE_BG_COLOR enables w3m to set background color.
+   USE_BG_COLOR enables w3mp to set background color.
  */
 #define USE_BG_COLOR
 
@@ -70,16 +70,16 @@
 #ifdef makefile_parameter
 
 BIN_DIR = /usr/local/bin
-AUXBIN_DIR = /usr/local/lib/w3m
-CGIBIN_DIR = /usr/local/lib/w3m/cgi-bin
-HELP_DIR = /usr/local/share/w3m
+AUXBIN_DIR = /usr/local/lib/w3mp
+CGIBIN_DIR = /usr/local/lib/w3mp/cgi-bin
+HELP_DIR = /usr/local/share/w3mp
 MAN_DIR = /usr/local/man
 MAN1_DIR = $(MAN_DIR)/man1
 MAN1_JA_DIR = $(MAN_DIR)/ja/man1
-ETC_DIR = /usr/local/etc/w3m
-RC_DIR = ~/.w3m
-HELP_FILE = w3mhelp-w3m_ja.html
-RC_DIR = ~/.w3m/
+ETC_DIR = /usr/local/etc/w3mp
+RC_DIR = ~/.w3mp
+HELP_FILE = w3mphelp-w3m_ja.html
+RC_DIR = ~/.w3mp/
 SYS_LIBRARIES = -lgpm  -lbsd -lnsl -lncurses  -L/usr/lib -L/usr/lib -L/usr/local/ssl/lib -L/usr/local/ssl/lib -lssl -lcrypto 
 LOCAL_LIBRARIES = 
 CC = gcc
@@ -154,17 +154,17 @@ INSTALL_W3MIMGDISPLAY=$(INSTALL_PROGRAM)
 /* for USE_MIGEMO */
 #define DEF_MIGEMO_COMMAND	"migemo -t egrep /usr/share/migemo/migemo-dict"
 
-#define AUXBIN_DIR   "/usr/local/lib/w3m"
-#define CGIBIN_DIR      "/usr/local/lib/w3m/cgi-bin"
-#define HELP_DIR     "/usr/local/lib/w3m"
-#define ETC_DIR	     "/usr/local/etc/w3m"
-#define HELP_FILE    "w3mhelp.html"
-#define HELP_CGI     "w3mhelp"
-#define W3MCONFIG    "w3mconfig"
+#define AUXBIN_DIR   "/usr/local/lib/w3mp"
+#define CGIBIN_DIR      "/usr/local/lib/w3mp/cgi-bin"
+#define HELP_DIR     "/usr/local/lib/w3mp"
+#define ETC_DIR	     "/usr/local/etc/w3mp"
+#define HELP_FILE    "w3mphelp.html"
+#define HELP_CGI     "w3mphelp"
+#define W3MCONFIG    "w3mpconfig"
 #define IMGDISPLAY   "w3mimgdisplay"
 #define XFACE2XPM    "xface2xpm"
 
-#define RC_DIR       "~/.w3m"
+#define RC_DIR       "~/.w3mp"
 #define BOOKMARK     "bookmark.html"
 #define CONFIG_FILE  "config"
 #define KEYMAP_FILE  "keymap"
