@@ -109,16 +109,16 @@ HELPER=w3mhelperpanel$(EXT)
 INFLATE=inflate$(EXT)
 IMGDISPLAY=w3mimgdisplay$(EXT)
 MAN1_TARGET=$(PACKAGE).1
-MAN1=$(top_srcdir)/doc/w3m.1
-MAN1_JA=$(top_srcdir)/doc-jp/w3m.1
-MAN1_DE=$(top_srcdir)/doc-de/w3m.1
+MAN1=$(top_srcdir)/doc/w3mp.1
+MAN1_JA=$(top_srcdir)/doc-jp/w3mp.1
+MAN1_DE=$(top_srcdir)/doc-de/w3mp.1
 
 LIB_TARGETS=$(BOOKMARKER) $(HELPER)
 AUXBIN_TARGETS=@AUXBIN_TARGETS@
 TARGETS=$(TARGET) $(LIB_TARGETS) $(AUXBIN_TARGETS)
-HELP_TARGET=w3mhelp.html
-HELP_ALLFILES=w3mhelp-w3m_en.html w3mhelp-w3m_ja.html \
-	w3mhelp-lynx_en.html w3mhelp-lynx_ja.html
+HELP_TARGET=w3mphelp.html
+HELP_ALLFILES=w3mphelp-w3m_en.html w3mphelp-w3m_ja.html \
+	w3mphelp-lynx_en.html w3mphelp-lynx_ja.html
 
 DEFUNS=$(top_srcdir)/main.c $(top_srcdir)/menu.c
 SCRIPTSUBDIRS= scripts
@@ -308,8 +308,8 @@ distclean: clean
 		(cd $$subdir && $(MAKE) distclean); \
 	done
 	-$(RM) -f config.cache config.log config.status
-	-$(RM) -f w3mhelp-w3m_en.html w3mhelp-w3m_ja.html
-	-$(RM) -f w3mhelp-lynx_en.html w3mhelp-lynx_ja.html
+	-$(RM) -f w3mphelp-w3m_en.html w3mphelp-w3m_ja.html
+	-$(RM) -f w3mphelp-lynx_en.html w3mphelp-lynx_ja.html
 	-$(RM) -f version.c
 	-$(RM) -f posubst
 	-$(RM) -f config.h Makefile
@@ -322,8 +322,8 @@ depend:
 	makedepend $(CFLAGS) *.c
 
 dist:
-	git archive --format=tar --prefix=w3m-$(VERSION)/ HEAD | xz -9e > ../w3m-$(VERSION).tar.xz
+	git archive --format=tar --prefix=w3mp-$(VERSION)/ HEAD | xz -9e > ../w3mp-$(VERSION).tar.xz
 
 bindist:
-	cd ..; tar cvfz w3m-$(VERSION)-$(MODEL).tar.gz w3m/w3m* w3m/doc* w3m/Bonus* w3m/README w3m/scripts 
+	cd ..; tar cvfz w3mp-$(VERSION)-$(MODEL).tar.gz w3mp/w3mp* w3mp/doc* w3mp/Bonus* w3mp/README w3mp/scripts 
 
