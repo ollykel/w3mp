@@ -5860,6 +5860,8 @@ set_buffer_environ(Buffer *buf)
 		set_environ("W3M_KEYNUM", "");
 	}
     if (buf != prev_buf) {
+	set_environ("W3M_HOME", rc_dir);
+	set_environ("W3M_TEMP", tmp_dir);
 	set_environ("W3M_SOURCEFILE", buf->sourcefile);
 	set_environ("W3M_FILENAME", buf->filename);
 	set_environ("W3M_TITLE", buf->buffername);
