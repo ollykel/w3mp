@@ -174,6 +174,8 @@ INSTALL_W3MIMGDISPLAY=$(INSTALL_PROGRAM)
 
 #define PASSWD_FILE RC_DIR "/passwd"
 #define PRE_FORM_FILE RC_DIR "/pre_form"
+#define USER_BINDIR RC_DIR "/bin"
+#define SYS_BINDIR ETC_DIR "/bin"
 #define USER_MAILCAP RC_DIR "/mailcap"
 #define SYS_MAILCAP  "/etc/mailcap"
 #define USER_MIMETYPES "~/.mime.types"
