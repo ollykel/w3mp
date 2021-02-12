@@ -148,6 +148,39 @@ sock_log(char *message, ...)
 
 #endif
 
+static TextList *bin_dir_list;
+
+void
+initBinDirs()
+{
+	char path_sep[2] = { PATH_SEPARATOR, '\0' };
+	if (!non_null(bin_dirs)) {
+		bin_dir_list = NULL;
+		return;
+	}// end if !non_null(bin_dirs)
+	bin_dir_list = make_domain_list(bin_dirs);
+	if (!bin_dir_list->nitem) {
+		return;
+	}// end if !bin_dir_list->nitem
+	Str path_env = Strnew_charp(expandPath(bin_dir_list->first->ptr));
+	for (TextListItem *tli = bin_dir_list->first->next; tli; tli = tli->next) {
+		Strcat_m_charp(path_env, path_sep, expandPath(tli->ptr), NULL);
+		if (tli == bin_dir_list->last) {
+			break;
+		}// end if tli == bin_dir_list->last
+	}// end for tli
+	const char *old_path_env = getenv("PATH");
+	// don't keep re-appending same paths to $PATH
+	if (!strncmp(path_env->ptr, old_path_env, path_env->length)) {
+		return;
+	}// end if !strncmp(path_env->ptr, old_path_env, strlen(path_env->ptr))
+	if (old_path_env) {
+		Strcat_m_charp(path_env, path_sep, old_path_env, NULL);
+	}// end if old_path_env
+	set_environ("PATH", path_env->ptr);
+	Strfree(path_env);
+}// end initBinDirs
+
 static TextList *mimetypes_list;
 static struct table2 **UserMimeTypes;
 

@@ -1074,6 +1074,7 @@ global struct auth_cookie *Auth_cookie init(NULL);
 global struct cookie *First_cookie init(NULL);
 #endif				/* USE_COOKIE */
 
+global char *bin_dirs init(USER_BINDIR ", " SYS_BINDIR);
 global char *mailcap_files init(USER_MAILCAP ", " SYS_MAILCAP);
 global char *mimetypes_files init(USER_MIMETYPES ", " SYS_MIMETYPES);
 #ifdef USE_EXTERNAL_URI_LOADER
