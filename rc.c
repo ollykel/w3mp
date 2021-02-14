@@ -139,6 +139,7 @@ static int OptionEncode = FALSE;
 #define CMT_FOLD_LINE    N_("Fold lines of plain text file")
 #define CMT_SHOW_NUM     N_("Show line numbers")
 #define CMT_SHOW_SRCH_STR N_("Show search string")
+#define CMT_BINDIRS		N_("List of bin directories (i.e. ~/.w3mp/bin)")
 #define CMT_MIMETYPES    N_("List of mime.types files")
 #define CMT_MAILCAP      N_("List of mailcap files")
 #define CMT_URIMETHODMAP N_("List of urimethodmap files")
@@ -573,6 +574,8 @@ struct param_ptr params5[] = {
 };
 
 struct param_ptr params6[] = {
+	{"bin_dirs", P_STRING, PI_TEXT, (void *)&bin_dirs, CMT_BINDIRS,
+		NULL},
     {"mime_types", P_STRING, PI_TEXT, (void *)&mimetypes_files, CMT_MIMETYPES,
      NULL},
     {"mailcap", P_STRING, PI_TEXT, (void *)&mailcap_files, CMT_MAILCAP, NULL},
@@ -1227,6 +1230,7 @@ sync_with_option(void)
 #ifdef USE_COOKIE
     parse_cookie();
 #endif
+	initBinDirs();
     initMailcap();
     initMimeTypes();
 #ifdef USE_EXTERNAL_URI_LOADER
