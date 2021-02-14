@@ -1071,6 +1071,7 @@ global char *migemo_command init(DEF_MIGEMO_COMMAND);
 
 global struct auth_cookie *Auth_cookie init(NULL);
 #ifdef USE_COOKIE
+global char *cookie_file init(COOKIE_FILE);
 global struct cookie *First_cookie init(NULL);
 #endif				/* USE_COOKIE */
 

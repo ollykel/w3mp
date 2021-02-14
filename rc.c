@@ -215,6 +215,7 @@ static int OptionEncode = FALSE;
 #define CMT_SSL_CIPHER N_("SSL ciphers for TLSv1.2 and below (e.g. DEFAULT:@SECLEVEL=2)")
 #endif				/* USE_SSL */
 #ifdef USE_COOKIE
+#define CMT_COOKIE_FILE	N_("Cookie jar file")
 #define CMT_USECOOKIE   N_("Enable cookie processing")
 #define CMT_SHOWCOOKIE  N_("Print a message when receiving a cookie")
 #define CMT_ACCEPTCOOKIE N_("Accept cookies")
@@ -652,6 +653,8 @@ struct param_ptr params7[] = {
 
 #ifdef USE_COOKIE
 struct param_ptr params8[] = {
+    {"cookie_file", P_STRING, PI_TEXT, (void *)&cookie_file, CMT_COOKIE_FILE,
+     NULL},
     {"use_cookie", P_INT, PI_ONOFF, (void *)&use_cookie, CMT_USECOOKIE, NULL},
     {"show_cookie", P_INT, PI_ONOFF, (void *)&show_cookie,
      CMT_SHOWCOOKIE, NULL},

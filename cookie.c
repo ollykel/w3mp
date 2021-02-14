@@ -430,7 +430,6 @@ void
 save_cookies(void)
 {
     struct cookie *p;
-    char *cookie_file;
     FILE *fp;
 
     check_expired_cookies();
@@ -438,8 +437,7 @@ save_cookies(void)
     if (!First_cookie || is_saved || no_rc_dir)
 	return;
 
-    cookie_file = rcFile(COOKIE_FILE);
-    if (!(fp = fopen(cookie_file, "w")))
+    if (!(fp = fopen(expandPath(cookie_file), "w")))
 	return;
 
     for (p = First_cookie; p; p = p->next) {
@@ -476,7 +474,7 @@ load_cookies(void)
     Str line;
     char *str;
 
-    if (!(fp = fopen(rcFile(COOKIE_FILE), "r")))
+    if (!(fp = fopen(expandPath(cookie_file), "r")))
 	return;
 
     if (First_cookie) {
