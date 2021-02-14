@@ -1,10 +1,10 @@
 .nr N -1
 .nr D 5
-.TH W3M 1 "2016-08-06" "w3m 0.5.3"
+.TH W3MP 1 "2021-02-14" "w3mp 0.1.0"
 .SH NAME
-w3m \- a text based web browser and pager
+w3mp \- a text based web browser and pager
 .SH SYNOPSIS
-w3m [OPTION]... [ \fIfile\fP | \fIURL\fP ]...
+w3mp [OPTION]... [ \fIfile\fP | \fIURL\fP ]...
 .SH DESCRIPTION
 .\" This defines appropriate quote strings for nroff and troff
 .ds lq \&"
@@ -15,38 +15,38 @@ w3m [OPTION]... [ \fIfile\fP | \fIURL\fP ]...
 .if \nN==0 .nr N 10
 .if \nD==0 .nr D 5
 
-\fIw3m\fP is a text based browser which can display local or remote
+\fIw3mp\fP is a text based browser which can display local or remote
 web pages as well as other documents.
 It is able to process HTML
 tables and frames but it ignores JavaScript and Cascading Style
 Sheets.
-\fIw3m\fP can also serve as a pager for text files named as
+\fIw3mp\fP can also serve as a pager for text files named as
 arguments or passed on standard input, and as a general purpose
 directory browser.
 
-\fIw3m\fP organizes its content in buffers or tabs, allowing easy
+\fIw3mp\fP organizes its content in buffers or tabs, allowing easy
 navigation between them.
-With the w3m-img extension installed, \fIw3m\fP can
+With the w3m-img extension installed, \fIw3mp\fP can
 display inline graphics in web pages.
-And whenever \fIw3m\fP's HTML
+And whenever \fIw3mp\fP's HTML
 rendering capabilities do not meet your needs, the target URL can be
 handed over to a graphical browser with a single command.
 
-For help with runtime options, press \(lqH\(rq while running \fIw3m\fP.
+For help with runtime options, press \(lqH\(rq while running \fIw3mp\fP.
 
 .SH ARGUMENTS
 
-When given one or more command line arguments, \fIw3m\fP will handle
+When given one or more command line arguments, \fIw3mp\fP will handle
 targets according to content type.
-For web, \fIw3m\fP gets this
+For web, \fIw3mp\fP gets this
 information from HTTP headers; for relative or absolute file system
 paths, it relies on filenames.
 
-With no argument, \fIw3m\fP expects data from standard input and
+With no argument, \fIw3mp\fP expects data from standard input and
 assumes \(lqtext/plain\(rq unless another MIME type is given by the user.
 
 If provided with no target and no fallback target (see for instance
-option \fB\-v\fP below), \fIw3m\fP will exit with usage information.
+option \fB\-v\fP below), \fIw3mp\fP will exit with usage information.
 .SH OPTIONS
 Command line options are introduced with a single \(lq\-\(rq character and
 may take an argument.
@@ -186,7 +186,7 @@ show a summary of compiled-in features and command line options
 show all available configuration options
 .TP
 \fB\-version\fP
-show the version of \fIw3m\fP
+show the version of \fIw3mp\fP
 .SS Options for overriding default settings and resources
 .TP
 \fB\-bookmark \fIfile\fR
@@ -203,115 +203,117 @@ modify one configuration item with an explicitly given value;
 without \fIoption=value\fR, equivalent to \fB\-show-option\fR
 .TP
 \fB\-reqlog\fP
-log headers of HTTP communication in file \f(CW~/.w3m/request.log\fP
+log headers of HTTP communication in file \f(CW~/.w3mp/request.log\fP
 .SH EXAMPLES
 .SS Pager-like usage
 .TP
 Combine snippets of HTML code and preview the page
 .EX
-$ cat header.html footer.html | w3m \-T text/html
+$ cat header.html footer.html | w3mp \-T text/html
 .EE
 .TP
 Compare two files using tabs
 .EX
-$ w3m \-N config.old config
+$ w3mp \-N config.old config
 .EE
 .SS Browser-like usage
 .TP
 Display web content in monochrome terminal
 .EX
-$ w3m \-M http://w3m.sourceforge.net
+$ w3mp \-M http://w3mp.sourceforge.net
 .EE
 .TP
 Display embedded graphics
 .EX
-$ w3m \-o auto_image=TRUE http://w3m.sourceforge.net
+$ w3mp \-o auto_image=TRUE http://w3m.sourceforge.net
 .EE
 .TP
 Display content from Usenet
 .EX
-$ w3m \-m nntp://news.aioe.org/comp.os.linux.networking
+$ w3mp \-m nntp://news.aioe.org/comp.os.linux.networking
 .EE
 .TP
 Upload data for a URL using the POST method
 .EX
-$ w3m \-post \- http://example.com/form.php <<<'a=0&b=1'
+$ w3mp \-post \- http://example.com/form.php <<<'a=0&b=1'
 .EE
 .SS Filter-like usage
 .TP
 Convert an HTML file to plain text with a defined line length
 .EX
-$ w3m \-cols 40 foo.html > foo.txt
+$ w3mp \-cols 40 foo.html > foo.txt
 .EE
 .TP
 Output the bookmarks page as text with an appended list of links
 .EX
-$ w3m \-B \-o display_link_number=1 > out.txt
+$ w3mp \-B \-o display_link_number=1 > out.txt
 .EE
 .TP
 Conversion of file format and character encoding
 .EX
-$ w3m \-T text/html \-I EUC-JP \-O UTF-8 < foo.html > foo.txt
+$ w3mp \-T text/html \-I EUC-JP \-O UTF-8 < foo.html > foo.txt
 .EE
 .SS Start with no input
 .TP
 Welcome users with a built-in page
 .EX
-$ w3m \-v
+$ w3mp \-v
 .EE
 .\".SH Errors
 .SH ENVIRONMENT
-\fIw3m\fP recognises the environment variable WWW_HOME as defining a
+\fIw3mp\fP recognises the environment variable WWW_HOME as defining a
 fallback target for use if it is invoked without one.
 .SH FILES
 .TP
-\f(CW~/.w3m/bookmark.html\fP
+\f(CW~/.w3mp/bookmark.html\fP
 default bookmark file
 .TP
-\f(CW~/.w3m/config\fP
-user defined configuration file; overrides \f(CW/etc/w3m/config\fP
+\f(CW~/.w3mp/config\fP
+user defined configuration file; overrides \f(CW/etc/w3mp/config\fP
 .TP
-\f(CW~/.w3m/cookie\fP
+\f(CW~/.w3mp/cookie\fP
 cookie jar; written on exit, read on launch
 .TP
-\f(CW~/.w3m/history\fP
+\f(CW~/.w3mp/history\fP
 browser history - visited files and URLs
 .TP
-\f(CW~/.w3m/keymap\fP
+\f(CW~/.w3mp/keymap\fP
 user defined key bindings; overrides default key bindings
 .TP
-\f(CW~/.w3m/mailcap\fP
+\f(CW~/.w3mp/mailcap\fP
 external viewer configuration file
 .TP
-\f(CW~/.w3m/menu\fP
+\f(CW~/.w3mp/menu\fP
 user defined menu; overrides default menu
 .TP
-\f(CW~/.w3m/mime.types\fP
+\f(CW~/.w3mp/mime.types\fP
 MIME types file
 .TP
-\f(CW~/.w3m/mouse\fP
+\f(CW~/.w3mp/mouse\fP
 user defined mouse settings
 .TP
-\f(CW~/.w3m/passwd\fP
+\f(CW~/.w3mp/passwd\fP
 password and username file
 .TP
-\f(CW~/.w3m/pre_form\fP
+\f(CW~/.w3mp/pre_form\fP
 contains predefined values to fill recurrent HTML forms
 .\" .TP
-.\" .I $~/.w3m/urimethodmap
+.\" .I $~/.w3mp/urimethodmap
 .\" ???
 .SH SEE ALSO
 README and example files are to be found in the doc directory of your
-\fIw3m\fP installation.
-Recent information about \fIw3m\fP may be found on
-.UR http://w3m.sourceforge.net
+\fIw3mp\fP installation.
+Recent information about \fIw3mp\fP may be found on
+.UR https://github.com/ollykel/w3mp
 the project's web pages at
 .UE
 .SH ACKNOWLEDGMENTS
 \fIw3m\fP has incorporated code from several sources.
 Users have contributed patches and suggestions over time.
-.SH AUTHOR
+.SH AUTHORS
 .MT aito@fw.ipsj.or.jp
 Akinori ITO
+.MT oakelton@gmail.com
+Oliver Kelton
 .ME
 
