@@ -269,6 +269,7 @@ fusage(FILE * f, int err)
     fprintf(f, "    -o opt=value     assign value to config option\n");
     fprintf(f, "    -show-option     print all config options\n");
     fprintf(f, "    -config file     specify config file\n");
+    fprintf(f, "    -rc_dir dir      specify rc directory\n");
     fprintf(f, "    -help            print this usage message\n");
     fprintf(f, "    -version         print w3m version\n");
     fprintf(f, "    -reqlog          write request logfile\n");
@@ -455,11 +456,18 @@ main(int argc, char **argv, char **envp)
     for (i = 1; i < argc; i++) {
 	if (*argv[i] == '-') {
 	    if (!strcmp("-config", argv[i])) {
-		argv[i] = "-dummy";
-		if (++i >= argc)
-		    usage();
-		config_file = argv[i];
-		argv[i] = "-dummy";
+			argv[i] = "-dummy";
+			if (++i >= argc)
+				usage();
+			config_file = argv[i];
+			argv[i] = "-dummy";
+	    }
+		else if (!strcmp("-rc_dir", argv[i])) {
+			argv[i] = "-dummy";
+			if (++i >= argc)
+				usage();
+			rc_dir = expandPath(argv[i]);
+			argv[i] = "-dummy";
 	    }
 	    else if (!strcmp("-h", argv[i]) || !strcmp("-help", argv[i]))
 		help();
@@ -487,6 +495,7 @@ main(int argc, char **argv, char **envp)
 
     /* initializations */
     init_rc();
+	init_tmp();
 
     LoadHist = newHist();
     SaveHist = newHist();
@@ -4356,8 +4365,9 @@ DEFUN(setOpt, SET_OPTION, "Set option")
 	    return;
 	}
     }
-    if (set_param_option(opt))
-	sync_with_option();
+    if (set_param_option(opt)) {
+		sync_with_option();
+	}
     displayBuffer(Currentbuf, B_REDRAW_IMAGE);
 }
 
@@ -6173,6 +6183,7 @@ DEFUN(reinit, REINIT, "Reload configuration file")
 
     if (resource == NULL) {
 	init_rc();
+	init_tmp();
 	sync_with_option();
 #ifdef USE_COOKIE
 	initCookie();
@@ -6183,6 +6194,7 @@ DEFUN(reinit, REINIT, "Reload configuration file")
 
     if (!strcasecmp(resource, "CONFIG") || !strcasecmp(resource, "RC")) {
 	init_rc();
+	init_tmp();
 	sync_with_option();
 	displayBuffer(Currentbuf, B_REDRAW_IMAGE);
 	return;
