@@ -8877,6 +8877,44 @@ guess_save_name(Buffer *buf, char *path)
     return guess_filename(path);
 }
 
+// remove directory recursively
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+int
+remove_dir(const char *dirname)
+{
+	DIR				*dir;
+	struct dirent	*file;
+	char 			fname_full[PATH_MAX];
+	char			*fname_dest;
+	size_t			fname_space;
+
+	fname_dest = fname_full + snprintf(fname_full, PATH_MAX, "%s/", dirname);
+	fname_space = (size_t)(PATH_MAX - (fname_dest - fname_full));
+	if (!fname_space || fname_space > PATH_MAX) {
+		fprintf(stderr, "ERROR: directory name invalid (%s)\n\r", dirname);
+		return -1;
+	}// end if !fname_space || fname_space > PATH_MAX
+	dir = opendir(dirname);
+	if (!dir) {
+		fprintf(stderr, "ERROR: could not open dir %s\n\r", dirname);
+		return -1;
+	}// end if !dir
+	while (file = readdir(dir)) {
+		// skip . and ..
+		if (!strcmp(file->d_name, ".") || !strcmp(file->d_name, ".."))
+			continue;
+		strncpy(fname_dest, file->d_name, fname_space);
+		if (file->d_type == DT_DIR && remove_dir(fname_full) == -1)
+			return -1;
+		else
+			remove(fname_full);
+	}
+	closedir(dir);
+	return rmdir(dirname);
+}// end remove_dir
+
 /* Local Variables:    */
 /* c-basic-offset: 4   */
 /* tab-width: 8        */
