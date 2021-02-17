@@ -1139,6 +1139,7 @@ extern int symbol_width0;
 #define SYMBOL_BASE 0x20
 global int no_rc_dir init(FALSE);
 global char *rc_dir init(NULL);
+global int rc_dir_initialized init(FALSE);
 global char *tmp_dir;
 global char *config_file init(NULL);
 

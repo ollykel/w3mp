@@ -1308,10 +1308,11 @@ init_rc(void)
     struct stat st;
     FILE *f;
 
-    if (rc_dir != NULL)
-	goto open_rc;
+    if (rc_dir_initialized)
+		goto open_rc;
 
-    rc_dir = expandPath(RC_DIR);
+	if (!rc_dir)
+    	rc_dir = expandPath(RC_DIR);
     i = strlen(rc_dir);
     if (i > 1 && rc_dir[i - 1] == '/')
 	rc_dir[i - 1] = '\0';
@@ -1347,16 +1348,6 @@ init_rc(void)
 		goto rc_dir_err;
     }
     no_rc_dir = FALSE;
-	create_tmp_dir:
-    if (((tmp_dir = getenv("TMPDIR")) == NULL || *tmp_dir == '\0') &&
-	((tmp_dir = getenv("TMP")) == NULL || *tmp_dir == '\0') &&
-	((tmp_dir = getenv("TEMP")) == NULL || *tmp_dir == '\0'))
-	tmp_dir = "/tmp";
-#ifdef HAVE_MKDTEMP
-    tmp_dir = mkdtemp(Strnew_m_charp(tmp_dir, "/w3m-XXXXXX", NULL)->ptr);
-    if (tmp_dir == NULL)
-	tmp_dir = rc_dir;
-#endif
 
     if (config_file == NULL)
 	config_file = rcFile(CONFIG_FILE);
@@ -1377,13 +1368,26 @@ init_rc(void)
 	interpret_rc(f);
 	fclose(f);
     }
+	rc_dir_initialized = 1;
     return;
 
   rc_dir_err:
     no_rc_dir = TRUE;
-    goto create_tmp_dir;
 }
 
+void
+init_tmp(void)
+{
+    if (((tmp_dir = getenv("TMPDIR")) == NULL || *tmp_dir == '\0') &&
+			((tmp_dir = getenv("TMP")) == NULL || *tmp_dir == '\0') &&
+			((tmp_dir = getenv("TEMP")) == NULL || *tmp_dir == '\0'))
+		tmp_dir = "/tmp";
+#ifdef HAVE_MKDTEMP
+    tmp_dir = mkdtemp(Strnew_m_charp(tmp_dir, "/w3m-XXXXXX", NULL)->ptr);
+    if (tmp_dir == NULL)
+		tmp_dir = rc_dir;
+#endif
+}
 
 static char optionpanel_src1[] =
     "<html><head><title>Option Setting Panel</title></head><body>\
