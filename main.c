@@ -6019,19 +6019,10 @@ w3m_exit(int i)
 #endif
 #ifdef HAVE_MKDTEMP
     if (tmp_dir != rc_dir)
-	{
-		pid_t child = fork();
-		if (child == -1) {
-			perror("fork");
-			exit(EXIT_FAILURE);
-		} else if (!child) {
-			// TODO: messy recursive directory removal, re-implement natively in cross-platform compatible way
-			execlp("rm", "rm", "-rf", tmp_dir);
-		} else if (wait(0) == -1) {
-			fprintf(stderr, "Can't remove temporary directory (%s)!\n", tmp_dir);
+		if (remove_dir(tmp_dir) == -1) {
+			fprintf(stderr, "ERROR: could not remove temp dir (%s)!\n\r", tmp_dir);
 			exit(1);
 		}
-	}
 #endif
     exit(i);
 }
