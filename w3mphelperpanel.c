@@ -1,4 +1,4 @@
-/* $Id: w3mhelperpanel.c,v 1.14 2007/05/31 01:19:50 inu Exp $ */
+/* $Id: w3mphelperpanel.c,v 1.14 2007/05/31 01:19:50 inu Exp $ */
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>

@@ -105,7 +105,7 @@ EXT=@EXEEXT@
 
 TARGET=$(PACKAGE)$(EXT)
 BOOKMARKER=w3mbookmark$(EXT)
-HELPER=w3mhelperpanel$(EXT)
+HELPER=w3mphelperpanel$(EXT)
 INFLATE=inflate$(EXT)
 IMGDISPLAY=w3mimgdisplay$(EXT)
 MAN1_TARGET=$(PACKAGE).1
@@ -183,8 +183,8 @@ mktable$(EXT): mktable.o dummy.o Str.o hash.o myctype.o
 $(BOOKMARKER): w3mbookmark.o dummy.o $(ALIB)
 	$(CC) $(CFLAGS) -o $(BOOKMARKER) w3mbookmark.o dummy.o $(LDFLAGS) $(LIBS) $(EXT_LIBS)
 
-$(HELPER): w3mhelperpanel.o dummy.o $(ALIB)
-	$(CC) $(CFLAGS) -o $(HELPER) w3mhelperpanel.o dummy.o $(LDFLAGS) $(LIBS) $(EXT_LIBS)
+$(HELPER): w3mphelperpanel.o dummy.o $(ALIB)
+	$(CC) $(CFLAGS) -o $(HELPER) w3mphelperpanel.o dummy.o $(LDFLAGS) $(LIBS) $(EXT_LIBS)
 
 $(INFLATE): inflate.o $(ALIB)
 	$(CC) $(CFLAGS) -o $(INFLATE) inflate.o $(LDFLAGS) $(LIBS) -lz
