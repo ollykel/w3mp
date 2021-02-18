@@ -3,4 +3,4 @@
 menu.c
 rc.c
 #w3mbookmark.c
-#w3mhelperpanel.c
+#w3mphelperpanel.c
