@@ -1,5 +1,5 @@
 #!@PERL@
-# $Id: w3mhelp.cgi.in,v 1.29 2007/05/29 11:50:24 inu Exp $
+# $Id: w3mphelp.cgi.in,v 1.29 2007/05/29 11:50:24 inu Exp $
 
 if ( $^O =~ /^(ms)?(dos|win(32|nt)?)/i ) {
   $CYGPATH = 1;
@@ -14,8 +14,8 @@ if ($CYGPATH) {
 unshift(@INC, $helpdir);
 @docdirs = split(" ", "@DOCDIRS@");
 
-require "w3mhelp-funcname.pl";
-require "w3mhelp-funcdesc.en.pl";
+require "w3mphelp-funcname.pl";
+require "w3mphelp-funcdesc.en.pl";
 $lang = 'en';
 $charset = 'US-ASCII';
 
@@ -47,7 +47,7 @@ if (defined($ENV{'QUERY_STRING'})) {
 	    $tlang = 'en';
 	}
 	# print "tlang=$tlang\n";
-	eval {require "w3mhelp-funcdesc.$tlang.pl";};
+	eval {require "w3mphelp-funcdesc.$tlang.pl";};
 	if (%funcdesc) {
 	    $lang = $tlang;
 	}

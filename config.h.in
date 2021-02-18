@@ -9,8 +9,8 @@
 /* Name of package */
 #undef PACKAGE
 
-#define HELP_FILE    "w3mhelp.html"
-#define HELP_CGI     "w3mhelp"
+#define HELP_FILE    "w3mphelp.html"
+#define HELP_CGI     "w3mphelp"
 #define W3MCONFIG    "w3mconfig"
 #define IMGDISPLAY   "w3mimgdisplay"
 #define XFACE2XPM    "xface2xpm"
@@ -229,7 +229,7 @@ typedef RETSIGTYPE MySignalHandler;
 #define BUNZIP2_CMDNAME "bzip2"
 #define INFLATE_CMDNAME  "inflate.exe"
 #define W3MBOOKMARK_CMDNAME	"w3mbookmark.exe"
-#define W3MHELPERPANEL_CMDNAME	"w3mhelperpanel.exe"
+#define W3MHELPERPANEL_CMDNAME	"w3mphelperpanel.exe"
 #define DEV_NULL_PATH	"nul"
 #define DEV_TTY_PATH	"con"
 #define CGI_EXTENSION	".cmd"
@@ -239,7 +239,7 @@ typedef RETSIGTYPE MySignalHandler;
 #define BUNZIP2_CMDNAME "bunzip2"
 #define INFLATE_CMDNAME	"inflate"
 #define W3MBOOKMARK_CMDNAME	"w3mbookmark"
-#define W3MHELPERPANEL_CMDNAME	"w3mhelperpanel"
+#define W3MHELPERPANEL_CMDNAME	"w3mphelperpanel"
 #define DEV_NULL_PATH	"/dev/null"
 #define DEV_TTY_PATH	"/dev/tty"
 #define CGI_EXTENSION	".cgi"

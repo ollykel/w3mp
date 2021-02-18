@@ -278,7 +278,7 @@ AC_DEFUN([AC_W3M_KEYMAP],
   AC_MSG_ERROR([keymap should be either w3m or lynx.]);;
  esac
  AC_SUBST(HELP_FILE)
- HELP_FILE=w3mhelp-${enable_keymap}_$w3m_lang.html
+ HELP_FILE=w3mphelp-${enable_keymap}_$w3m_lang.html
  AC_DEFINE_UNQUOTED(HELP_FILE, "$HELP_FILE")
  AC_SUBST(KEYBIND)
  AC_DEFINE_UNQUOTED(KEYBIND, $enable_keymap)])
