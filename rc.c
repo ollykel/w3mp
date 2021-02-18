@@ -126,6 +126,7 @@ static int OptionEncode = FALSE;
 #define CMT_DNS_ORDER	N_("Order of name resolution")
 #define CMT_DROOT       N_("Directory corresponding to / (document root)")
 #define CMT_PDROOT      N_("Directory corresponding to /~user")
+#define CMT_DOWNLOAD_DIR	N_("Default directory for downloads")
 #define CMT_CGIBIN      N_("Directory corresponding to /cgi-bin")
 #define CMT_CONFIRM_QQ  N_("Confirm when quitting with q")
 #define CMT_CLOSE_TAB_BACK N_("Close tab if buffer is last when back")
@@ -580,6 +581,8 @@ struct param_ptr params5[] = {
      NULL},
     {"personal_document_root", P_STRING, PI_TEXT,
      (void *)&personal_document_root, CMT_PDROOT, NULL},
+	{"download_dir", P_STRING, PI_TEXT,
+		(void *)&download_dir, CMT_DOWNLOAD_DIR, NULL},
     {"cgi_bin", P_STRING, PI_TEXT, (void *)&cgi_bin, CMT_CGIBIN, NULL},
     {"index_file", P_STRING, PI_TEXT, (void *)&index_file, CMT_IFILE, NULL},
     {NULL, 0, 0, NULL, NULL, NULL},

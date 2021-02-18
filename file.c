@@ -8373,6 +8373,13 @@ _MoveFile(char *path1, char *path2)
 int
 _doFileCopy(char *tmpf, char *defstr, int download)
 {
+    char	filename_default[PATH_MAX];
+    if (download_dir && strlen(download_dir))
+	snprintf(filename_default, PATH_MAX, "%s/%s", download_dir, defstr);
+    else if (defstr && strlen(defstr) > 0)
+	strncpy(filename_default, defstr, PATH_MAX);
+    else
+	filename_default[0] = '\0';
 #ifndef __MINGW32_VERSION
     Str msg;
     Str filen;
@@ -8391,7 +8398,7 @@ _doFileCopy(char *tmpf, char *defstr, int download)
 	if (p == NULL || *p == '\0') {
 	    /* FIXME: gettextize? */
 	    q = inputLineHist("(Download)Save file to: ",
-			      defstr, IN_COMMAND, SaveHist);
+			      filename_default, IN_COMMAND, SaveHist);
 	    if (q == NULL || *q == '\0')
 		return FALSE;
 	    p = conv_to_system(q);
@@ -8495,6 +8502,13 @@ doFileMove(char *tmpf, char *defstr)
 int
 doFileSave(URLFile uf, char *defstr)
 {
+    char	filename_default[PATH_MAX];
+    if (download_dir && strlen(download_dir))
+	snprintf(filename_default, PATH_MAX, "%s/%s", download_dir, defstr);
+    else if (defstr && strlen(defstr) > 0)
+	strncpy(filename_default, defstr, PATH_MAX);
+    else
+	filename_default[0] = '\0';
 #ifndef __MINGW32_VERSION
     Str msg;
     Str filen;
@@ -8511,7 +8525,7 @@ doFileSave(URLFile uf, char *defstr)
 	if (p == NULL || *p == '\0') {
 	    /* FIXME: gettextize? */
 	    p = inputLineHist("(Download)Save file to: ",
-			      defstr, IN_FILENAME, SaveHist);
+			      filename_default, IN_FILENAME, SaveHist);
 	    if (p == NULL || *p == '\0')
 		return -1;
 	    p = conv_to_system(p);
