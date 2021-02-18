@@ -902,6 +902,7 @@ global int MaxNewsMessage init(50);
 
 global char *document_root init(NULL);
 global char *personal_document_root init(NULL);
+global char *download_dir init("~/Downloads");
 global char *cgi_bin init(NULL);
 global char *index_file init(NULL);
 
