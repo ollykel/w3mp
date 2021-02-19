@@ -842,6 +842,7 @@ global char PermitSaveToPipe init(FALSE);
 global char DecodeCTE init(FALSE);
 global char AutoUncompress init(FALSE);
 global char PreserveTimestamp init(TRUE);
+global char ZeroTempfiles init(FALSE);
 global char ArgvIsURL init(TRUE);
 global char MetaRefresh init(FALSE);
 global char LocalhostOnly init(FALSE);

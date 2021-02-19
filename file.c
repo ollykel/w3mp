@@ -8895,11 +8895,34 @@ guess_save_name(Buffer *buf, char *path)
 #ifndef PATH_MAX
 #define PATH_MAX 4096
 #endif
+
 int
-remove_dir(const char *dirname)
+zero_file(const char *filename)
 {
-	DIR				*dir;
-	struct dirent	*file;
+    static const char		zeroes[PATH_MAX];
+    int				fd;
+    off_t			size;
+
+    fd = open(filename, O_WRONLY);
+    if (fd != -1) {
+	size = lseek(fd, 0, SEEK_END);
+	lseek(fd, 0, SEEK_SET);
+	while (size > PATH_MAX)
+	    size -= write(fd, zeroes, PATH_MAX);
+	while (size)
+	    size -= write(fd, zeroes, size);
+	close(fd);
+    }
+    else
+	return -1;
+    return 0;
+}// end zero_file
+
+int
+remove_dir(const char *dirname, int should_zero_files)
+{
+	DIR			*dir;
+	struct dirent		*file;
 	char 			fname_full[PATH_MAX];
 	char			*fname_dest;
 	size_t			fname_space;
@@ -8907,23 +8930,26 @@ remove_dir(const char *dirname)
 	fname_dest = fname_full + snprintf(fname_full, PATH_MAX, "%s/", dirname);
 	fname_space = (size_t)(PATH_MAX - (fname_dest - fname_full));
 	if (!fname_space || fname_space > PATH_MAX) {
-		fprintf(stderr, "ERROR: directory name invalid (%s)\n\r", dirname);
-		return -1;
+	    fprintf(stderr, "ERROR: directory name invalid (%s)\n\r", dirname);
+	    return -1;
 	}// end if !fname_space || fname_space > PATH_MAX
 	dir = opendir(dirname);
 	if (!dir) {
-		fprintf(stderr, "ERROR: could not open dir %s\n\r", dirname);
-		return -1;
+	    fprintf(stderr, "ERROR: could not open dir %s\n\r", dirname);
+	    return -1;
 	}// end if !dir
 	while (file = readdir(dir)) {
-		// skip . and ..
-		if (!strcmp(file->d_name, ".") || !strcmp(file->d_name, ".."))
-			continue;
-		strncpy(fname_dest, file->d_name, fname_space);
-		if (file->d_type == DT_DIR && remove_dir(fname_full) == -1)
-			return -1;
-		else
-			remove(fname_full);
+	    // skip . and ..
+	    if (!strcmp(file->d_name, ".") || !strcmp(file->d_name, ".."))
+		continue;
+	    strncpy(fname_dest, file->d_name, fname_space);
+	    if (file->d_type == DT_DIR && remove_dir(fname_full, should_zero_files) == -1)
+		return -1;
+	    else {
+		if (should_zero_files)
+		    zero_file(fname_full);
+		remove(fname_full);
+	    }
 	}
 	closedir(dir);
 	return rmdir(dirname);

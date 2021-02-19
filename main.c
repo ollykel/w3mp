@@ -6080,13 +6080,25 @@ deleteFiles()
 	}
     }
     while ((f = popText(fileToDelete)) != NULL) {
-	unlink(f);
-	if (enable_inline_image == INLINE_IMG_SIXEL && strcmp(f+strlen(f)-4, ".gif") == 0) {
-	    Str firstframe = Strnew_charp(f);
-	    Strcat_charp(firstframe, "-1");
-	    unlink(firstframe->ptr);
-        }
+		if (ZeroTempfiles)
+			zero_file(f);
+		unlink(f);
+		if (enable_inline_image == INLINE_IMG_SIXEL && strcmp(f+strlen(f)-4, ".gif") == 0) {
+			Str firstframe = Strnew_charp(f);
+			Strcat_charp(firstframe, "-1");
+			if (ZeroTempfiles)
+				zero_file(firstframe->ptr);
+			unlink(firstframe->ptr);
+		}
     }
+#ifdef HAVE_MKDTEMP
+	// remove any user-created files in the tempdir
+	if (tmp_dir != rc_dir)
+		if (remove_dir(tmp_dir, ZeroTempfiles) == -1) {
+			fprintf(stderr, "ERROR: could not remove temp dir (%s)!\n\r", tmp_dir);
+			exit(1);
+		}
+#endif
 }
 
 void
@@ -6106,13 +6118,6 @@ w3m_exit(int i)
 #endif
 #ifdef __MINGW32_VERSION
     WSACleanup();
-#endif
-#ifdef HAVE_MKDTEMP
-    if (tmp_dir != rc_dir)
-		if (remove_dir(tmp_dir) == -1) {
-			fprintf(stderr, "ERROR: could not remove temp dir (%s)!\n\r", tmp_dir);
-			exit(1);
-		}
 #endif
     exit(i);
 }
