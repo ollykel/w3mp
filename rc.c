@@ -187,6 +187,7 @@ static int OptionEncode = FALSE;
 #define CMT_DEFAULT_URL  N_("Default value for open-URL command")
 #define CMT_DECODE_CTE   N_("Decode Content-Transfer-Encoding when saving")
 #define CMT_PRESERVE_TIMESTAMP N_("Preserve timestamp when saving")
+#define CMT_ZERO_TEMPFILES N_("Overwrite tempfiles with zeroes before quitting")
 #ifdef USE_MOUSE
 #define CMT_MOUSE         N_("Enable mouse")
 #define CMT_REVERSE_MOUSE N_("Scroll in reverse direction of mouse drag")
@@ -538,6 +539,8 @@ struct param_ptr params3[] = {
      CMT_AUTO_UNCOMPRESS, NULL},
     {"preserve_timestamp", P_CHARINT, PI_ONOFF, (void *)&PreserveTimestamp,
      CMT_PRESERVE_TIMESTAMP, NULL},
+    {"zero_tempfiles", P_CHARINT, PI_ONOFF, (void *)&ZeroTempfiles,
+     CMT_ZERO_TEMPFILES, NULL},
     {"keymap_file", P_STRING, PI_TEXT, (void *)&keymap_file, CMT_KEYMAP_FILE,
      NULL},
     {NULL, 0, 0, NULL, NULL, NULL},
