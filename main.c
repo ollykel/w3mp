@@ -5851,6 +5851,61 @@ DEFUN(dictwordat, DICT_WORD_AT,
 #endif				/* USE_DICT */
 
 void
+_promptResponse(int use_newtab)
+{
+	char		*data				= NULL;
+	char		*url_fmt			= NULL;
+	char		*prompt				= "(input):";
+	char		*default_response	= "";
+	char		*input				= NULL;
+	char		*input_urlquoted	= NULL;
+	Str			parsed_url			= NULL;
+
+    data = searchKeyData();
+	CurrentKeyData = NULL;
+	if (!data || *data == '\0') {
+		displayBuffer(Currentbuf, B_NORMAL);
+		return;
+	}
+	url_fmt = getWord(&data);
+	if (!*data)
+		goto get_response;
+	prompt = getQWord(&data);
+	if (!*data)
+		goto get_response;
+	default_response = getQWord(&data);
+get_response:
+	input = inputStrHist(prompt, default_response, TextHist);
+	if (!input || *input == '\0') {
+		displayBuffer(Currentbuf, B_NORMAL);
+		return;
+	}
+    input_urlquoted = Str_form_quote(Strnew_charp(input))->ptr;
+	parsed_url = unquote_mailcap_raw(url_fmt, NULL, input_urlquoted, NULL, NULL);
+	if (!parsed_url || !parsed_url->ptr || *parsed_url->ptr == '\0') {
+		displayBuffer(Currentbuf, B_NORMAL);
+		return;
+	}
+	CurrentKeyData = parsed_url->ptr;
+	if (use_newtab)
+		tabURL();
+	else
+		goURL();
+}// end _promptResponse
+
+// format: PROMPT url_fmt ["prompt"] ["default_response"]
+DEFUN(promptResponse, PROMPT, "Prompt user for a string to send as part of a url in a GET request")
+{
+	_promptResponse(0);
+}
+
+// format: PROMPT_TAB url_fmt ["prompt"] ["default_response"]
+DEFUN(promptResponseTab, PROMPT_TAB, "Prompt user for a string to send as part of a url in a GET request, and open in new tab")
+{
+	_promptResponse(1);
+}
+
+void
 set_buffer_environ(Buffer *buf)
 {
     static Buffer *prev_buf = NULL;
@@ -6132,25 +6187,25 @@ DEFUN(setAlarm, ALARM, "Set alarm")
     CurrentKeyData = NULL;	/* not allowed in w3m-control: */
     data = searchKeyData();
     if (data == NULL || *data == '\0') {
-	data = inputStrHist("(Alarm)sec command: ", "", TextHist);
-	if (data == NULL) {
-	    displayBuffer(Currentbuf, B_NORMAL);
-	    return;
-	}
+		data = inputStrHist("(Alarm)sec command: ", "", TextHist);
+		if (data == NULL) {
+			displayBuffer(Currentbuf, B_NORMAL);
+			return;
+		}
     }
     if (*data != '\0') {
-	sec = atoi(getWord(&data));
-	if (sec > 0)
-	    cmd = getFuncList(getWord(&data));
+		sec = atoi(getWord(&data));
+		if (sec > 0)
+			cmd = getFuncList(getWord(&data));
     }
     if (cmd >= 0) {
-	data = getQWord(&data);
-	setAlarmEvent(&DefaultAlarm, sec, AL_EXPLICIT, cmd, data);
-	disp_message_nsec(Sprintf("%dsec %s %s", sec, w3mFuncList[cmd].id,
-				  data)->ptr, FALSE, 1, FALSE, TRUE);
+		data = getQWord(&data);
+		setAlarmEvent(&DefaultAlarm, sec, AL_EXPLICIT, cmd, data);
+		disp_message_nsec(Sprintf("%dsec %s %s", sec, w3mFuncList[cmd].id,
+					  data)->ptr, FALSE, 1, FALSE, TRUE);
     }
     else {
-	setAlarmEvent(&DefaultAlarm, 0, AL_UNSET, FUNCNAME_nulcmd, NULL);
+		setAlarmEvent(&DefaultAlarm, 0, AL_UNSET, FUNCNAME_nulcmd, NULL);
     }
     displayBuffer(Currentbuf, B_NORMAL);
 }

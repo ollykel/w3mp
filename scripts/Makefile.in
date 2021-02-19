@@ -34,8 +34,8 @@ CONF_DIR = $(sysconfdir)/$(PACKAGE)
 DOCDIRS = @DOCDIRS@
 
 AUXBIN_TARGETS	= xface2xpm
-LIB_TARGETS	= dirlist.cgi w3mhelp.cgi w3mmail.cgi
-HELP_TARGETS	= w3mhelp-funcname.pl w3mhelp-funcdesc-stamp
+LIB_TARGETS	= dirlist.cgi w3mphelp.cgi w3mmail.cgi
+HELP_TARGETS	= w3mphelp-funcname.pl w3mphelp-funcdesc-stamp
 SUBDIRS = multipart w3mman
 .PHONY: $(SUBDIRS)
 
@@ -48,30 +48,30 @@ PERL		= @PERL@
 
 all: $(LIB_TARGETS) $(AUXBIN_TARGETS) $(HELP_TARGETS) $(SUBDIRS)
 
-w3mhelp-funcname.pl: w3mhelp-funcname.pl.in ../funcname.tab $(top_srcdir)/doc/keymap.default $(top_srcdir)/doc/keymap.lynx
-	@echo "generating w3mhelp-funcname.pl..."
-	@echo '%funcname = (' > w3mhelp-funcname.pl
-	@sed -ne "/^[a-zA-Z@]/s/\([a-zA-Z@][a-zA-Z0-9@_]*\)[ 	][ 	]*\([^ 	]*\)/'\1', '\2',/p" < ../funcname.tab >> w3mhelp-funcname.pl
-	@echo ');' >> w3mhelp-funcname.pl
-	@echo '%keyfunc = (' >> w3mhelp-funcname.pl
+w3mphelp-funcname.pl: w3mphelp-funcname.pl.in ../funcname.tab $(top_srcdir)/doc/keymap.default $(top_srcdir)/doc/keymap.lynx
+	@echo "generating w3mphelp-funcname.pl..."
+	@echo '%funcname = (' > w3mphelp-funcname.pl
+	@sed -ne "/^[a-zA-Z@]/s/\([a-zA-Z@][a-zA-Z0-9@_]*\)[ 	][ 	]*\([^ 	]*\)/'\1', '\2',/p" < ../funcname.tab >> w3mphelp-funcname.pl
+	@echo ');' >> w3mphelp-funcname.pl
+	@echo '%keyfunc = (' >> w3mphelp-funcname.pl
 	@case "$(KEYBIND_SRC)" in *lynx*) keymap=keymap.lynx;; *) keymap=keymap.default;; esac; \
-	sed -ne "/^keymap/s/^keymap[ 	][ 	]*\([^ 	]*\)[ 	][ 	]*\([a-zA-Z@][a-zA-Z0-9@_]*\)/'\1', '\2', /p" < $(top_srcdir)/doc/$$keymap >> w3mhelp-funcname.pl
-	@echo ');' >> w3mhelp-funcname.pl
-	@cat $(srcdir)/w3mhelp-funcname.pl.in >> w3mhelp-funcname.pl
+	sed -ne "/^keymap/s/^keymap[ 	][ 	]*\([^ 	]*\)[ 	][ 	]*\([a-zA-Z@][a-zA-Z0-9@_]*\)/'\1', '\2', /p" < $(top_srcdir)/doc/$$keymap >> w3mphelp-funcname.pl
+	@echo ');' >> w3mphelp-funcname.pl
+	@cat $(srcdir)/w3mphelp-funcname.pl.in >> w3mphelp-funcname.pl
 	@echo "done"
 
-w3mhelp-funcdesc-stamp: $(top_srcdir)/doc/README.func $(top_srcdir)/doc-jp/README.func $(top_srcdir)/doc-de/README.func w3mhelp-funcdesc.en.pl.in w3mhelp-funcdesc.ja.pl.in w3mhelp-funcdesc.de.pl.in
-	@echo "generating w3mhelp-funcdesc*.pl..."
+w3mphelp-funcdesc-stamp: $(top_srcdir)/doc/README.func $(top_srcdir)/doc-jp/README.func $(top_srcdir)/doc-de/README.func w3mphelp-funcdesc.en.pl.in w3mphelp-funcdesc.ja.pl.in w3mphelp-funcdesc.de.pl.in
+	@echo "generating w3mphelp-funcdesc*.pl..."
 	@for dirlang in $(DOCDIRS); do \
 	  dir=`expr "$$dirlang" : "\(.*\):.*"`; \
 	  lang=`expr "$$dirlang" : ".*:\(.*\)_.*"`; \
-	  echo '%funcdesc = (' > w3mhelp-funcdesc.$$lang.pl; \
-	  sed -ne "/^[a-zA-Z@]/s/\([a-zA-Z@][a-zA-Z0-9@_]*\)[ 	][ 	]*\(.*\)/'\1', '\2',/p" < $(top_srcdir)/$$dir/README.func >> w3mhelp-funcdesc.$$lang.pl; \
-	  echo ');' >> w3mhelp-funcdesc.$$lang.pl; \
-	  cat $(srcdir)/w3mhelp-funcdesc.$$lang.pl.in >> w3mhelp-funcdesc.$$lang.pl; \
+	  echo '%funcdesc = (' > w3mphelp-funcdesc.$$lang.pl; \
+	  sed -ne "/^[a-zA-Z@]/s/\([a-zA-Z@][a-zA-Z0-9@_]*\)[ 	][ 	]*\(.*\)/'\1', '\2',/p" < $(top_srcdir)/$$dir/README.func >> w3mphelp-funcdesc.$$lang.pl; \
+	  echo ');' >> w3mphelp-funcdesc.$$lang.pl; \
+	  cat $(srcdir)/w3mphelp-funcdesc.$$lang.pl.in >> w3mphelp-funcdesc.$$lang.pl; \
 	done
 	@echo done
-	@touch w3mhelp-funcdesc-stamp
+	@touch w3mphelp-funcdesc-stamp
 
 $(SUBDIRS):
 	for subdir in $(SUBDIRS); \
@@ -91,7 +91,7 @@ install: $(LIB_TARGETS) $(HELP_TARGETS)
 	do      \
 		$(INSTALL_SCRIPT) $$file $(DESTDIR)$(CGIBIN_DIR);  \
 	done
-	for file in w3mhelp-*.pl; \
+	for file in w3mphelp-*.pl; \
 	do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(HELP_DIR); \
 	done
@@ -109,7 +109,7 @@ uninstall:
 	do      \
 		rm -f $(LIB_DIR)/$$file; \
 	done
-	-for file in w3mhelp-*.pl; \
+	-for file in w3mphelp-*.pl; \
 	do \
 		rm -f $(HELP_DIR)/$$file; \
 	done
@@ -119,7 +119,7 @@ uninstall:
 	done
 
 clean:
-	-rm -f $(HELP_TARGETS) w3mhelp-*.pl
+	-rm -f $(HELP_TARGETS) w3mphelp-*.pl
 	-for subdir in $(SUBDIRS); \
 	do \
 	  (cd $$subdir && $(MAKE) clean); \
