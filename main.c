@@ -5858,7 +5858,6 @@ _promptResponse(int use_newtab)
 	char		*prompt				= "(input):";
 	char		*default_response	= "";
 	char		*input				= NULL;
-	char		*input_urlquoted	= NULL;
 	Str			parsed_url			= NULL;
 
     data = searchKeyData();
@@ -5880,8 +5879,7 @@ get_response:
 		displayBuffer(Currentbuf, B_NORMAL);
 		return;
 	}
-    input_urlquoted = Str_form_quote(Strnew_charp(input))->ptr;
-	parsed_url = unquote_mailcap_raw(url_fmt, NULL, input_urlquoted, NULL, NULL);
+	parsed_url = unquote_mailcap_raw(url_fmt, NULL, input, NULL, NULL);
 	if (!parsed_url || !parsed_url->ptr || *parsed_url->ptr == '\0') {
 		displayBuffer(Currentbuf, B_NORMAL);
 		return;
