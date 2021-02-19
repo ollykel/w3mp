@@ -561,6 +561,8 @@ extern char *acceptableMimeTypes();
 extern struct mailcap *searchExtViewer(char *type);
 extern Str unquote_mailcap(char *qstr, char *type, char *name, char *attr,
 			   int *mc_stat);
+extern Str unquote_mailcap_raw(char *qstr, char *type, char *name, char *attr,
+			   int *mc_stat);
 extern char *guessContentType(char *filename);
 extern TextList *make_domain_list(char *domain_list);
 extern int check_no_proxy(char *domain);
@@ -816,6 +818,9 @@ extern void dictwordat(void);
 #if 0
 extern void reloadBuffer(Buffer *buf);
 #endif
+extern void promptResponse(void);
+extern void promptResponseTab(void);
+
 extern char *guess_save_name(Buffer *buf, char *file);
 
 extern void wrapToggle(void);

@@ -479,3 +479,9 @@ unquote_mailcap(char *qstr, char *type, char *name, char *attr, int *mc_stat)
 {
     return unquote_mailcap_loop(qstr, type, name, attr, mc_stat, 0);
 }
+
+Str
+unquote_mailcap_raw(char *qstr, char *type, char *name, char *attr, int *mc_stat)
+{
+    return unquote_mailcap_loop(qstr, type, name, attr, mc_stat, -1);
+}
