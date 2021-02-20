@@ -28,7 +28,7 @@ VPATH = $(top_srcdir):.
 CGIBIN_DIR = $(libexecdir)/$(PACKAGE)/cgi-bin
 AUXBIN_DIR = $(libexecdir)/$(PACKAGE)
 HELP_DIR = @HELP_DIR@
-RC_DIR = @RC_DIR@
+CONFIG_DIR = @CONFIG_DIR@
 ETC_DIR = $(sysconfdir)
 CONF_DIR = $(sysconfdir)/$(PACKAGE)
 

@@ -77,9 +77,8 @@ MAN_DIR = /usr/local/man
 MAN1_DIR = $(MAN_DIR)/man1
 MAN1_JA_DIR = $(MAN_DIR)/ja/man1
 ETC_DIR = /usr/local/etc/w3mp
-RC_DIR = ~/.w3mp
+CONFIG_DIR = ~/.config/w3mp
 HELP_FILE = w3mphelp-w3m_ja.html
-RC_DIR = ~/.w3mp/
 SYS_LIBRARIES = -lgpm  -lbsd -lnsl -lncurses  -L/usr/lib -L/usr/lib -L/usr/local/ssl/lib -L/usr/local/ssl/lib -lssl -lcrypto 
 LOCAL_LIBRARIES = 
 CC = gcc
@@ -164,23 +163,23 @@ INSTALL_W3MIMGDISPLAY=$(INSTALL_PROGRAM)
 #define IMGDISPLAY   "w3mimgdisplay"
 #define XFACE2XPM    "xface2xpm"
 
-#define RC_DIR       "~/.w3mp"
+#define CONFIG_DIR       "~/.config/w3mp"
 #define BOOKMARK     "bookmark.html"
 #define CONFIG_FILE  "config"
 #define KEYMAP_FILE  "keymap"
 #define MENU_FILE    "menu"
-#define COOKIE_FILE  RC_DIR "/cookie"
+#define COOKIE_FILE  CONFIG_DIR "/cookie"
 #define HISTORY_FILE "history"
 
-#define PASSWD_FILE RC_DIR "/passwd"
-#define PRE_FORM_FILE RC_DIR "/pre_form"
-#define USER_BINDIR RC_DIR "/bin"
+#define PASSWD_FILE CONFIG_DIR "/passwd"
+#define PRE_FORM_FILE CONFIG_DIR "/pre_form"
+#define USER_BINDIR CONFIG_DIR "/bin"
 #define SYS_BINDIR ETC_DIR "/bin"
-#define USER_MAILCAP RC_DIR "/mailcap"
+#define USER_MAILCAP CONFIG_DIR "/mailcap"
 #define SYS_MAILCAP  "/etc/mailcap"
 #define USER_MIMETYPES "~/.mime.types"
 #define SYS_MIMETYPES "/usr/local/lib/mime.types"
-#define USER_URIMETHODMAP RC_DIR "/urimethodmap"
+#define USER_URIMETHODMAP CONFIG_DIR "/urimethodmap"
 #define SYS_URIMETHODMAP  ETC_DIR "/urimethodmap"
 
 #define DEF_SAVE_FILE "index.html"

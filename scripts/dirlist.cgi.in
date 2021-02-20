@@ -15,12 +15,12 @@ else {
   $WIN32 = 0;
   $CYGPATH = 0;
 }
-$RC_DIR = '@RC_DIR@';
-$RC_DIR =~ s@^~/@$ENV{'HOME'}/@;
+$CONFIG_DIR = '@CONFIG_DIR@';
+$CONFIG_DIR =~ s@^~/@$ENV{'HOME'}/@;
 if ($CYGPATH) {
-  $RC_DIR = &cygwin_pathconv("$RC_DIR");
+  $CONFIG_DIR = &cygwin_pathconv("$CONFIG_DIR");
 }
-$CONFIG = "$RC_DIR/dirlist";
+$CONFIG = "$CONFIG_DIR/dirlist";
 $CGI = $ENV{'SCRIPT_NAME'} || $0;
 $CGI = "file://" . &file_encode("$CGI");
 

@@ -434,7 +434,7 @@ save_cookies(void)
 
     check_expired_cookies();
 
-    if (!First_cookie || is_saved || no_rc_dir)
+    if (!First_cookie || is_saved || no_config_dir)
 	return;
 
     if (!(fp = fopen(expandPath(cookie_file), "w")))
