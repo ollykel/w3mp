@@ -275,6 +275,7 @@ fusage(FILE * f, int err)
     fprintf(f, "    -debug           use debug mode (only for debugging)\n");
     fprintf(f, "    -reqlog          write request logfile\n");
     fprintf(f, "    -rc_dir dir      specify rc directory\n");
+    fprintf(f, "    -config_dir dir      specify rc directory\n");
     fprintf(f, "    -help            print this usage message\n");
     fprintf(f, "    -version         print w3m version\n");
     if (show_params_p)
@@ -479,11 +480,11 @@ main(int argc, char **argv, char **envp)
 			config_file = argv[i];
 			argv[i] = "-dummy";
 	    }
-		else if (!strcmp("-rc_dir", argv[i])) {
+		else if (!strcmp("-config_dir", argv[i])) {
 			argv[i] = "-dummy";
 			if (++i >= argc)
 				usage();
-			rc_dir = expandPath(argv[i]);
+			config_dir = expandPath(argv[i]);
 			argv[i] = "-dummy";
 	    }
 	    else if (!strcmp("-h", argv[i]) || !strcmp("-help", argv[i]))
@@ -5958,7 +5959,7 @@ set_buffer_environ(Buffer *buf)
 		set_environ("W3M_KEYNUM", "");
 	}
     if (buf != prev_buf) {
-	set_environ("W3M_HOME", rc_dir);
+	set_environ("W3M_CONFIG_HOME", config_dir);
 	set_environ("W3M_TEMP", tmp_dir);
 	set_environ("W3M_SOURCEFILE", buf->sourcefile);
 	set_environ("W3M_FILENAME", buf->filename);
@@ -6091,7 +6092,7 @@ deleteFiles()
     }
 #ifdef HAVE_MKDTEMP
 	// remove any user-created files in the tempdir
-	if (tmp_dir != rc_dir)
+	if (tmp_dir != config_dir)
 		if (remove_dir(tmp_dir, ZeroTempfiles) == -1) {
 			fprintf(stderr, "ERROR: could not remove temp dir (%s)!\n\r", tmp_dir);
 			exit(1);

@@ -141,7 +141,7 @@ static int OptionEncode = FALSE;
 #define CMT_FOLD_LINE    N_("Fold lines of plain text file")
 #define CMT_SHOW_NUM     N_("Show line numbers")
 #define CMT_SHOW_SRCH_STR N_("Show search string")
-#define CMT_BINDIRS		N_("List of bin directories (i.e. ~/.w3mp/bin)")
+#define CMT_BINDIRS		N_("List of bin directories (i.e. ~/.config/w3mp/bin)")
 #define CMT_MIMETYPES    N_("List of mime.types files")
 #define CMT_MAILCAP      N_("List of mailcap files")
 #define CMT_URIMETHODMAP N_("List of urimethodmap files")
@@ -1232,7 +1232,7 @@ do_mkdir(const char *dir, long mode)
     char *r, abs[_MAX_PATH];
     size_t n;
 
-    _abspath(abs, rc_dir, _MAX_PATH);	/* Translate '\\' to '/' */
+    _abspath(abs, config_dir, _MAX_PATH);	/* Translate '\\' to '/' */
 
     if (!(n = strlen(abs)))
 	return -1;
@@ -1310,18 +1310,29 @@ sync_with_option(void)
 void
 init_rc(void)
 {
-    int i;
-    struct stat st;
-    FILE *f;
+    size_t			i						= 0;
+    struct stat		st;
+	memset(&st, 0, sizeof(struct stat));
+    FILE			*f						= NULL;
+	char			*xdg_config_home		= NULL;
 
-    if (rc_dir_initialized)
+    if (config_dir_initialized)
 		goto open_rc;
 
-	if (!rc_dir)
-    	rc_dir = expandPath(RC_DIR);
-    i = strlen(rc_dir);
-    if (i > 1 && rc_dir[i - 1] == '/')
-	rc_dir[i - 1] = '\0';
+	if (!config_dir) {
+		xdg_config_home = getenv("XDG_CONFIG_HOME");
+		if (xdg_config_home && *xdg_config_home) {
+			i = strlen(xdg_config_home);
+			if (xdg_config_home[i - 1] == '/')
+				xdg_config_home[i - 1] = '\0';
+			config_dir = Strnew_m_charp(xdg_config_home, "/", "w3mp", NULL)->ptr;
+		} else {
+    		config_dir = expandPath(CONFIG_DIR);
+		}
+	}
+    i = strlen(config_dir);
+    if (i > 1 && config_dir[i - 1] == '/')
+	config_dir[i - 1] = '\0';
 
 #ifdef USE_M17N
     display_charset_str = wc_get_ces_list();
@@ -1329,31 +1340,31 @@ init_rc(void)
     system_charset_str = display_charset_str;
 #endif
 
-    if (stat(rc_dir, &st) < 0) {
+    if (stat(config_dir, &st) < 0) {
 	if (errno == ENOENT) {	/* no directory */
-	    if (do_mkdir(rc_dir, 0700) < 0) {
-		/* fprintf(stderr, "Can't create config directory (%s)!\n", rc_dir); */
-		goto rc_dir_err;
+	    if (do_mkdir(config_dir, 0700) < 0) {
+		/* fprintf(stderr, "Can't create config directory (%s)!\n", config_dir); */
+		goto config_dir_err;
 	    }
 	    else {
-		stat(rc_dir, &st);
+		stat(config_dir, &st);
 	    }
 	}
 	else {
-	    /* fprintf(stderr, "Can't open config directory (%s)!\n", rc_dir); */
-	    goto rc_dir_err;
+	    /* fprintf(stderr, "Can't open config directory (%s)!\n", config_dir); */
+	    goto config_dir_err;
 	}
     }
     if (!S_ISDIR(st.st_mode)) {
 	/* not a directory */
-	/* fprintf(stderr, "%s is not a directory!\n", rc_dir); */
-	goto rc_dir_err;
+	/* fprintf(stderr, "%s is not a directory!\n", config_dir); */
+	goto config_dir_err;
     }
     if (!(st.st_mode & S_IWUSR)) {
-		/* fprintf(stderr, "%s is not writable!\n", rc_dir); */
-		goto rc_dir_err;
+		/* fprintf(stderr, "%s is not writable!\n", config_dir); */
+		goto config_dir_err;
     }
-    no_rc_dir = FALSE;
+    no_config_dir = FALSE;
 
     if (config_file == NULL)
 	config_file = rcFile(CONFIG_FILE);
@@ -1374,11 +1385,11 @@ init_rc(void)
 	interpret_rc(f);
 	fclose(f);
     }
-	rc_dir_initialized = 1;
+	config_dir_initialized = 1;
     return;
 
-  rc_dir_err:
-    no_rc_dir = TRUE;
+  config_dir_err:
+    no_config_dir = TRUE;
 }
 
 void
@@ -1391,7 +1402,7 @@ init_tmp(void)
 #ifdef HAVE_MKDTEMP
     tmp_dir = mkdtemp(Strnew_m_charp(tmp_dir, "/w3m-XXXXXX", NULL)->ptr);
     if (tmp_dir == NULL)
-		tmp_dir = rc_dir;
+		tmp_dir = config_dir;
 #endif
 }
 
@@ -1613,7 +1624,7 @@ rcFile(char *base)
 	 || (base[0] == '~' && base[1] == '/')))
 	/* /file, ./file, ../file, ~/file */
 	return expandPath(base);
-    return expandPath(Strnew_m_charp(rc_dir, "/", base, NULL)->ptr);
+    return expandPath(Strnew_m_charp(config_dir, "/", base, NULL)->ptr);
 }
 
 char *

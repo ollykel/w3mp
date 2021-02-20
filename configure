@@ -623,7 +623,7 @@ ac_subst_vars='LTLIBOBJS
 LIBOBJS
 CURRENT_VERSION
 DOCDIRS
-RC_DIR
+CONFIG_DIR
 HELP_DIR
 SIGNAL_RETURN
 RETSIGTYPE
@@ -9836,8 +9836,8 @@ HELP_DIR="$datadir/$PACKAGE"
 $as_echo "#define HELP_DIR \"\$HELP_DIR\"" >>confdefs.h
 
 
-RC_DIR="~/.$PACKAGE"
-$as_echo "#define RC_DIR \"\$RC_DIR\"" >>confdefs.h
+CONFIG_DIR="~/.$PACKAGE"
+$as_echo "#define CONFIG_DIR \"\$CONFIG_DIR\"" >>confdefs.h
 
 
 DOCDIRS="doc:en_English doc-jp:ja_Japanese doc-de:de_German"

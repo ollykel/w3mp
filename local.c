@@ -32,7 +32,7 @@ writeLocalCookie()
 {
     FILE *f;
 
-    if (no_rc_dir)
+    if (no_config_dir)
 	return;
     if (Local_cookie_file)
 	return;
