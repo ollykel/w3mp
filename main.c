@@ -5889,12 +5889,15 @@ DEFUN(dictwordat, DICT_WORD_AT,
 void
 _promptResponse(int use_newtab)
 {
-	char		*data				= NULL;
-	char		*url_fmt			= NULL;
-	char		*prompt				= "(input):";
-	char		*default_response	= "";
-	char		*input				= NULL;
-	Str			parsed_url			= NULL;
+	char		*data					= NULL;
+	char		*url_fmt				= NULL;
+	size_t		url_fmt_len				= 0;
+	char		*prompt					= "(input):";
+	char		*default_response		= "";
+	char		*input					= NULL;
+	char		*parsed_url				= NULL;
+	size_t		parsed_url_len_max		= 0;
+	char		*parsed_url_elems[2]	= { NULL, NULL };
 
     data = searchKeyData();
 	CurrentKeyData = NULL;
@@ -5903,6 +5906,7 @@ _promptResponse(int use_newtab)
 		return;
 	}
 	url_fmt = getWord(&data);
+	url_fmt_len = strlen(url_fmt);
 	if (!*data)
 		goto get_response;
 	prompt = getQWord(&data);
@@ -5915,16 +5919,23 @@ get_response:
 		displayBuffer(Currentbuf, B_NORMAL);
 		return;
 	}
-	parsed_url = unquote_mailcap_raw(url_fmt, NULL, input, NULL, NULL);
-	if (!parsed_url || !parsed_url->ptr || *parsed_url->ptr == '\0') {
+	parsed_url_len_max = ((url_fmt_len >> 1) * strlen(input)) + 1;
+	if (url_fmt_len > parsed_url_len_max)
+		parsed_url_len_max = url_fmt_len + 1;
+	parsed_url = calloc(parsed_url_len_max, 1);
+	parsed_url_elems[0] = input;
+	snformat(parsed_url, url_fmt, parsed_url_len_max - 1, "s", parsed_url_elems);
+	if (!parsed_url || !*parsed_url) {
+		free(parsed_url);
 		displayBuffer(Currentbuf, B_NORMAL);
 		return;
 	}
-	CurrentKeyData = parsed_url->ptr;
+	CurrentKeyData = parsed_url;
 	if (use_newtab)
 		tabURL();
 	else
 		goURL();
+	free(parsed_url);
 }// end _promptResponse
 
 // format: PROMPT url_fmt ["prompt"] ["default_response"]
