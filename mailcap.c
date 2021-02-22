@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include "parsetag.h"
+#include <limits.h>
 #include "local.h"
 
 static struct mailcap DefaultMailcap[] = {
@@ -483,5 +484,54 @@ unquote_mailcap(char *qstr, char *type, char *name, char *attr, int *mc_stat)
 Str
 unquote_mailcap_raw(char *qstr, char *type, char *name, char *attr, int *mc_stat)
 {
-    return unquote_mailcap_loop(qstr, type, name, attr, mc_stat, -1);
+    return unquote_mailcap_loop(qstr, type, name, attr, mc_stat, INT_MAX);
+}
+
+// various string-related utils
+
+size_t
+snformat(char *dest, char *fmt, size_t max_len, const char *keys, const char **values)
+{
+	char		*mapping[CHAR_MAX];
+	memset(mapping, 0, CHAR_MAX * sizeof(char*));
+	char		*key		= keys;
+	char		**val		= values;
+	char		*match_src	= NULL;
+	size_t		num_written	= 0;
+
+	for (; *key; key++) {
+		mapping[*key] = *val;
+		if (*(val + 1))
+			val++;
+	}
+	for (; max_len && *fmt; fmt++) {
+		switch (*fmt) {
+			case '%':
+				fmt++;
+				if (!*fmt)
+					return;
+				if (*fmt == '%') {
+					*dest = *fmt;
+					dest++;
+					num_written++;
+					max_len--;
+				} else if (!mapping[*fmt]) {
+					continue;
+				} else {
+					for (match_src = mapping[*fmt]; max_len && *match_src; dest++, match_src++) {
+						*dest = *match_src;
+						num_written++;
+						max_len--;
+					}
+				}
+				break;
+			default:
+				*dest = *fmt;
+				dest++;
+				num_written++;
+				max_len--;
+				break;
+		}
+	}
+	return num_written;
 }
