@@ -7083,3 +7083,27 @@ DEFUN(printMsg, MESSAGE, "display a message at the bottom of the screen")
 		displayBuffer(Currentbuf, B_NORMAL);
 	}
 }
+
+DEFUN(changeCwd, CHDIR, "Change the current working directory (./)")
+{
+	char			*data		= NULL;
+	char			cwd[PATH_MAX]; memset(cwd, 0, PATH_MAX);
+	char			*new_cwd	= NULL;
+
+	getcwd(cwd, PATH_MAX);
+	data = searchKeyData();
+	CurrentKeyData = NULL;
+	if (!data || *data == '\0')
+		new_cwd = inputFilenameHist("Set working directory: ", cwd, LoadHist);
+	else
+		new_cwd = getWord(&data);
+	new_cwd = expandPath(new_cwd);
+	if (!new_cwd || *new_cwd == '\0') {
+		displayBuffer(Currentbuf, B_NORMAL);
+		return;
+	}
+	if (chdir(new_cwd) == -1)
+		disp_message("ERROR: could not set new working directory", TRUE);
+	else
+    	displayBuffer(Currentbuf, B_NORMAL);
+}

@@ -821,6 +821,8 @@ extern void reloadBuffer(Buffer *buf);
 extern void promptResponse(void);
 extern void promptResponseTab(void);
 
+extern void changeCwd(void);
+
 extern char *guess_save_name(Buffer *buf, char *file);
 
 extern void wrapToggle(void);
