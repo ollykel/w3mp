@@ -1,0 +1,14 @@
+#!/bin/bash
+# converts pdf file to png, plays as mpv playlist
+
+fname="$1"
+outdir="$(mktemp --directory "${W3M_TEMP}/mpv_pdf-XXXXXXXX")"
+
+mkdir -p "${outdir}"
+echo "converting ${fname} ..." >&2
+convert "${fname}" "${outdir}/pdf.jpg"
+
+mpv --image-display-duration=inf $([[ ! ${DISPLAY} ]] && echo -vo=drm) "${outdir}"
+
+find "${outdir}" -type f -execdir shred -u '{}' \;
+rm -rf "${outdir}"

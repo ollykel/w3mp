@@ -1,0 +1,4 @@
+sredir: file:/cgi-bin/search-redir?%s
+sreddit: file:/cgi-bin/search-reddit?%s
+youtube: file:/cgi-bin/youtube.cgi?%s
+firefox: file:/cgi-bin/firefox.cgi?%s

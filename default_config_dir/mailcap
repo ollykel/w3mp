@@ -1,0 +1,41 @@
+text/markdown;	pandoc < %s; x-htmloutput
+text/xml;	xmllint --htmlout -; x-htmloutput; test=which xmllint 1>&- 2>&-
+text/pdf;	fname="${W3M_TEMP}/$(basename %s)"\; mv %s "${fname}"\; pdftohtml -stdout "${fname}" \| sed "s#$HOME#file://$HOME#g"; x-htmloutput; test=[ ! "$DISPLAY" ]
+image/*;	mpv --image-display-duration=inf %s; test=/usr/bin/test -n "$DISPLAY"
+image/*;	mpv -vo drm --image-display-duration=inf %s; test=/usr/bin/test ! "$DISPLAY"; needsterminal
+image/gif;	mpv --keep-open=yes --loop %s; test=test -n "$DISPLAY"
+image/gif;	mpv -vo drm --loop %s; test=test ! "$DISPLAY"; needsterminal
+image/svg;	convert %s png:/dev/stdout | mpv --image-display-duration=inf --title=$W3M_CURRENT_IMG -; needsterminal; test=test -n "${DISPLAY}"
+image/svg;	convert %s png:/dev/stdout | mpv --image-display-duration=inf --title=$W3M_CURRENT_IMG -vo=drm -; needsterminal; test=test ! "${DISPLAY}"
+image/svg+xml;	tmux-launch new-window -d "convert %s png:/dev/stdout | mpv --image-display-duration=inf --title=$W3M_CURRENT_IMG -"; needsterminal; test=test -n "${DISPLAY}"
+image/svg+xml;	convert %s png:/dev/stdout | mpv --image-display-duration=inf --title=$W3M_CURRENT_IMG -vo=drm -; needsterminal; test=test ! "${DISPLAY}"
+video/*;	mpv --keep-open=yes -vo drm %s; test=test ! "$DISPLAY"; needsterminal
+video/*;	tmux-launch new-window -d "exec mpv --keep-open=yes %s"; needsterminal; test=test -n "$DISPLAY"
+video/gif;	mpv -vo drm --loop %s; test=test ! "$DISPLAY"; needsterminal
+video/gif;	mpv --loop %s 1>&-; test=test -n "$DISPLAY"
+video/x-youtube;	tmux-launch new-window -d "PYTHONPATH=$PYTHONPATH mpv --keep-open=yes $(cat %s)"; test=test "$DISPLAY"; needsterminal
+video/x-youtube;	mpv --keep-open=yes -vo drm $(cat %s); test=test ! "$DISPLAY"; needsterminal
+video/x-youtube2;	tmux-launch new-window -d -n youtube \"PYTHONPATH=${PYTHONPATH} $(which youtube-play) --url \\\"$(cat %s)\\\" --mode download -- $([ ! $DISPLAY ] && echo --no-video) --cookies ${W3M_CONFIG_HOME}/cookies.txt\"; needsterminal
+audio/*;	tmux-launch new-window -d "exec mpv -vo=null %s"; needsterminal
+application/ogg;	tmux-launch new-window -d "exec mpv -vo=null %s"; needsterminal
+application/pdf; evince %s; test=test -n "$DISPLAY"
+application/pdf; mpv_pdf %s; needsterminal; test=test ! "${DISPLAY}"
+# application/pdf;	fname="${W3M_TEMP}/$(basename %s)"\; mv %s "${fname}"\; pdftohtml -stdout "${fname}" \| sed "s#$HOME#file://$HOME#g"; x-htmloutput; test=[ ! "$DISPLAY" ]
+application/x-mpegURL;	mpv --keep-open=yes -vo drm --playlist=%s; test=test ! "$DISPLAY"; needsterminal
+application/x-mpegURL;	tmux-launch new-window -d "mpv --keep-open=yes --playlist=%s"; needsterminal; test=test -n "$DISPLAY"
+application/vnd.apple.mpegurl;	mpv --keep-open=yes -vo drm --playlist=%s; test=test ! "$DISPLAY"; needsterminal
+application/vnd.apple.mpegurl;	tmux-launch new-window -d "mpv --keep-open=yes --playlist=%s"; needsterminal; test=test -n "$DISPLAY"
+application/x-troff-man; BROWSER=$(which cat) man --html '%s'; x-htmloutput; description=Man page
+application/json;	json_xs -t json-pretty; copiousoutput; test=which json_xs 1>&- 2>&-
+application/json;	cat %s; copiousoutput
+application/xml;	xmllint --htmlout -; x-htmloutput; test=which xmllint 1>&- 2>&-
+application/xml;	cat %s; copiousoutput
+application/rss+xml;	xmllint --htmlout -; x-htmloutput; nametemplate=%s.rss; test=which xmllint 1>&- 2>&-
+application/rss+xml;	cat %s; copiousoutput; nametemplate=%s.rss
+application/javascript;	cat %s; copiousoutput
+application/ecmascript;	cat %s; copiousoutput
+application/yaml; cat %s; copiousoutput
+application/toml; cat %s; copiousoutput
+application/x-sh; cat %s; copiousoutput
+application/x-shellscript; cat %s; copiousoutput
+# application/x-shockwave-flash;	ruffle %s

@@ -1,0 +1,107 @@
+#!/bin/bash
+
+# Extracts meta property/properties from page. Redirects browser to links when appropriate.
+# Usage: meta [--link, -l] [--print, -p] PROPERTY_NAME | --all, -a
+# 
+# Options:
+# 	--link, -l				Get meta properties from current link ($W3M_CURRENT_LINK). Parses current page by default.
+# 	--print, -p				Print meta property even if it can be parsed as a url. By default, redirects to urls to be handled by mailcap
+# 	--all, -a				Print all meta properties
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		--link|-l)
+			use_link=t
+			;;
+		--print|-p)
+			to_print=t
+			;;
+		--all|-a)
+			to_print_all=t
+			;;
+		*)
+			break
+			;;
+	esac
+	shift
+done
+
+if [[ -f ${user_agent_file} ]]; then
+	user_agent="$(tac < ${user_agent_file} | tail --lines=1)"
+else
+	user_agent='Lynx/2.8.9rel.1 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/1.1.1d'
+fi
+
+if [[ ${use_link} = t ]]; then
+	content="$(curl --location --compressed --header "User-Agent: ${user_agent}" "${W3M_CURRENT_LINK}")"
+	for i in {1..10}; do
+		redirect="$(grep -i -o -m 1 -E "<meta\s[^>]*http-equiv=.refresh.\s[^>]*content=.['\"]*.[^>]*>" <<< "${content}" | sed -re "s#.*content=.0;URL=([^'\"]*)..*#\1#")"
+		if [[ ! ${redirect} ]]; then
+			break
+		else
+			content="$(curl --location --compressed --header "User-Agent: ${user_agent}" "${redirect}")"
+		fi
+		if [[ $i = 10 ]]; then
+cat << _EOF_
+w3m-control: BACK
+w3m-control: MESSAGE ERROR: Number of redirects exceeded limit (10)
+
+_EOF_
+			exit 0
+		fi
+	done
+else
+	content="$(cat "${W3M_SOURCEFILE}")"
+fi
+
+if [[ ${to_print_all} = t ]]; then
+	IFS=$'\n\r' meta_props=($(grep -o -E '<meta\s[^>]*property="[^"]*"\s[^>]*content="[^"]*"' <<< "${content}" | sed -re 's#.*property="([^"]+)"\s[^>]*content="([^"]+)".*#<li><em>\1</em> \2</li>#'))
+cat << _EOF_
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta lang="en" />
+	<title>Meta Properties -- ${W3M_TITLE}</title>
+</head>
+<body>
+	<h1>Meta Properties -- ${W3M_TITLE}</h1>
+	<ol>${meta_props[*]}</ol>
+</body>
+</html>
+_EOF_
+	exit 0
+else
+	meta_property="$1"
+	echo "meta_property: ${meta_property}" >&2
+	[[ ! ${meta_property} ]] && echo "usage: $(basename $0) [OPTIONS ...] meta_property" >&2 && exit 1
+fi
+
+user_agent_file="${W3M_CONFIG_HOME}/user-agents.txt"
+
+item="$(grep -m 1 -o "<meta[^>]* property=\"${meta_property}\"[^>]*>" <<< "${content}" | sed -re 's#.*content="([^"]+)".*#\1#')"
+
+[[ ! ${item} ]] && echo "could not find meta ${meta_property}" >&2 && exit 1
+
+if [[ ${to_print} != 't' ]]; then
+	content_url="$(grep -m 1 -o '[a-z]\+\:\/\/[0-9a-z\._-]\+\.[0-9a-z]\+\S*' <<< "${item}")"
+	if [[ ${content_url} ]]; then
+cat << _EOF_
+w3m-control: BACK
+w3m-control: GOTO ${content_url}
+
+_EOF_
+		exit 0
+	fi
+fi
+
+cat << _EOF_
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+
+meta ${meta_property} = "${item}"
+_EOF_
+

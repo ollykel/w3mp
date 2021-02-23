@@ -1,0 +1,17 @@
+duckduckgo, ddg: https://lite.duckduckgo.com/lite/?q=%s
+youtube, yt: https://www.youtube.com/results?search_query=%s
+google, gg: https://www.google.com/search?q=%s
+wikipedia, wiki, wk: https://en.wikipedia.org/w/index.php?search=%s&title=Special:Search&fulltext=Search
+stackoverflow, so: https://stackoverflow.com/search?q=%s#bigsearch
+reddit, rd: file:/cgi-bin/search-reddit?%s
+rust-docs, rust-doc, rust: https://docs.rs/releases/search?query=%s
+github, gh: https://github.com/search?q=%s#start-of-content
+gitlab, gl: https://gitlab.com/search?search=%s
+mozilla, moz, mz: https://developer.mozilla.org/en-US/search?q=%s
+cheat, ch: https://cheat.sh/%s
+superuser, su: https://www.superuser.com/search?q=%s
+britannica, brit: https://www.britannica.com/search?query=%s
+wiktionary, wikt, wkt: https://en.wiktionary.org/w/index.php?search=%s&title=Special%3ASearch&fulltext=Search&ns0=1
+google-news, ggn, gg-n, gn: https://google.com/search?q=%s&tbm=nws
+google-image, google-images, gi: https://google.com/search?q=%s&tbm=isch
+project-gutenberg, gutenberg, pg: https://www.gutenberg.org/ebooks/search/?query=%s

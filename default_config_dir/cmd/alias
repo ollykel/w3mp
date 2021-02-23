@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# Aliases a command in $W3M_CONFIG_HOME/cmd to another name using a symlink
+# See alias --help for usage instructions.
+
+function print_help() {
+	cat << _EOF_
+HTTP/2
+Content-Type: text/plain; charset=utf-8
+
+Usage: $(basename $0) [OPTIONS ...] COMMAND ALIAS(ES) ...
+
+Options:
+	--force, -f:		replace link if it already exists
+_EOF_
+}
+# end function print_help
+
+function print_msg() {
+	cat << _EOF_
+w3m-control: BACK
+w3m-control: MESSAGE $*
+
+_EOF_
+}
+# end function print_msg
+
+cmd_dir="${W3M_CONFIG_HOME}/cmd"
+to_force=f
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		--force|-f)
+			to_force=t
+			;;
+		--help|-h)
+			print_help
+			exit 0
+			;;
+		*) break ;;
+	esac
+	shift
+done
+
+cmd="$1"
+cmd_path="${cmd_dir}/${cmd}"
+aliases=(${*:2})
+settable_aliases=""
+unsettable_aliases=""
+
+if [[ ! ${cmd} || ${#aliases[*]} -lt 1 ]]; then
+	print_help
+	exit 0
+fi
+
+if [[ ! -f "${cmd_path}" ]]; then
+	print_msg "ERROR: Command \"${cmd}\" not found in ${cmd_dir}"
+	exit 0
+fi
+
+for al in ${aliases[*]}; do
+	alias_path="${cmd_dir}/${al}"
+	if [[ -f "${alias_path}" ]]; then
+		if [[ "${to_force}" = t && -h "${alias_path}" ]]; then
+			rm "${alias_path}"
+		else
+			[[ ! ${unsettable_aliases} ]] && unsettable_aliases="${al}" || unsettable_aliases="${unsettable_aliases}, ${al}"
+		fi
+	fi
+	ln -s ./"${cmd}" "${alias_path}"
+	[[ ! ${settable_aliases} ]] && settable_aliases="${al}" || settable_aliases="${settable_aliases}, ${al}"
+done
+
+if [[ ${unsettable_aliases} ]]; then
+	print_msg "Unsettable aliases: ${unsettable_aliases}"
+else
+	print_msg "${cmd} aliased to ${settable_aliases}"
+fi

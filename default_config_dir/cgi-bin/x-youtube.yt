@@ -1,0 +1,15 @@
+#!/bin/bash
+
+ext="${0##*.}"
+
+[[ "${ext}" = 'yt2' ]] && content_type='video/x-youtube2' || \
+	content_type='video/x-youtube'
+
+cat << _END_
+HTTP/1.1 200 ok
+Content-Type: ${content_type}
+Date: $(date --utc)
+
+$QUERY_STRING
+_END_
+

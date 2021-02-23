@@ -1,0 +1,11 @@
+#!/bin/bash
+
+[[ $1 ]] && reps="$1" || reps=1
+
+echo "w3m-control: BACK"
+while [[ ${reps} -gt 0 ]]; do
+	echo "w3m-control: NEXT_LINK"
+	reps=$(( ${reps} - 1 ))
+done
+echo "w3m-control: GOTO_LINK"
+echo

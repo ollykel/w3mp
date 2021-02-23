@@ -1,0 +1,10 @@
+mpv: test ! "${DISPLAY}" && unset TMUX_PANE; tmux-launch new-window -d "PYTHONPATH=${PYTHONPATH} mpv --keep-open=yes --log-file=${W3M_TEMP}/mpv.log $(test ! ${DISPLAY} && echo -vo=drm) %s"
+mpv-audio, mpva: tmux-launch new-window -d "PYTHONPATH=${PYTHONPATH} exec mpv --keep-open=yes --video=no --log-file=${W3M_TEMP}/mpv.log %s"
+ttrv, tr: tmux-launch new-window -n ttrv "PYTHONPATH=${PYTHONPATH} PAGER=${PAGER} BROWSER=${BROWSER} EDITOR=${EDITOR} MAILCAPS=${MAILCAPS} exec ttrv %s"
+ttrv-sub, trs: tmux-launch new-window -n ttrv "PYTHONPATH=${PYTHONPATH} PAGER=${PAGER} BROWSER=${BROWSER} EDITOR=${EDITOR} MAILCAPS=${MAILCAPS} exec ttrv $(grep -o -e '/r/[0-9A-Za-z\._-]\+' <<< %s | tail --bytes=+4)"
+firefox, ff: firefox -new-tab %s 1>/dev/null 2>/dev/null & disown
+vlc: tmux-launch new-window -d "vlc %s"
+rvlc: tmux-launch new-window -d "rvlc %s"
+eog: tmux-launch new-window -d "eog %s"
+clip: /bin/echo -n '%s' | xclip -selection clipboard -in
+ffplay: ffplay %s 1>/dev/null 2>/dev/null & disown

@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Unzip .zip file under cursor into $W3M_TEMP, view contents
+# Only works if $W3M_CURRENT_LINK is a file:// uri
+
+function print_msg() {
+cat << _EOF_
+w3m-control: BACK
+w3m-control: MESSAGE ${1}
+
+_EOF_
+}
+
+if [[ ${W3M_URL::7} != 'file://' ]]; then
+	print_msg "ERROR: must be in file mode"
+	exit 0
+fi
+
+if [[ ${W3M_CURRENT_LINK::7} != 'file://' || ${W3M_CURRENT_LINK##*.} != 'zip' ]]; then
+	print_msg "ERROR: current link must be file of type .zip"
+	exit 0
+fi
+
+fname="${W3M_CURRENT_LINK:7}"
+
+if [[ ${W3M_TEMP} ]]; then
+	TEMP="${W3M_TEMP}"
+elif [[ ! ${TEMP} ]]; then
+	TEMP='/tmp'
+fi
+
+outdir="$(mktemp --tmpdir=${TEMP} --directory 'zip-XXXXXXXX')"
+
+unzip "${fname}" -d "${outdir}"
+
+cat << _EOF_
+w3m-control: BACK
+w3m-control: LOAD ${outdir}
+
+_EOF_
+

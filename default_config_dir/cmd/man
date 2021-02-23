@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cat << _EOF_
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=UTF-8
+Date: $(date --utc)
+
+$(man --html=$(which cat) $* || echo "<h1>Error</h1><p>could not find man docs for \"$*\"</p>")
+_EOF_

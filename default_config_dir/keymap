@@ -1,0 +1,35 @@
+# w3m keymap file
+keymap	C-n	NEXT_LINK
+keymap	C-p	PREV_LINK
+keymap	"0"	LINE_BEGIN
+keymap	Q	NULL
+keymap	"-"	GOTO file:/cgi-bin/updir.cgi
+keymap	C-u	GOTO file:/cgi-bin/clip.cgi?W3M_CURRENT_IMG
+keymap	C-o	SAVE_IMAGE
+keymap	p	SUBMIT
+keymap	C-x	SETENV
+keymap	C-r	REINIT
+keymap	ESC-i	LINK_MENU
+keymap	"&"	MARK_MID
+keymap	ESC-:	COMMAND
+keymap	:	GOTO file:/cgi-bin/command.cgi/prompt
+keymap	P	GOTO file:/cgi-bin/repeat.cgi
+keymap	";"	MARK_URL
+keymap	ESC-c	MARK_WORD
+keymap	"*"	GOTO file:/cgi-bin/clip.cgi?W3M_CURRENT_ANCHOR+W3M_CURRENT_WORD
+keymap	"_"	GOTO_HOME
+keymap	f	GOTO file:/cgi-bin/search.cgi
+keymap	F	GOTO file:/cgi-bin/search.cgi/newtab
+keymap	M	GOTO file:/cgi-bin/extern.cgi
+keymap	Y	GOTO file:/cgi-bin/extern.cgi/link
+# bookmarks
+keymap	ESC-a	GOTO file:/cgi-bin/bookmark/add
+keymap	ESC-A	GOTO file:/cgi-bin/bookmark/add?target=link
+keymap	ESC-b	GOTO file:/cgi-bin/bookmark
+keymap	ESC-B	TAB_GOTO file:/cgi-bin/bookmark
+# misc scripts and utilities
+keymap	"%"	GOTO file:/cgi-bin/user-agent.cgi
+keymap	"ESC-%"	GOTO file:/cgi-bin/user-agent.cgi/select
+keymap	ESC-w	GOTO file:/cgi-bin/env.cgi
+keymap	"#"	GOTO_RELATIVE "#content"
+keymap	"ESC-V"	COMMAND "NEW_TAB; LOAD"

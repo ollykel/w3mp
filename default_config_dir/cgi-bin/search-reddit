@@ -1,0 +1,74 @@
+#!/usr/bin/env python
+
+import sys
+import os
+from urllib import parse as urlparse
+
+ERROR_FMT = '''HTTP/1.1 404 ERROR
+Content-Type: text/html; charset=UTF-8
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta lang="en" />
+        <title>Error: {err}</title>
+    </head>
+    <body>
+        <h1>Error: {err}</h1>
+    </body>
+</html>
+'''
+
+SEARCH_FMT = '''w3m-control: GOTO {url}
+
+'''
+
+if __name__ == "__main__":
+    qs = os.getenv('QUERY_STRING')
+    if qs is None:
+        sys.stdout.write(ERROR_FMT.format(err='requires $QUERY_STRING'))
+        exit(0)
+    args = urlparse.unquote_plus(qs).split(' ')
+    if len(args) < 1:
+        sys.stdout.write(ERROR_FMT.format(err='requires at least one arg'))
+        exit(0)
+    search_params = dict()
+    subreddits, flairs = list(), list()
+    while len(args) > 0:
+        arg = args[0]
+        if arg in ('--sort', '-s'):
+            search_params['sort'] = args[1]
+            args = args[2:]
+        elif arg in ('--time', '-t'):
+            search_params['t'] = args[1]
+            args = args[2:]
+        elif arg in ('--nsfw', '-w'):
+            search_params['include_over_18'] = 'on'
+            args = args[1:]
+        elif arg == '-r':
+            subreddits.append(args[1])
+            args = args[2:]
+        elif arg in ('--flair', '-f'):
+            flairs.append(args[1])
+            args = args[2:]
+        else:
+            break
+        #-- end while
+    for i, sub in enumerate(subreddits):
+        subreddits[i] = 'subreddit:{}'.format(sub)
+        #-- end for i, sub
+    subreddit_str = '({})'.format(' OR '.join(subreddits)) if len(subreddits) > 0 else None
+    for i, flair in enumerate(flairs):
+        flairs[i] = 'flair:"{}"'.format(flair)
+        #-- end for i, flaie
+    flair_str = '({})'.format(' OR '.join(flairs)) if len(flairs) > 0 else None
+    arg_str = ' '.join(args) if len(args) > 0 else None
+    search_params['q'] = ' '.join(tuple(filter(lambda x: x is not None, (subreddit_str, flair_str, arg_str))))
+    query = urlparse.urlencode(search_params, safe='()')
+    url = urlparse.urlunsplit(('https', 'reddit.com', '/search/.mobile', query, ''))
+    if os.getenv('SEARCH_NEWTAB', 'f') == 't':
+        print('w3m-control: BACK')
+    sys.stdout.write(SEARCH_FMT.format(url=url))
+    #-- end main
+
