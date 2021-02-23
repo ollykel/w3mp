@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [[ ${DISPLAY} ]]; then
+	/bin/echo -n "${*}" | xclip -selection clipboard -in -quiet 1>/dev/null 2>/dev/null & disown
+else
+	/bin/echo -n "${*}" | termclip --in
+fi
+
+cat << _EOF_
+w3m-control: BACK
+
+_EOF_
+

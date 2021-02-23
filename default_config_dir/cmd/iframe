@@ -1,0 +1,12 @@
+#!/bin/bash
+
+url_domain="$(grep -m 1 -o '[a-z]*\:\/\/[^\/]*' <<< "${W3M_URL}")"
+
+cat << _EOF_
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+$([[ ${W3M_CURRENT_LINE} ]] && echo "w3m-control: GOTO_LINE ${W3M_CURRENT_LINE}")
+
+$(sed -re 's#<iframe [^>]*src="([^"].*)"[^>]*>.*<\/iframe>#<p><a href="\1">\1</a></p>#g' -re "s#(\S+)=\"\/#\1=\"${url_domain}/#g" < "${W3M_SOURCEFILE}")
+_EOF_
+

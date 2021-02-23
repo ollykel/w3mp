@@ -1,0 +1,13 @@
+#!/bin/bash
+
+[[ ! ${W3M_CMD_PATH} ]] && W3M_CMD_PATH="${W3M_CONFIG_HOME}/cmd"
+
+cat << _EOF_
+HTTP/1.1 200 OK
+Content-Type: text/plain; charset=utf-8
+Date: $(date)
+
+Available Commands:
+$(ls --dereference-command-line -l $(IFS=:; echo ${W3M_CMD_PATH[*]}) | cut -c50-)
+_EOF_
+

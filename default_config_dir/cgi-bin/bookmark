@@ -1,0 +1,194 @@
+#!/usr/bin/env python
+
+import sys
+import yaml
+import sys
+import os
+from os import path as fpath
+import tempfile
+from urllib import parse as urlparse
+import configparser
+from datetime import datetime
+
+HTML_FORMAT = '''<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta lang="en" />
+        <title>{title}</title>
+    </head>
+    <body>{body}</body>
+</html>
+'''
+
+def format_html(body, title='Bookmarks'):
+    return HTML_FORMAT.format(title=title.encode('utf-8', 'replace').decode(),
+        body=body.encode('utf-8', 'replace').decode())
+    #-- end format_html
+
+HTTP_FORMAT = '''HTTP/1.1 {status}
+Content-Type: text/html; charset=UTF-8
+Date: {date}
+
+{html}
+'''
+
+def format_date(date=(lambda: datetime.utcnow())()):
+    return date.strftime('%a, %d %b %Y %H:%M:%S GMT')
+    #-- end format_date
+
+def format_http(html, status='200 OK', date=None):
+    return HTTP_FORMAT.format(status=status,
+        date=format_date(date) if date is not None else format_date(),
+        html=html)
+    #-- end format_http
+
+REDIRECT_FMT = '''HTTP/1.1 302 REDIRECT
+Date: {date}
+Location: {location}
+
+'''
+
+def format_redirect(location, date=None):
+    return REDIRECT_FMT.format(location=location, date=format_date(date))
+    #-- end format_redirect
+
+class BookmarkManager:
+    def __init__(self, filename):
+        self._filename = filename
+        self._bookmarks = self._load_bookmarks()
+        #-- end BookmarkManager.__init__
+
+    def _load_bookmarks(self):
+        try:
+            with open(self._filename, 'r') as source:
+                data = yaml.load(source.read(), Loader=yaml.FullLoader)
+                if isinstance(data, list):
+                    data = {'Other': data}
+                return data
+                #-- end with source
+        except Exception as err:
+            return dict()
+        #-- end BookmarkManager._load_bookmarks
+
+    def get_bookmarks(self):
+        return dict(self._bookmarks)
+        #-- end BookmarkManager.get_bookmarks
+
+    def write_bookmarks(self):
+        with open(self._filename, 'w') as dest:
+            output = os.linesep.join(yaml.dump(self._bookmarks, default_flow_style=False).split(os.linesep))
+            dest.write(output)
+            #-- end with dest
+        #-- end BookmarkManager.write_bookmarks
+
+    def add_bookmark(self, section, title, url):
+        bmark = {'title': title, 'url': url}
+        if section not in self._bookmarks:
+            self._bookmarks[section] = [bmark]
+        else:
+            self._bookmarks[section].append(bmark)
+        self.write_bookmarks()
+        #-- end BookmarkManager.add_bookmark
+    #-- end class BookmarkManager
+
+def get_bookmark_defaults(env_filename):
+    if fpath.exists(env_filename):
+        cparser = configparser.ConfigParser()
+        with open(env_filename, 'r') as source:
+            contents = os.linesep.join(('[env]', source.read()))
+            cparser.read_string(contents)
+            #-- end with source
+        os.remove(env_filename)
+        title = cparser.get(section='env', option='W3M_TITLE', fallback='')
+        url = cparser.get(section='env', option='W3M_URL', fallback='')
+        return {'title': title, 'url': url}
+    return {'title': '', 'url': ''}
+    #-- end get_bookmark_defaults
+
+def format_select(name, *options):
+    options_html = ['<option value="{opt}">{opt}</option>'.format(opt=opt) for opt in options]
+    return '<select name="{name}">{options}</select>'.format(name=name, options=''.join(options_html))
+    #-- end format_select
+
+ADD_BOOKMARK_FORM_FMT = '''<form method="POST" action="{root_url}/add">
+    <table>
+    <tr>
+        <td><label for="section">Section:</label></td>
+        <td>{sections}</td>
+    </tr>
+    <tr>
+        <td><label for="newsection">New Section:</label></td>
+        <td><input name="newsection" type="text" size="60" /></td>
+    </tr>
+    <tr>
+        <td><label for="title">Title:</label></td>
+        <td><input name="title" type="text" value="{title}" size="60" required /></td>
+    </tr>
+    <tr>
+        <td><label for="url">URL:</label></td>
+        <td><input name="url" type="text" value="{url}" size="60" required /></td>
+    </tr>
+    <tr><button type="submit">Add</button></tr>
+    </table>
+</form>
+'''
+
+def get_add_bookmark(bookmark_manager, root_url, get_data):
+    query_options = urlparse.parse_qs(get_data)
+    use_link = True if 'target' in query_options and query_options['target'][0] == 'link' else False
+    title = os.getenv('W3M_CURRENT_ANCHOR', '') if use_link else os.getenv('W3M_TITLE', '')
+    url = os.getenv('W3M_CURRENT_LINK', '') if use_link else os.getenv('W3M_URL', '')
+    sections_select = format_select('section', *bookmark_manager.get_bookmarks().keys())
+    bookmark_form = ADD_BOOKMARK_FORM_FMT.format(root_url=root_url, sections=sections_select, title=title, url=url)
+    body = os.linesep.join(('<h1>Add Bookmark</h1>', bookmark_form))
+    return format_http(format_html(body, title='Add Bookmark'))
+    #-- end get_add_bookmark
+
+def post_add_bookmark(bookmark_manager, root_url, post_data):
+    data = urlparse.parse_qs(post_data)
+    if 'title' and 'url' in data.keys():
+        section = ' '.join(data['newsection']) if 'newsection' in data else ' '.join(data['section']) if 'section' in data else 'Other'
+        section = section.strip()
+        title, url = ' '.join(data['title']).strip(), data['url'][0].strip()
+        parsed_url = urlparse.urlsplit(url, scheme='https')
+        url = urlparse.urlunsplit(parsed_url)
+        # url = url if parsed_url.scheme != 'file' else url.replace(':///', '://', 1)
+        bookmark_manager.add_bookmark(section, title, url)
+    return os.linesep.join(('HTTP/1.1 200 OK', 'w3m-control: BACK', 'w3m-control: BACK'))
+    #-- end post_add_bookmark
+
+def get_bookmarks(bookmark_manager, root_url):
+    bookmarks = bookmark_manager.get_bookmarks()
+    def format_section(title, bookmarks):
+        list_items = ['<li><a href="{url}">{title}</a></li>'.format(**bm) for bm in bookmarks]
+        return '<section id="{section}"><h2>{section}</h2>{bookmarks}</section>'.format(section=title, bookmarks=''.join(list_items))
+        #-- end format_section
+    table_of_contents = '<section><h2>Table of Contents</h2><ol>{}</ol></section>'.format(''.join(['<li><a href="#{t}">{t}</a></li>'.format(t=title) for title in bookmarks.keys()]))
+    sections = ''.join([format_section(title, bm) for title, bm in bookmarks.items()])
+    body = '<h1><center>Bookmarks</center></h1>{toc}{sections}<hr /><p><a href="{root_url}/add">Add Bookmark</a></p>'.format(root_url=root_url,
+        toc=table_of_contents, sections=sections)
+    html = format_html(body, title='Bookmarks')
+    with open(fpath.join(os.getenv('W3M_CONFIG_HOME', ''), 'bookmark.html'), 'w') as bookmark_file:
+        bookmark_file.write(html)
+        #-- end with bookmark_file
+    return format_http(html)
+    #-- end get_bookmarks
+
+if __name__ == "__main__":
+    try:
+        bookmark_filename = fpath.join(os.getenv('W3M_CONFIG_HOME', ''), 'bookmarks.yaml')
+        bookmark_manager = BookmarkManager(bookmark_filename)
+        path, method = os.getenv('PATH_INFO', ''), os.getenv('REQUEST_METHOD', 'GET')
+        root_url = 'file:/cgi-bin/bookmark'
+        if path == '/add':
+            if method == 'POST':
+                print(post_add_bookmark(bookmark_manager, root_url, sys.stdin.read()))
+            else:
+                print(get_add_bookmark(bookmark_manager, root_url, os.getenv('QUERY_STRING', '')))
+        else:
+            print(get_bookmarks(bookmark_manager, root_url))
+    except Exception as err:
+        print(format_http(format_html('<p>Error: {err}</p>'.format(err=err), title='Error | Bookmarks'), status='404 ERROR'))
+    #-- end main
+

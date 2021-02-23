@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+
+import os
+
+from tuir import config as tuir_config
+from tuir import mime_parsers
+
+URI_PREFIX = 'imgur://'
+
+HTTP_TEMP = '''HTTP/1.1 {status}
+Content-Type: text/html; charset=UTF-8
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta lang="en" />
+        <title>{title}</title>
+    </head>
+    <body>
+        <center><h1>{title}</h1></center>
+        {body}
+    </body>
+</html>
+'''
+
+def parse_http(title, body, status='200 ok'):
+    return HTTP_TEMP.format(title=title, body=body, status=status)
+
+if __name__ == '__main__':
+    path = os.getenv('QUERY_STRING').replace(URI_PREFIX, '', 1)
+    path_elems = path.strip('/').split('/')
+    if path_elems[0] not in ('a', 'album', 'gallery'):
+        url = 'i.imgur.com/{img_hash}.jpg'.format(img_hash=path_elems[0])
+        print('Location: {url}\n'.format(url=url))
+        exit(0)
+    url = '/'.join(('https://imgur.com', path))
+    cfg = tuir_config.Config.get_file()
+    client_id = cfg[0]['imgur_client_id']
+    
+    mime_parsers.ImgurApiMIMEParser.CLIENT_ID = client_id
+    parser = mime_parsers.ImgurApiMIMEParser()
+    mime_data = parser.get_mimetype(url)
+    image_urls = mime_data[0].split(' ')
+    image_list = ['<li><a href="{url}">{url}</a></li>'.format(url=iu) for iu in image_urls]
+    image_list = ['<li><a href="{url}"><img src="{url}" alt="{url}" /></a></li>'.format(url=iu) for iu in image_urls]
+    image_list_html = '<ol>{items}</ol>'.format(items=''.join(image_list))
+    print(parse_http('Imgur Album', image_list_html))
+

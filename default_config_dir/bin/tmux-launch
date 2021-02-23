@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+
+cmd=$*[-1]
+
+if [[ ${W3M_USE_TMUX} = t && $(which tmux) && "${TMUX_PANE}" && "${TL_DEBUG}" != t ]]; then
+	tmux $*
+else
+	[[ "${TL_DEBUG}" ]] && echo "cmd: ${cmd}" >&2
+	eval "${cmd}"
+fi
+

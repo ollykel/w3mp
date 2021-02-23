@@ -1,0 +1,37 @@
+#!/bin/bash
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		--unique|-u)
+			to_filter_unique=t
+			;;
+		--reverse|-r)
+			to_reverse=t
+			;;
+		*) break ;;
+	esac
+	shift
+done
+
+if [[ $# -lt 1 ]]; then
+	echo 'no patterns provided' >&2
+	exit 1
+fi
+
+declare -a grep_patterns
+
+for item in $*; do
+	grep_patterns+=('-e' "href=\"[^\"]*${item}[^\"]*\"" '-e' "src=\"[^\"]*${item}[^\"]*\"")
+done
+
+IFS=$'\n\r' links=($(grep -o ${grep_patterns[*]} < ${W3M_SOURCEFILE} | sed -re 's#href="([^"]+)"#\1#' -re 's#src="([^"]+)"#\1#' -e 's#&amp;#\&#g'))
+
+[[ ${to_filter_unique} ]] && links=($(sort -u - <<< "${links[*]}"))
+[[ ${to_reverse} ]] && links=($(tac <<< "${links[*]}"))
+
+cat << _EOF_
+HTTP/2 200
+Content-Type: text/plain; charset=utf-8
+
+${links[*]}
+_EOF_

@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+
+import os
+from os import path as fpath
+from urllib import parse as urlparse
+
+FILE_URI = 'file://'
+
+if __name__ == "__main__":
+    try:
+        if os.getenv('W3M_URL', '')[:len(FILE_URI)] == FILE_URI:
+            furl = os.getenv('W3M_CURRENT_LINK', '').strip().replace('file://', '', 1)
+            fname = urlparse.unquote(furl)
+            if fpath.exists(fname):
+                os.remove(fname)
+    finally:
+        print(os.linesep.join(('w3m-control: BACK', 'w3m-control: RELOAD')))
+    #-- end main
+

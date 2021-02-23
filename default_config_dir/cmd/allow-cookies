@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Adds current domain to list of allowed cookie domains in config
+
+w3m_config_file="${W3M_CONFIG_HOME}/config"
+url="${W3M_URL}"
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		--link|-l)
+			url="${W3M_CURRENT_LINK}"
+			;;
+	esac
+	shift
+done
+
+domain=".$(grep -o '[0-9A-Za-z\._-]\+\.[a-z]\+' <<< "${url}" | sed -e 's#www\.##' | head --lines=1)"
+sed -i '' -re "s#(^cookie_accept_domains.*)#\1, ${domain}#" "${w3m_config_file}"
+
+cat << _EOF_
+w3m-control: BACK
+w3m-control: REINIT
+w3m-control: MESSAGE Domain "${domain}" added to allowed cookies list
+
+_EOF_

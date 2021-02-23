@@ -1,0 +1,42 @@
+url /^data:/
+substitute_url "file:/cgi-bin/base64.cgi?data:"
+
+url m@https?://(www\.)?google\.com/search?@
+user_agent "Lynx/2.8.9rel.1 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/1.1.1d"
+
+url m@^https?://(www\.)?google\.com/amp/s/amp\.@
+substitute_url "https://www."
+
+url m@^https?:\/\/(www\.)?youtube\.com/@
+substitute_url "youtube://"
+
+url /^https?:\/\/.*duckduckgo\.com\/l\//
+substitute_url "sredir://https://duckduckgo.com/l/"
+
+url /^https?:\/\/(www\.)?google\.com\/url\?"
+substitute_url "sredir://https://google.com/url?"
+
+url m@^https?://((www|mobile)\.)?twitter\.com/@
+substitute_url "firefox://https://www.twitter.com/"
+
+url m@^https?://(www\.)?reddit\.com.*/$@
+substitute_url ".mobile"
+user_agent "Lynx/2.8.9rel.1 libwww-FM/2.14 SSL-MM/1.4.1 OpenSSL/1.1.1d"
+
+url /^https?:\/\/(www\.)?imgur\.com\//
+substitute_url "imgur://"
+
+url m@^https?://(www\.)?youtu.be/@
+substitute_url "file:/cgi-bin/x-youtube.yt?https://youtu.be/"
+
+url m@^https?://v\.redd\.it/@
+substitute_url "file:/cgi-bin/x-youtube.yt?https://v.redd.it/"
+
+url m@^https?://(www\.)?netflix\.com/@
+accept_encoding "identity"
+
+url m@^https?://(www\.)?github\.com[^#]*$@
+substitute_url "#start-of-content"
+
+url m@^https?://(www\.)?stackoverflow\.com[^#]*$@
+substitute_url "#content"

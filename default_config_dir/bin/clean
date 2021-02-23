@@ -1,0 +1,4 @@
+#!/bin/bash
+
+find "${W3M_TEMP}" -type f -name 'w3m*' -execdir shred -u '{}' \;
+

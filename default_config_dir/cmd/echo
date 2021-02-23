@@ -1,0 +1,8 @@
+#!/bin/bash
+
+cat << _EOF_
+w3m-control: BACK
+w3m-control: MESSAGE $(echo $*)
+
+_EOF_
+
