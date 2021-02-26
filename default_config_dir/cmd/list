@@ -2,12 +2,27 @@
 
 [[ ! ${W3M_CMD_PATH} ]] && W3M_CMD_PATH="${W3M_CONFIG_HOME}/cmd"
 
+IFS=: read -a cmd_dirs <<< "${W3M_CMD_PATH}"
+
 cat << _EOF_
 HTTP/1.1 200 OK
 Content-Type: text/plain; charset=utf-8
-Date: $(date)
 
 Available Commands:
-$(ls --dereference-command-line -l $(IFS=:; echo ${W3M_CMD_PATH[*]}) | cut -c50-)
+
 _EOF_
+
+for dir in ${cmd_dirs[*]}; do
+	if test -d "${dir}"; then
+		for file in "${dir}"/*; do
+			if test -x "${file}"; then
+				if test -h "${file}"; then
+					echo "$(basename "${file}") -> $(readlink "${file}")"
+				else
+					basename "${file}"
+				fi
+			fi
+		done
+	fi
+done
 

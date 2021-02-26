@@ -52,6 +52,8 @@ WCTARGET = @WCTARGET@
 NLSTARGET = @NLSTARGET@
 
 MAKE_ARGS = PERL='$(PERL)' MKDIR='$(MKDIR)' \
+	CHMOD='$(CHMOD)' CHMOD_RECURSIVE='$(CHMOD_RECURSIVE)' \
+	COPY_RECURSIVE_NOCLOBBER='$(COPY_RECURSIVE_NOCLOBBER)' \
 	BIN_DIR='$(bindir)' AUXBIN_DIR='$(AUXBIN_DIR)' \
 	CGIBIN_DIR='$(CGIBIN_DIR)' \
 	HELP_DIR='$(HELP_DIR)' MAN_DIR='$(mandir)' ETC_DIR='$(ETC_DIR)' \
@@ -70,6 +72,9 @@ RANLIB=@RANLIB@
 AWK = @AWK@
 PERL = @PERL@
 MKDIR=mkdir -p
+CHMOD=chmod
+CHMOD_RECURSIVE=chmod -R
+COPY_RECURSIVE_NOCLOBBER=cp -r --no-clobber
 MV=mv
 RM=rm
 AR=ar
@@ -119,6 +124,8 @@ TARGETS=$(TARGET) $(LIB_TARGETS) $(AUXBIN_TARGETS)
 HELP_TARGET=w3mphelp.html
 HELP_ALLFILES=w3mphelp-w3m_en.html w3mphelp-w3m_ja.html \
 	w3mphelp-lynx_en.html w3mphelp-lynx_ja.html
+
+CONFIG_DIR_TEMPLATE=default_config_dir
 
 DEFUNS=$(top_srcdir)/main.c $(top_srcdir)/menu.c
 SCRIPTSUBDIRS= scripts
@@ -212,7 +219,7 @@ w3mimg:
 po:
 	(cd $@ && $(MAKE))
 
-install: install-core install-scripts install-po
+install: install-core install-scripts install-po install-config
 
 install-core: $(TARGETS)
 	-$(MKDIR) $(DESTDIR)$(bindir)
@@ -252,6 +259,13 @@ install-po:
 	do \
 	 (cd $$subdir && $(MAKE) install); \
 	done
+
+install-config:
+	if test ! -d $(CONFIG_DIR); then \
+		$(COPY_RECURSIVE_NOCLOBBER) $(CONFIG_DIR_TEMPLATE) $(CONFIG_DIR); \
+		chown -R $$(stat --format=%U:%G $(HOME)) $(CONFIG_DIR); \
+	fi
+	@echo default config dir files installed at $(CONFIG_DIR)
 
 all-scripts: funcname.tab
 	for dir in $(SCRIPTSUBDIRS);	\

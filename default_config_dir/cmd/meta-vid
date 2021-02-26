@@ -1,44 +1,4 @@
 #!/bin/bash
 
-# defaults
-content_type='text/plain'
-
-while [[ $# -gt 0 ]]; do
-	case "$1" in
-		--content-type|-T)
-			content_type="$2"
-			shift
-			;;
-		--pipe-source|-S)
-			src_cmd="cat ${W3M_SOURCEFILE}"
-			;;
-		--pipe-buffer|-B)
-			src_cmd="w3mp -dump ${W3M_SOURCEFILE}"
-			;;
-		*) break ;;
-	esac
-	shift
-done
-
-bname="$(basename $0)"
-
-case "${bname}" in
-	exec|x)
-		unset prog_name
-		;;
-	*)
-		prog_name="${bname}"
-		;;
-esac
-
-cat << _EOF_
-HTTP/1.1 200 OK
-Content-Type: ${content_type}
-
-$(if [[ ${src_cmd} ]]; then
-	eval "${src_cmd}" | eval "${prog_name} $*" 2>&1
-else
-	eval "${prog_name} $*" 2>&1
-fi)
-_EOF_
+exec "$(dirname $0)/meta" $* 'og:video'
 
