@@ -1,13 +1,5 @@
 #!/bin/bash
 
-# Extracts meta property/properties from page. Redirects browser to links when appropriate.
-# Usage: meta [--link, -l] [--print, -p] PROPERTY_NAME | --all, -a
-# 
-# Options:
-# 	--link, -l				Get meta properties from current link ($W3M_CURRENT_LINK). Parses current page by default.
-# 	--print, -p				Print meta property even if it can be parsed as a url. By default, redirects to urls to be handled by mailcap
-# 	--all, -a				Print all meta properties
-
 while [[ $# -gt 0 ]]; do
 	case "$1" in
 		--link|-l)

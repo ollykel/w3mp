@@ -9779,8 +9779,11 @@ _ACEOF
 HELP_DIR="$datadir/$PACKAGE"
 $as_echo "#define HELP_DIR \"\$HELP_DIR\"" >>confdefs.h
 
+if test ! $XDG_CONFIG_HOME; then
+	XDG_CONFIG_HOME=~/.config
+fi
 
-CONFIG_DIR="~/.$PACKAGE"
+CONFIG_DIR="$XDG_CONFIG_HOME/$PACKAGE"
 $as_echo "#define CONFIG_DIR \"\$CONFIG_DIR\"" >>confdefs.h
 
 
