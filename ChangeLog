@@ -1,3 +1,190 @@
+2021-02-28  Tatsuya Kinoshita  <tats@debian.org>
+
+	* Str.c: Prevent zero size allocation in Str.c.
+
+	* po/de.po, po/ja.po, po/w3m.pot, po/zh_CN.po, po/zh_TW.po:
+	Update PO strings.
+
+	* doc-jp/README.SSL, fm.h, rc.c, url.c:
+	New option ssl_ca_default to explicitly use OpenSSL default paths.
+
+	* libwc/utf7.c, libwc/utf8.c:
+	Prevent unintentional integer overflow in libwc.
+
+	* Str.c: Prevent unintentional integer overflow in Strcat_charp_n.
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31500
+
+	* Str.c: Prevent unintentional integer overflow in Strgrow.
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31467
+
+2021-02-27  Tatsuya Kinoshita  <tats@debian.org>
+
+	* Str.c: One more fix overflow due to Strgrow.
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31397
+
+2021-02-26  Tatsuya Kinoshita  <tats@debian.org>
+
+	* Str.c: Fix potential overflow due to Str.c.
+
+	* Str.c: Fix integer overflow due to Strgrow.
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31397
+
+2021-02-24  Tatsuya Kinoshita  <tats@debian.org>
+
+	* doc-jp/README.SSL: Simplify doc for SSL.
+
+2021-02-24  davkor  <david@adalogics.com>
+
+	* fuzz/fuzz-conv.c:
+	Added initial fuzzer for integration with OSS-Fuzz.
+	Origin: https://github.com/tats/w3m/pull/169
+	Bug-Debian: https://github.com/tats/w3m/issues/165
+
+2021-02-22  Tatsuya Kinoshita  <tats@debian.org>
+
+	* url.c: Don't fallback when SSL_CTX_load_verify_locations fails.
+
+	* url.c:
+	Don't use SSL_CTX_set_default_verify_paths when not USE_SSL_VERIFY.
+
+	* acinclude.m4, config.h.dist, configure, doc-jp/README.SSL:
+	Disable --with-cafile by default to use OpenSSL default paths.
+
+2021-02-21  Tatsuya Kinoshita  <tats@debian.org>
+
+	* main.c: Don't use SECLEVEL when not OPENSSL_TLS_SECURITY_LEVEL.
+
+	* doc/w3m.1, main.c: Add eNULL to ssl_cipher when -insecure.
+
+2021-02-21  bptato  <nincsnevem662@gmail.com>
+
+	Improved iTerm2 image display + initial kitty image support
+	Origin: https://github.com/tats/w3m/pull/168
+
+	* image.c, rc.c, terms.c:
+	Convert images to PNG for kitty with ImageMagick.
+
+	* terms.c: Fix potential segfault.
+
+	* terms.c: Fix small images on kitty.
+
+	* etc.c, fm.h, image.c, rc.c, terms.c: Support kitty image protocol.
+
+	* etc.c, terms.c: Handle iTerm2 images more efficiently.
+
+2021-02-17  Tatsuya Kinoshita  <tats@debian.org>
+
+	* libwc/iso2022.c, w3mimgdisplay.c: Typo fix.
+
+2021-02-16  Tatsuya Kinoshita  <tats@debian.org>
+
+	* acinclude.m4, configure:
+	Add auto-detection for configure --with-migemo.
+
+	* acinclude.m4, configure: Prefer Imlib2 over GTK2 by default.
+	Bug-Debian: https://github.com/tats/w3m/issues/95
+	Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=672121
+
+	* acinclude.m4, configure:
+	Indentation and wording fixes for configure --help.
+
+2021-02-15  Tatsuya Kinoshita  <tats@debian.org>
+
+	* acinclude.m4, configure: Wording fixes for configure --help.
+
+	* acinclude.m4, configure:
+	Accept configure --with-cafile without filename.
+
+2021-02-14  bptato  <nincsnevem662@gmail.com>
+
+	Improve description list rendering
+	Origin: https://github.com/tats/w3m/pull/167
+	Bug-Debian: https://github.com/tats/w3m/issues/162
+
+	* html.c: Fix a mistake I made with </dd> and </dt> tags.
+
+	* file.c, tests/dl.expected, tests/dl.html: Nested <dl>s.
+
+	* file.c, tests/dl.expected, tests/dl.html: Fix <dl compact>.
+
+	* tests/dl.expected, tests/dl.html: <dl> test.
+
+	* file.c, html.c, html.h, tagtable.tab:
+	Improve description list rendering.
+
+2021-02-13  Tatsuya Kinoshita  <tats@debian.org>
+
+	* acinclude.m4, configure: Minor fixes for ./configure --help.
+
+	* acinclude.m4, config.h.dist, config.h.in, configure:
+	* doc-jp/README.SSL, fm.h:
+	Add auto-detection of ssl_ca_file by configure.
+	New configure option --with-cafile to specify ssl_ca_file.
+	cf. gnutls-trustfiles in Emacs 27.1
+	<https://git.savannah.gnu.org/cgit/emacs.git/tree/lisp/net/gnutls.el?h=emacs-27.1#n106>
+
+	* doc-jp/README.SSL: Doc fix.
+
+	* url.c: Use ssl_ca_file and ssl_ca_path only when ssl_verify_server.
+
+2021-02-12  Tatsuya Kinoshita  <tats@debian.org>
+
+	* url.c: Check empty string conditions for ssl_ca_file and ssl_ca_path.
+
+	* url.c:
+	Fix OpenSSL default always overrides ssl_ca_file and ssl_ca_path.
+
+2021-02-11  Tatsuya Kinoshita  <tats@debian.org>
+
+	* po/de.po, po/ja.po, po/w3m.pot, po/zh_CN.po, po/zh_TW.po:
+	Update PO strings.
+
+	* doc/w3m.1, main.c: Update wording for -debug option.
+
+	* doc/w3m.1: Update manpage for -insecure option.
+
+	* url.c: Mention -insecure option as a workaround for SSL error.
+	Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=900984
+	Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=934493
+	Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=953045
+
+	* main.c: New option -insecure to use insecure SSL config options.
+	Alias for `-o ssl_cipher=ALL:@SECLEVEL=0 -o ssl_min_version=all
+	-o ssl_forbid_method= -o ssl_verify_server=0`.
+
+	* doc-jp/README.SSL: Typo fix for ssl_cipher.
+
+	* doc-jp/README.SSL, rc.c, url.c:
+	Update ssl_min_version to accept "all" and reject "SSLv2".
+
+2021-02-11  bptato  <nincsnevem662@gmail.com>
+
+	Support brotli content encoding
+	Origin: https://github.com/tats/w3m/pull/164
+
+	* config.h.dist: Update config.h.dist.
+
+	* config.h.in, file.c, html.h: Support brotli content encoding.
+
+2021-02-10  Tatsuya Kinoshita  <tats@debian.org>
+
+	* po/de.po, po/ja.po, po/w3m.pot, po/zh_CN.po, po/zh_TW.po:
+	Update PO strings.
+
+	* doc-jp/README.SSL, fm.h: Disable TLSv1.0 and TLSv1.1 by default.
+
+	* url.c: Mention ssl_* options as a workaround for SSL error.
+	Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=900984
+	Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=934493
+	Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=953045
+
+	* doc-jp/README.SSL, fm.h, rc.c, url.c:
+	New option ssl_min_version for OpenSSL 1.1.
+
+	* doc-jp/README.SSL, fm.h, rc.c, url.c:
+	New option ssl_cipher to specify ciphers for TLSv1.2 and below.
+	e.g. DEFAULT:@SECLEVEL=2, ALL:@SECLEVEL=0
+
 2021-02-06  Tatsuya Kinoshita  <tats@debian.org>
 
 	* po/de.po, po/ja.po, po/w3m.pot, po/zh_CN.po, po/zh_TW.po:

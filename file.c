@@ -161,20 +161,24 @@ static struct compression_decoder {
     char *name;
     char *encoding;
     char *encodings[4];
+    int use_d_arg;
 } compression_decoders[] = {
     { CMP_COMPRESS, ".gz", "application/x-gzip",
       0, GUNZIP_CMDNAME, GUNZIP_NAME, "gzip", 
-      {"gzip", "x-gzip", NULL} }, 
+      {"gzip", "x-gzip", NULL}, 0 }, 
     { CMP_COMPRESS, ".Z", "application/x-compress",
       0, GUNZIP_CMDNAME, GUNZIP_NAME, "compress",
-      {"compress", "x-compress", NULL} }, 
+      {"compress", "x-compress", NULL}, 0 }, 
     { CMP_BZIP2, ".bz2", "application/x-bzip",
       0, BUNZIP2_CMDNAME, BUNZIP2_NAME, "bzip, bzip2",
-      {"x-bzip", "bzip", "bzip2", NULL} }, 
+      {"x-bzip", "bzip", "bzip2", NULL}, 0 }, 
     { CMP_DEFLATE, ".deflate", "application/x-deflate",
       1, INFLATE_CMDNAME, INFLATE_NAME, "deflate",
-      {"deflate", "x-deflate", NULL} }, 
-    { CMP_NOCOMPRESS, NULL, NULL, 0, NULL, NULL, NULL, {NULL}},
+      {"deflate", "x-deflate", NULL}, 0 }, 
+    { CMP_BROTLI, ".br", "application/x-br",
+      0, BROTLI_CMDNAME, BROTLI_NAME, "br",
+      {"br", "x-br", NULL}, 1 }, 
+    { CMP_NOCOMPRESS, NULL, NULL, 0, NULL, NULL, NULL, {NULL}, 0},
 };
 /* *INDENT-ON* */
 
@@ -4395,6 +4399,14 @@ process_idattr(struct readbuffer *obuf, int cmd, struct parsed_tag *tag)
         envs[h_env->envc].indent = envs[h_env->envc - 1].indent; \
     }
 
+#define PUSH_ENV_NOINDENT(cmd) \
+    if (++h_env->envc_real < h_env->nenv) { \
+      ++h_env->envc; \
+      envs[h_env->envc].env = cmd; \
+      envs[h_env->envc].count = 0; \
+      envs[h_env->envc].indent = envs[h_env->envc - 1].indent; \
+    }
+
 #define POP_ENV \
     if (h_env->envc_real-- < h_env->nenv) \
       h_env->envc--;
@@ -4641,7 +4653,7 @@ HTMLtagproc1(struct parsed_tag *tag, struct html_feed_environ *h_env)
 		      h_env->limit);
 	    POP_ENV;
 	    if (!(obuf->flag & RB_PREMODE) &&
-		(h_env->envc == 0 || cmd == HTML_N_DL || cmd == HTML_N_BLQ)) {
+		(h_env->envc == 0 || cmd == HTML_N_BLQ)) {
 		do_blankline(h_env, obuf,
 			     envs[h_env->envc].indent,
 			     INDENT_INCR, h_env->limit);
@@ -4654,11 +4666,13 @@ HTMLtagproc1(struct parsed_tag *tag, struct html_feed_environ *h_env)
 	CLOSE_A;
 	if (!(obuf->flag & RB_IGNORE_P)) {
 	    flushline(h_env, obuf, envs[h_env->envc].indent, 0, h_env->limit);
-	    if (!(obuf->flag & RB_PREMODE))
+	    if (!(obuf->flag & RB_PREMODE) && envs[h_env->envc].env != HTML_DL
+		    && envs[h_env->envc].env != HTML_DL_COMPACT
+		    && envs[h_env->envc].env != HTML_DD)
 		do_blankline(h_env, obuf, envs[h_env->envc].indent, 0,
 			     h_env->limit);
 	}
-	PUSH_ENV(cmd);
+	PUSH_ENV_NOINDENT(cmd);
 	if (parsedtag_exists(tag, ATTR_COMPACT))
 	    envs[h_env->envc].env = HTML_DL_COMPACT;
 	obuf->flag |= RB_IGNORE_P;
@@ -4754,7 +4768,7 @@ HTMLtagproc1(struct parsed_tag *tag, struct html_feed_environ *h_env)
 	    (h_env->envc_real < h_env->nenv &&
 	     envs[h_env->envc].env != HTML_DL &&
 	     envs[h_env->envc].env != HTML_DL_COMPACT)) {
-	    PUSH_ENV(HTML_DL);
+	    PUSH_ENV_NOINDENT(HTML_DL);
 	}
 	if (h_env->envc > 0) {
 	    flushline(h_env, obuf,
@@ -4766,6 +4780,16 @@ HTMLtagproc1(struct parsed_tag *tag, struct html_feed_environ *h_env)
 	}
 	obuf->flag |= RB_IGNORE_P;
 	return 1;
+    case HTML_N_DT:
+	if (!(obuf->flag & RB_IN_DT)) {
+	    return 1;
+	}
+	obuf->flag &= ~RB_IN_DT;
+	HTMLlineproc1("</b>", h_env);
+	if (h_env->envc > 0 && envs[h_env->envc].env == HTML_DL)
+	    flushline(h_env, obuf,
+		      envs[h_env->envc - 1].indent, 0, h_env->limit);
+	return 1;
     case HTML_DD:
 	CLOSE_A;
 	CLOSE_DT;
@@ -4775,6 +4799,10 @@ HTMLtagproc1(struct parsed_tag *tag, struct html_feed_environ *h_env)
 	     envs[h_env->envc].env != HTML_DL_COMPACT)) {
 	    PUSH_ENV(HTML_DL);
 	}
+
+	if (h_env->envc <= MAX_INDENT_LEVEL)
+	    envs[h_env->envc].indent = envs[h_env->envc - 1].indent + INDENT_INCR;
+
 	if (envs[h_env->envc].env == HTML_DL_COMPACT) {
 	    if (obuf->pos > envs[h_env->envc].indent)
 		flushline(h_env, obuf, envs[h_env->envc].indent, 0,
@@ -4785,6 +4813,15 @@ HTMLtagproc1(struct parsed_tag *tag, struct html_feed_environ *h_env)
 	else
 	    flushline(h_env, obuf, envs[h_env->envc].indent, 0, h_env->limit);
 	/* obuf->flag |= RB_IGNORE_P; */
+	return 1;
+    case HTML_N_DD:
+	if (h_env->envc == 0 ||
+	    (h_env->envc_real < h_env->nenv &&
+	     envs[h_env->envc].env != HTML_DL &&
+	     envs[h_env->envc].env != HTML_DL_COMPACT))
+	    return 1;
+	envs[h_env->envc].indent = envs[h_env->envc].indent - INDENT_INCR;
+	flushline(h_env, obuf, envs[h_env->envc].indent, 0, h_env->limit);
 	return 1;
     case HTML_TITLE:
 	close_anchor(h_env, obuf);
@@ -8656,6 +8693,7 @@ uncompress_stream(URLFile *uf, char **src)
     char *tmpf = NULL;
     char *ext = NULL;
     struct compression_decoder *d;
+    int use_d_arg = 0;
 
     if (IStype(uf->stream) != IST_ENCODED) {
 	uf->stream = newEncodedStream(uf->stream, uf->encoding);
@@ -8669,6 +8707,7 @@ uncompress_stream(URLFile *uf, char **src)
 		expand_cmd = d->cmd;
 	    expand_name = d->name;
 	    ext = d->ext;
+	    use_d_arg = d->use_d_arg;
 	    break;
 	}
     }
@@ -8723,7 +8762,10 @@ uncompress_stream(URLFile *uf, char **src)
 	/* child1 */
 	dup2(1, 2);		/* stderr>&stdout */
 	setup_child(TRUE, -1, -1);
-	execlp(expand_cmd, expand_name, NULL);
+	if (use_d_arg)
+	    execlp(expand_cmd, expand_name, "-d", NULL);
+	else
+	    execlp(expand_cmd, expand_name, NULL);
 	exit(1);
     }
     if (tmpf) {

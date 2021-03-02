@@ -206,8 +206,13 @@ static int OptionEncode = FALSE;
 #define CMT_SSL_KEY_FILE N_("PEM encoded private key file of client")
 #define CMT_SSL_CA_PATH N_("Path to directory for PEM encoded certificates of CAs")
 #define CMT_SSL_CA_FILE N_("File consisting of PEM encoded certificates of CAs")
+#define CMT_SSL_CA_DEFAULT N_("Use default locations for PEM encoded certificates of CAs")
 #endif				/* USE_SSL_VERIFY */
 #define CMT_SSL_FORBID_METHOD N_("List of forbidden SSL methods (2: SSLv2, 3: SSLv3, t: TLSv1.0, 5: TLSv1.1, 6: TLSv1.2, 7: TLSv1.3)")
+#ifdef SSL_CTX_set_min_proto_version
+#define CMT_SSL_MIN_VERSION N_("Minimum SSL version (all, TLSv1.0, TLSv1.1, TLSv1.2, or TLSv1.3)")
+#endif
+#define CMT_SSL_CIPHER N_("SSL ciphers for TLSv1.2 and below (e.g. DEFAULT:@SECLEVEL=2)")
 #endif				/* USE_SSL */
 #ifdef USE_COOKIE
 #define CMT_COOKIE_FILE	N_("Cookie jar file")
@@ -374,6 +379,7 @@ static struct sel_c inlineimgstr[] = {
     {N_S(INLINE_IMG_OSC5379), N_("OSC 5379 (mlterm)")},
     {N_S(INLINE_IMG_SIXEL), N_("sixel (img2sixel)")},
     {N_S(INLINE_IMG_ITERM2), N_("OSC 1337 (iTerm2)")},
+    {N_S(INLINE_IMG_KITTY), N_("kitty (ImageMagick)")},
     {0, NULL, NULL}
 };
 #endif				/* USE_IMAGE */
@@ -622,6 +628,12 @@ struct param_ptr params6[] = {
 struct param_ptr params7[] = {
     {"ssl_forbid_method", P_STRING, PI_TEXT, (void *)&ssl_forbid_method,
      CMT_SSL_FORBID_METHOD, NULL},
+#ifdef SSL_CTX_set_min_proto_version
+    {"ssl_min_version", P_STRING, PI_TEXT, (void *)&ssl_min_version,
+     CMT_SSL_MIN_VERSION, NULL},
+#endif
+    {"ssl_cipher", P_STRING, PI_TEXT, (void *)&ssl_cipher, CMT_SSL_CIPHER,
+     NULL},
 #ifdef USE_SSL_VERIFY
     {"ssl_verify_server", P_INT, PI_ONOFF, (void *)&ssl_verify_server,
      CMT_SSL_VERIFY_SERVER, NULL},
@@ -633,6 +645,8 @@ struct param_ptr params7[] = {
      NULL},
     {"ssl_ca_file", P_SSLPATH, PI_TEXT, (void *)&ssl_ca_file, CMT_SSL_CA_FILE,
      NULL},
+    {"ssl_ca_default", P_INT, PI_ONOFF, (void *)&ssl_ca_default,
+     CMT_SSL_CA_DEFAULT, NULL},
 #endif				/* USE_SSL_VERIFY */
     {NULL, 0, 0, NULL, NULL, NULL},
 };

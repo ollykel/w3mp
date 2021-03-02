@@ -326,6 +326,38 @@ init_PRNG()
 }
 #endif				/* SSLEAY_VERSION_NUMBER >= 0x00905100 */
 
+#ifdef SSL_CTX_set_min_proto_version
+static int
+str_to_ssl_version(const char *name)
+{
+    if(!strcasecmp(name, "all"))
+	return 0;
+    if(!strcasecmp(name, "none"))
+	return 0;
+#ifdef TLS1_3_VERSION
+    if (!strcasecmp(name, "TLSv1.3"))
+	return TLS1_3_VERSION;
+#endif
+#ifdef TLS1_2_VERSION
+    if (!strcasecmp(name, "TLSv1.2"))
+	return TLS1_2_VERSION;
+#endif
+#ifdef TLS1_1_VERSION
+    if (!strcasecmp(name, "TLSv1.1"))
+	return TLS1_1_VERSION;
+#endif
+    if (!strcasecmp(name, "TLSv1.0"))
+	return TLS1_VERSION;
+    if (!strcasecmp(name, "TLSv1"))
+	return TLS1_VERSION;
+    if (!strcasecmp(name, "SSLv3.0"))
+	return SSL3_VERSION;
+    if (!strcasecmp(name, "SSLv3"))
+	return SSL3_VERSION;
+    return -1;
+}
+#endif				/* SSL_CTX_set_min_proto_version */
+
 static SSL *
 openSSLHandle(int sock, char *hostname, char **p_cert)
 {
@@ -369,9 +401,22 @@ openSSLHandle(int sock, char *hostname, char **p_cert)
 #endif
 	if (!(ssl_ctx = SSL_CTX_new(SSLv23_client_method())))
 	    goto eend;
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L) || defined(LIBRESSL_VERSION_NUMBER)
-	SSL_CTX_set_cipher_list(ssl_ctx, "DEFAULT:!LOW:!RC4:!EXP");
+#ifdef SSL_CTX_set_min_proto_version
+	if (ssl_min_version && *ssl_min_version != '\0') {
+	    int sslver;
+	    sslver = str_to_ssl_version(ssl_min_version);
+	    if (sslver < 0
+		|| !SSL_CTX_set_min_proto_version(ssl_ctx, sslver)) {
+		free_ssl_ctx();
+		goto eend;
+	    }
+	}
 #endif
+	if (ssl_cipher && *ssl_cipher != '\0')
+	    if (!SSL_CTX_set_cipher_list(ssl_ctx, ssl_cipher)) {
+		free_ssl_ctx();
+		goto eend;
+	    }
 	option = SSL_OP_ALL;
 	if (ssl_forbid_method) {
 	    if (strchr(ssl_forbid_method, '2'))
@@ -432,10 +477,19 @@ openSSLHandle(int sock, char *hostname, char **p_cert)
 		goto eend;
 	    }
 	}
-	if ((!ssl_ca_file && !ssl_ca_path)
-	    || SSL_CTX_load_verify_locations(ssl_ctx, ssl_ca_file, ssl_ca_path))
+	if (ssl_verify_server) {
+	    char *file = NULL, *path = NULL;
+	    if (ssl_ca_file && *ssl_ca_file != '\0') file = ssl_ca_file;
+	    if (ssl_ca_path && *ssl_ca_path != '\0') path = ssl_ca_path;
+	    if ((file || path)
+		&& !SSL_CTX_load_verify_locations(ssl_ctx, file, path)) {
+		free_ssl_ctx();
+		goto eend;
+	    }
+	    if (ssl_ca_default)
+		SSL_CTX_set_default_verify_paths(ssl_ctx);
+	}
 #endif				/* defined(USE_SSL_VERIFY) */
-	    SSL_CTX_set_default_verify_paths(ssl_ctx);
 #endif				/* SSLEAY_VERSION_NUMBER >= 0x0800 */
     }
     handle = SSL_new(ssl_ctx);
@@ -462,7 +516,7 @@ openSSLHandle(int sock, char *hostname, char **p_cert)
 	SSL_free(handle);
     /* FIXME: gettextize? */
     disp_err_message(Sprintf
-		     ("SSL error: %s",
+		     ("SSL error: %s, a workaround might be: w3m -insecure",
 		      ERR_error_string(ERR_get_error(), NULL))->ptr, FALSE);
     return NULL;
 }
