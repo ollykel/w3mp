@@ -1393,6 +1393,34 @@ init_rc(void)
 }
 
 void
+init_data_home()
+{
+	char			*xdg_data_home		= NULL;
+	size_t			i					= 0;
+    struct stat		st;					memset(&st, 0, sizeof(struct stat));
+
+	if (data_home_initialized)
+		return;
+	xdg_data_home = getenv("XDG_DATA_HOME");
+	if (!xdg_data_home)
+		data_home = expandPath(DATA_HOME);
+	else
+		data_home = Strnew_m_charp(xdg_data_home, "/", "w3mp", NULL)->ptr;
+	i = strlen(data_home);
+    if (i > 1 && data_home[i - 1] == '/')
+		data_home[i - 1] = '\0';
+    if (stat(data_home, &st) < 0) {
+		if (errno == ENOENT) {	/* no directory */
+			if (do_mkdir(data_home, 0700) < 0)
+				fprintf(stderr, "Can't create config directory (%s)!\n", data_home);
+		} else {
+			fprintf(stderr, "Can't create config directory (%s)!\n", data_home);
+		}
+    }
+	data_home_initialized = 1;
+}
+
+void
 init_tmp(void)
 {
     if (((tmp_dir = getenv("TMPDIR")) == NULL || *tmp_dir == '\0') &&
@@ -1625,6 +1653,19 @@ rcFile(char *base)
 	/* /file, ./file, ../file, ~/file */
 	return expandPath(base);
     return expandPath(Strnew_m_charp(config_dir, "/", base, NULL)->ptr);
+}
+
+char *
+dataFile(char *base)
+{
+    if (base &&
+	(base[0] == '/' ||
+	 (base[0] == '.'
+	  && (base[1] == '/' || (base[1] == '.' && base[2] == '/')))
+	 || (base[0] == '~' && base[1] == '/')))
+	/* /file, ./file, ../file, ~/file */
+		return expandPath(base);
+    return expandPath(Strnew_m_charp(data_home, "/", base, NULL)->ptr);
 }
 
 char *
