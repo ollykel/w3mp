@@ -169,7 +169,7 @@ def get_bookmarks(bookmark_manager, root_url):
     body = '<h1><center>Bookmarks</center></h1>{toc}{sections}<hr /><p><a href="{root_url}/add">Add Bookmark</a></p>'.format(root_url=root_url,
         toc=table_of_contents, sections=sections)
     html = format_html(body, title='Bookmarks')
-    with open(fpath.join(os.getenv('W3M_CONFIG_HOME', ''), 'bookmark.html'), 'w') as bookmark_file:
+    with open(fpath.join(os.getenv('W3M_DATA_HOME', ''), 'bookmark.html'), 'w') as bookmark_file:
         bookmark_file.write(html)
         #-- end with bookmark_file
     return format_http(html)
@@ -177,7 +177,7 @@ def get_bookmarks(bookmark_manager, root_url):
 
 if __name__ == "__main__":
     try:
-        bookmark_filename = fpath.join(os.getenv('W3M_CONFIG_HOME', ''), 'bookmarks.yaml')
+        bookmark_filename = fpath.join(os.getenv('W3M_DATA_HOME', ''), 'bookmarks.yaml')
         bookmark_manager = BookmarkManager(bookmark_filename)
         path, method = os.getenv('PATH_INFO', ''), os.getenv('REQUEST_METHOD', 'GET')
         root_url = 'file:/cgi-bin/bookmark'
