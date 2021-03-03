@@ -1392,11 +1392,13 @@ init_data_home()
 
 	if (data_home_initialized)
 		return;
-	xdg_data_home = getenv("XDG_DATA_HOME");
-	if (!xdg_data_home)
-		data_home = expandPath(DATA_HOME);
-	else
-		data_home = Strnew_m_charp(xdg_data_home, "/", "w3mp", NULL)->ptr;
+	if (!data_home) {
+		xdg_data_home = getenv("XDG_DATA_HOME");
+		if (!xdg_data_home)
+			data_home = expandPath(DATA_HOME);
+		else
+			data_home = Strnew_m_charp(xdg_data_home, "/", "w3mp", NULL)->ptr;
+	}
 	i = strlen(data_home);
     if (i > 1 && data_home[i - 1] == '/')
 		data_home[i - 1] = '\0';
