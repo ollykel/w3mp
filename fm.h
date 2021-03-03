@@ -1132,6 +1132,9 @@ extern int symbol_width0;
 global int no_config_dir init(FALSE);
 global char *config_dir init(NULL);
 global int config_dir_initialized init(FALSE);
+global int no_data_home init(FALSE);
+global char *data_home init(NULL);
+global int data_home_initialized init(FALSE);
 global char *tmp_dir;
 global char *config_file init(NULL);
 

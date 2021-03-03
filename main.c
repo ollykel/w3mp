@@ -273,6 +273,7 @@ fusage(FILE * f, int err)
     fprintf(f, "    -show-option     print all config options\n");
     fprintf(f, "    -config file     specify config file\n");
     fprintf(f, "    -config_dir dir      specify rc directory\n");
+    fprintf(f, "    -data_home dir      specify data home directory\n");
     fprintf(f, "    -debug           use debug mode (only for debugging)\n");
     fprintf(f, "    -reqlog          write request logfile\n");
     fprintf(f, "    -help            print this usage message\n");
@@ -472,6 +473,13 @@ main(int argc, char **argv, char **envp)
 			config_dir = expandPath(argv[i]);
 			argv[i] = "-dummy";
 	    }
+		else if (!strcmp("-data_home", argv[i])) {
+			argv[i] = "-dummy";
+			if (++i >= argc)
+				usage();
+			data_home = expandPath(argv[i]);
+			argv[i] = "-dummy";
+	    }
 	    else if (!strcmp("-h", argv[i]) || !strcmp("-help", argv[i]))
 		help();
 	    else if (!strcmp("-V", argv[i]) || !strcmp("-version", argv[i])) {
@@ -498,6 +506,7 @@ main(int argc, char **argv, char **envp)
 
     /* initializations */
     init_rc();
+	init_data_home();
 	init_tmp();
 
     LoadHist = newHist();
@@ -5954,6 +5963,7 @@ set_buffer_environ(Buffer *buf)
 	}
     if (buf != prev_buf) {
 	set_environ("W3M_CONFIG_HOME", config_dir);
+	set_environ("W3M_DATA_HOME", data_home);
 	set_environ("W3M_TEMP", tmp_dir);
 	set_environ("W3M_SOURCEFILE", buf->sourcefile);
 	set_environ("W3M_FILENAME", buf->filename);
@@ -6086,7 +6096,7 @@ deleteFiles()
     }
 #ifdef HAVE_MKDTEMP
 	// remove any user-created files in the tempdir
-	if (tmp_dir != config_dir)
+	if (tmp_dir != config_dir && tmp_dir != data_home)
 		if (remove_dir(tmp_dir, ZeroTempfiles) == -1) {
 			fprintf(stderr, "ERROR: could not remove temp dir (%s)!\n\r", tmp_dir);
 			exit(1);
@@ -6262,6 +6272,7 @@ DEFUN(reinit, REINIT, "Reload configuration file")
 
     if (resource == NULL) {
 	init_rc();
+	init_data_home();
 	init_tmp();
 	sync_with_option();
 #ifdef USE_COOKIE
@@ -6273,6 +6284,7 @@ DEFUN(reinit, REINIT, "Reload configuration file")
 
     if (!strcasecmp(resource, "CONFIG") || !strcasecmp(resource, "RC")) {
 	init_rc();
+	init_data_home();
 	init_tmp();
 	sync_with_option();
 	displayBuffer(Currentbuf, B_REDRAW_IMAGE);

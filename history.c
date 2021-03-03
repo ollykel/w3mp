@@ -39,7 +39,7 @@ loadHistory(Hist *hist)
 
     if (hist == NULL)
 	return;
-    if ((f = fopen(rcFile(HISTORY_FILE), "rt")) == NULL)
+    if ((f = fopen(dataFile(HISTORY_FILE), "rt")) == NULL)
 	return;
 
     while (!feof(f)) {
@@ -80,7 +80,7 @@ saveHistory(Hist *hist, size_t size)
 	disp_err_message("Can't save history", FALSE);
 	return;
     }
-    rename_ret = rename(tmpf, rcFile(HISTORY_FILE));
+    rename_ret = rename(tmpf, dataFile(HISTORY_FILE));
     if (rename_ret != 0) {
 	disp_err_message("Can't save history", FALSE);
 	return;
