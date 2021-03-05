@@ -1356,12 +1356,8 @@ init_rc(void)
 	}
     }
     if (!S_ISDIR(st.st_mode)) {
-	/* not a directory */
-	/* fprintf(stderr, "%s is not a directory!\n", config_dir); */
-	goto config_dir_err;
-    }
-    if (!(st.st_mode & S_IWUSR)) {
-		/* fprintf(stderr, "%s is not writable!\n", config_dir); */
+		/* not a directory */
+		/* fprintf(stderr, "%s is not a directory!\n", config_dir); */
 		goto config_dir_err;
     }
     no_config_dir = FALSE;
