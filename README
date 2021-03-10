@@ -1,10 +1,11 @@
-w3m: WWW wo Miru Tool
+w3mp: w3m plus
+A fork of w3m: WWW wo Miru Tool
 =====================
 
-w3m is a pager with WWW capability.  It IS a pager, but it can be used
+w3mp is a pager with WWW capability.  It IS a pager, but it can be used
 as a text-mode WWW browser.
 
-This package is maintained for Debian <https://www.debian.org>,
+This package is forked from the w3m package maintained for Debian <https://github.com/tats/w3m/>,
 forked from the original version <https://sourceforge.net/projects/w3m/>.
 
 If you can read English, see doc/*.
