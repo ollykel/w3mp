@@ -158,6 +158,7 @@ static int OptionEncode = FALSE;
 #define CMT_EXTBRZ8      N_("8th external browser")
 #define CMT_EXTBRZ9      N_("9th external browser")
 #define CMT_DISABLE_SECRET_SECURITY_CHECK	N_("Disable secret file security check")
+#define CMT_HOME_URL	N_("Default home url (overrides $HTTP_HOME and $WWW_HOME)")
 #define CMT_PASSWDFILE	 N_("Password file")
 #define CMT_PRE_FORM_FILE	N_("File for setting form on loading")
 #define CMT_SITECONF_FILE	N_("File for preferences for each site")
@@ -680,6 +681,8 @@ struct param_ptr params8[] = {
 #endif
 
 struct param_ptr params9[] = {
+	{"home_url", P_STRING, PI_TEXT, (void *)&default_home_url, CMT_HOME_URL,
+	 NULL},
     {"passwd_file", P_STRING, PI_TEXT, (void *)&passwd_file, CMT_PASSWDFILE,
      NULL},
     {"disable_secret_security_check", P_INT, PI_ONOFF,
