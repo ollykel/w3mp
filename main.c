@@ -983,7 +983,8 @@ main(int argc, char **argv, char **envp)
 	    else if (newbuf != NO_BUFFER)
 		newbuf->bufferprop |= (BP_INTERNAL | BP_NO_URL);
 	}
-	else if ((p = getenv("HTTP_HOME")) != NULL ||
+	else if ((p = default_home_url) != NULL ||
+		(p = getenv("HTTP_HOME")) != NULL ||
 		 (p = getenv("WWW_HOME")) != NULL) {
 	    newbuf = loadGeneralFile(p, NULL, NO_REFERER, 0, NULL);
 	    if (newbuf == NULL)
@@ -4294,7 +4295,8 @@ DEFUN(goURL, GOTO, "Open specified document in a new buffer")
 DEFUN(goHome, GOTO_HOME, "Open home page in a new buffer")
 {
     char *url;
-    if ((url = getenv("HTTP_HOME")) != NULL ||
+    if ((url = default_home_url) != NULL ||
+		(url = getenv("HTTP_HOME")) != NULL ||
         (url = getenv("WWW_HOME")) != NULL) {
         ParsedURL p_url;
         Buffer *cur_buf = Currentbuf;
