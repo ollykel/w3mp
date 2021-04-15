@@ -1,3 +1,156 @@
+2021-04-10  Tatsuya Kinoshita  <tats@debian.org>
+
+	* po/de.po, po/ja.po, po/w3m.pot, po/zh_CN.po, po/zh_TW.po:
+	Update PO strings.
+
+	* fm.h, rc.c, url.c:
+	New option cross_origin_referer to use origin only Referer.
+
+	* main.c, proto.h, url.c: Don't include username in Referer.
+
+	* main.c, url.c: Don't set Referer when data URI scheme.
+
+2021-04-05  Tatsuya Kinoshita  <tats@debian.org>
+
+	* etc.c: Use Strcatc and Strnulterm in base64_encode.
+
+	* Str.h: New macros Strcatc and Strnulterm.
+
+2021-04-05  bptato  <nincsnevem662@gmail.com>
+
+	* etc.c, file.c, proto.h, terms.c: Return Str from base64_encode.
+	Fix base64 padding could be applied incorrectly.
+	Fix extraction of first gif frame for animations in put_image_kitty.
+	Origin: https://github.com/tats/w3m/pull/177
+
+2021-04-03  Tatsuya Kinoshita  <tats@debian.org>
+
+	* file.c, table.c, table.h:
+	Limit size and number of tables to prevent integer overflow.
+
+2021-03-30  Tatsuya Kinoshita  <tats@debian.org>
+
+	* table.c, table.h: Treat table height as int instead of short.
+	Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=838952
+
+	* history.c, history.h, textlist.c, textlist.h:
+	Treat textlist item number as int instead of short.
+	cf. https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=838952
+
+2021-03-29  Tatsuya Kinoshita  <tats@debian.org>
+
+	* main.c: Prevent GC warnings of repeated allocation.
+	Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=746701
+	Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=832407
+	Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=862382
+
+2021-03-27  Tatsuya Kinoshita  <tats@debian.org>
+
+	* indep.c: Fix potential integer overflow in allocStr.
+
+2021-03-26  Tatsuya Kinoshita  <tats@debian.org>
+
+	* main.c: Ignore the "-" option to accept `w3m -` as "read from stdin".
+	Bug-Debian: https://github.com/tats/w3m/issues/87
+
+2021-03-25  Tatsuya Kinoshita  <tats@debian.org>
+
+	* fuzz/fuzz-conv.c: Explicitly call GC_gcollect() in fuzzer.
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=32453
+
+	* fuzz/fuzz-conv.c: Prevent memory leak in fuzzer.
+
+2021-03-23  Tatsuya Kinoshita  <tats@debian.org>
+
+	* Str.c: Reduce memory reallocation due to Strgrow.
+
+	* libwc/ucs.c:
+	Prevent unneeded memory allocation for language tags in libwc.
+	cf. https://oss-fuzz.com/testcase-detail/6275874304425984
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31397
+
+2021-03-22  Tatsuya Kinoshita  <tats@debian.org>
+
+	* libwc/ucs.c: Prevent very long language tag in libwc.
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=32229
+
+2021-03-21  Tatsuya Kinoshita  <tats@debian.org>
+
+	* Str.c, Str.h: Check STR_SIZE_MAX in Strcat_char.
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31804
+
+2021-03-20  Tatsuya Kinoshita  <tats@debian.org>
+
+	* Str.c: Prevent very small allocation in Str.c.
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31397
+
+2021-03-19  Tatsuya Kinoshita  <tats@debian.org>
+
+	* Str.c: Decrease STR_SIZE_MAX to prevent large memory usage.
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31468
+
+2021-03-14  Tatsuya Kinoshita  <tats@debian.org>
+
+	* fuzz/fuzz-conv.c:
+	Include unistd.h for getpid() and unlink() in fuzzer.
+
+	* fuzz/fuzz-conv.c: Call wtf_init() in fuzzing.
+
+2021-03-11  Tatsuya Kinoshita  <tats@debian.org>
+
+	* libwc/ucs.c, libwc/ucs.h:
+	Prevent index overflow due to tag_map in libwc.
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31936
+
+2021-03-06  Tatsuya Kinoshita  <tats@debian.org>
+
+	* fuzz/fuzz-conv.c: Set GC_oom_fn in fuzzing.
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31500
+
+	* fuzz/fuzz-conv.c: Call GC_INIT() in fuzzing.
+
+2021-03-06  bptato  <nincsnevem662@gmail.com>
+
+	* terms.c: Fix file handle leaks in kitty and iTerm2 image display.
+	Origin: https://github.com/tats/w3m/pull/174
+
+2021-03-04  Tatsuya Kinoshita  <tats@debian.org>
+
+	* Str.c: Prevent redundant memory reallocation in Str.c.
+
+	* Str.c: Prevent unneeded Strgrow in Strinsert_char.
+
+	* Str.c: Consider Strgrow overflow in Strinsert_char.
+
+2021-03-03  Tatsuya Kinoshita  <tats@debian.org>
+
+	* Str.c: Prevent unneeded memory allocation in Strgrow.
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31664
+
+2021-03-02  Tatsuya Kinoshita  <tats@debian.org>
+
+	* Str.c: Prevent large memory usage and null-deref in Str.c.
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31579
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31589
+
+2021-03-02  bptato  <nincsnevem662@gmail.com>
+
+	Support named character references specified by the living standard
+	Origin: https://github.com/tats/w3m/pull/170
+
+	* entity.js, tests/allentity.html:
+	Use &gt; instead of &gt in entity test generator.
+
+	* entity.js, tests/allentity.html:
+	Fix small mistakes in entity test generator.
+
+	* entity.js, entity.tab, tests/allentity.expected:
+	* tests/allentity.html:
+	Support single-codepoint HTML entities specified by whatwg.
+	https://html.spec.whatwg.org/multipage/named-characters.html#named-character-references
+
+	* entity.tab: Support period entity name.
+
 2021-02-28  Tatsuya Kinoshita  <tats@debian.org>
 
 	* Str.c: Prevent zero size allocation in Str.c.
@@ -12,7 +165,7 @@
 	Prevent unintentional integer overflow in libwc.
 
 	* Str.c: Prevent unintentional integer overflow in Strcat_charp_n.
-	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31500
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31500 (not yet fixed)
 
 	* Str.c: Prevent unintentional integer overflow in Strgrow.
 	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31467
@@ -20,14 +173,14 @@
 2021-02-27  Tatsuya Kinoshita  <tats@debian.org>
 
 	* Str.c: One more fix overflow due to Strgrow.
-	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31397
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31397 (not yet fixed)
 
 2021-02-26  Tatsuya Kinoshita  <tats@debian.org>
 
 	* Str.c: Fix potential overflow due to Str.c.
 
 	* Str.c: Fix integer overflow due to Strgrow.
-	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31397
+	Bug-Chromium: https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=31397 (not yet fixed)
 
 2021-02-24  Tatsuya Kinoshita  <tats@debian.org>
 

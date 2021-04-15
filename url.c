@@ -1309,7 +1309,7 @@ parseURL2(char *url, ParsedURL *pu, ParsedURL *current)
 }
 
 static Str
-_parsedURL2Str(ParsedURL *pu, int pass)
+_parsedURL2Str(ParsedURL *pu, int pass, int user, int label)
 {
     Str tmp;
     static char *scheme_str[] = {
@@ -1326,13 +1326,13 @@ _parsedURL2Str(ParsedURL *pu, int pass)
     else if (pu->scheme == SCM_UNKNOWN) {
 	return Strnew_charp(pu->file);
     }
-    if (pu->host == NULL && pu->file == NULL && pu->label != NULL) {
+    if (pu->host == NULL && pu->file == NULL && label && pu->label != NULL) {
 	/* local label */
 	return Sprintf("#%s", pu->label);
     }
     if (pu->scheme == SCM_LOCAL && !strcmp(pu->file, "-")) {
 	tmp = Strnew_charp("-");
-	if (pu->label) {
+	if (label && pu->label) {
 	    Strcat_char(tmp, '#');
 	    Strcat_charp(tmp, pu->label);
 	}
@@ -1360,7 +1360,7 @@ _parsedURL2Str(ParsedURL *pu, int pass)
     {
 	Strcat_charp(tmp, "//");
     }
-    if (pu->user) {
+    if (user && pu->user) {
 	Strcat_charp(tmp, pu->user);
 	if (pass && pu->pass) {
 	    Strcat_char(tmp, ':');
@@ -1394,7 +1394,7 @@ _parsedURL2Str(ParsedURL *pu, int pass)
 	Strcat_char(tmp, '?');
 	Strcat_charp(tmp, pu->query);
     }
-    if (pu->label) {
+    if (label && pu->label) {
 	Strcat_char(tmp, '#');
 	Strcat_charp(tmp, pu->label);
     }
@@ -1404,7 +1404,28 @@ _parsedURL2Str(ParsedURL *pu, int pass)
 Str
 parsedURL2Str(ParsedURL *pu)
 {
-    return _parsedURL2Str(pu, FALSE);
+    return _parsedURL2Str(pu, FALSE, TRUE, TRUE);
+}
+
+static Str
+parsedURL2RefererOriginStr(ParsedURL *pu)
+{
+    Str s;
+    char *f = pu->file, *q = pu->query;
+
+    pu->file = NULL;
+    pu->query = NULL;
+    s = _parsedURL2Str(pu, FALSE, FALSE, FALSE);
+    pu->file = f;
+    pu->query = q;
+
+    return s;
+}
+
+Str
+parsedURL2RefererStr(ParsedURL *pu)
+{
+    return _parsedURL2Str(pu, FALSE, FALSE, FALSE);
 }
 
 int
@@ -1485,6 +1506,13 @@ otherinfo(ParsedURL *target, ParsedURL *current, char *referer)
     no_referer_ptr = query_SCONF_NO_REFERER_TO(target);
     no_referer = no_referer || (no_referer_ptr && *no_referer_ptr);
     if (!no_referer) {
+	int cross_origin = FALSE;
+	if (CrossOriginReferer && current && current->host &&
+	    (!target || !target->host ||
+	     strcasecmp(current->host, target->host) != 0 || 
+	     current->port != target->port ||
+	     current->scheme != target->scheme))
+	    cross_origin = TRUE;
 #ifdef USE_SSL
         if (current && current->scheme == SCM_HTTPS && target->scheme != SCM_HTTPS) {
 	  /* Don't send Referer: if https:// -> http:// */
@@ -1492,21 +1520,20 @@ otherinfo(ParsedURL *target, ParsedURL *current, char *referer)
 	else
 #endif
 	if (referer == NULL && current && current->scheme != SCM_LOCAL &&
-	    current->scheme != SCM_LOCAL_CGI &&
+	    current->scheme != SCM_LOCAL_CGI && current->scheme != SCM_DATA &&
 	    (current->scheme != SCM_FTP ||
 	     (current->user == NULL && current->pass == NULL))) {
-	    char *p = current->label;
 	    Strcat_charp(s, "Referer: ");
-	    current->label = NULL;
-	    Strcat(s, parsedURL2Str(current));
-	    current->label = p;
+	    if (cross_origin)
+		Strcat(s, parsedURL2RefererOriginStr(current));
+	    else
+		Strcat(s, parsedURL2RefererStr(current));
 	    Strcat_charp(s, "\r\n");
 	}
 	else if (referer != NULL && referer != NO_REFERER) {
-	    char *p = strchr(referer, '#');
 	    Strcat_charp(s, "Referer: ");
-	    if (p)
-		Strcat_charp_n(s, referer, p - referer);
+	    if (cross_origin)
+		Strcat(s, parsedURL2RefererOriginStr(current));
 	    else
 		Strcat_charp(s, referer);
 	    Strcat_charp(s, "\r\n");
@@ -1549,12 +1576,8 @@ HTTPrequestURI(ParsedURL *pu, HRequest *hr)
 	    Strcat_charp(tmp, pu->query);
 	}
     }
-    else {
-	char *save_label = pu->label;
-	pu->label = NULL;
-	Strcat(tmp, _parsedURL2Str(pu, TRUE));
-	pu->label = save_label;
-    }
+    else
+	Strcat(tmp, _parsedURL2Str(pu, TRUE, TRUE, FALSE));
     return tmp;
 }
 

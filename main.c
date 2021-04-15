@@ -427,6 +427,8 @@ main(int argc, char **argv, char **envp)
 #if defined(DONT_CALL_GC_AFTER_FORK) && defined(USE_IMAGE)
     char **getimage_args = NULL;
 #endif /* defined(DONT_CALL_GC_AFTER_FORK) && defined(USE_IMAGE) */
+    if (!getenv("GC_LARGE_ALLOC_WARN_INTERVAL"))
+	set_environ("GC_LARGE_ALLOC_WARN_INTERVAL", "30000");
     GC_INIT();
 #if (GC_VERSION_MAJOR>7) || ((GC_VERSION_MAJOR==7) && (GC_VERSION_MINOR>=2))
     GC_set_oom_fn(die_oom);
@@ -806,7 +808,7 @@ main(int argc, char **argv, char **envp)
 		    usage();
 		}
 	    }
-	    else if (!strcmp("-dummy", argv[i])) {
+	    else if (!strcmp("-", argv[i]) || !strcmp("-dummy", argv[i])) {
 		/* do nothing */
 	    }
 	    else if (!strcmp("-debug", argv[i])) {
@@ -2963,10 +2965,11 @@ loadLink(char *url, char *target, char *referer, FormList *request)
     base = baseURL(Currentbuf);
     if ((no_referer_ptr && *no_referer_ptr) ||
 	base == NULL ||
-	base->scheme == SCM_LOCAL || base->scheme == SCM_LOCAL_CGI)
+	base->scheme == SCM_LOCAL || base->scheme == SCM_LOCAL_CGI ||
+	base->scheme == SCM_DATA)
 	referer = NO_REFERER;
     if (referer == NULL)
-	referer = parsedURL2Str(&Currentbuf->currentURL)->ptr;
+	referer = parsedURL2RefererStr(&Currentbuf->currentURL)->ptr;
     buf = loadGeneralFile(url, baseURL(Currentbuf), referer, flag, request);
     if (buf == NULL) {
 	char *emsg = Sprintf("Can't load %s", url)->ptr;
@@ -4261,10 +4264,11 @@ goURL0(char *prompt, int relative)
 	current = baseURL(Currentbuf);
 	if ((no_referer_ptr && *no_referer_ptr) ||
 	    current == NULL ||
-	    current->scheme == SCM_LOCAL || current->scheme == SCM_LOCAL_CGI)
+	    current->scheme == SCM_LOCAL || current->scheme == SCM_LOCAL_CGI ||
+	    current->scheme == SCM_DATA)
 	    referer = NO_REFERER;
 	else
-	    referer = parsedURL2Str(&Currentbuf->currentURL)->ptr;
+	    referer = parsedURL2RefererStr(&Currentbuf->currentURL)->ptr;
 	url = url_encode(url, current, Currentbuf->document_charset);
     }
     else {

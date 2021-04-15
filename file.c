@@ -1179,11 +1179,7 @@ AuthBasicCred(struct http_auth *ha, Str uname, Str pw, ParsedURL *pu,
     Str s = Strdup(uname);
     Strcat_char(s, ':');
     Strcat(s, pw);
-    char *base64 = base64_encode(s->ptr, s->length);
-    if (!base64)
-	return Strnew_charp("Basic ");
-    else
-	return Strnew_m_charp("Basic ", base64, NULL);
+    return Strnew_m_charp("Basic ", base64_encode(s->ptr, s->length)->ptr, NULL);
 }
 
 #ifdef USE_DIGEST_AUTH
@@ -5107,9 +5103,9 @@ HTMLtagproc1(struct parsed_tag *tag, struct html_feed_environ *h_env)
 	return 1;
     case HTML_TABLE:
 	close_anchor(h_env, obuf);
-	obuf->table_level++;
-	if (obuf->table_level >= MAX_TABLE)
+	if (obuf->table_level + 1 >= MAX_TABLE)
 	    break;
+	obuf->table_level++;
 	w = BORDER_NONE;
 	/* x: cellspacing, y: cellpadding */
 	x = 2;

@@ -21,12 +21,10 @@
 #ifdef __EMX__			/* or include "fm.h" for HAVE_BCOPY? */
 #include <strings.h>
 #endif
-#include <limits.h>
 #include "Str.h"
 #include "myctype.h"
 
 #define INITIAL_STR_SIZE 32
-#define STR_SIZE_MAX (INT_MAX - 1)
 
 #ifdef STR_DEBUG
 /* This is obsolete, because "Str" can handle a '\0' character now. */
@@ -39,7 +37,11 @@ Str
 Strnew()
 {
     Str x = GC_MALLOC(sizeof(struct _Str));
+    if (x == NULL)
+	exit(1);
     x->ptr = GC_MALLOC_ATOMIC(INITIAL_STR_SIZE);
+    if (x->ptr == NULL)
+	exit(1);
     x->ptr[0] = '\0';
     x->area_size = INITIAL_STR_SIZE;
     x->length = 0;
@@ -50,9 +52,15 @@ Str
 Strnew_size(int n)
 {
     Str x = GC_MALLOC(sizeof(struct _Str));
+    if (x == NULL)
+	exit(1);
     if (n < 0 || n >= STR_SIZE_MAX)
 	n = STR_SIZE_MAX - 1;
+    else if (n + 1 < INITIAL_STR_SIZE)
+	n = INITIAL_STR_SIZE - 1;
     x->ptr = GC_MALLOC_ATOMIC(n + 1);
+    if (x->ptr == NULL)
+	exit(1);
     x->ptr[0] = '\0';
     x->area_size = n + 1;
     x->length = 0;
@@ -63,18 +71,25 @@ Str
 Strnew_charp(const char *p)
 {
     Str x;
-    int n;
+    int n, len;
 
     if (p == NULL)
 	return Strnew();
     x = GC_MALLOC(sizeof(struct _Str));
+    if (x == NULL)
+	exit(1);
     n = strlen(p) + 1;
     if (n <= 0 || n > STR_SIZE_MAX)
 	n = STR_SIZE_MAX;
+    len = n - 1;
+    if (n < INITIAL_STR_SIZE)
+	n = INITIAL_STR_SIZE;
     x->ptr = GC_MALLOC_ATOMIC(n);
+    if (x->ptr == NULL)
+	exit(1);
     x->area_size = n;
-    x->length = n - 1;
-    bcopy((void *)p, (void *)x->ptr, n - 1);
+    x->length = len;
+    bcopy((void *)p, (void *)x->ptr, len);
     x->ptr[x->length] = '\0';
     return x;
 }
@@ -97,17 +112,25 @@ Str
 Strnew_charp_n(const char *p, int n)
 {
     Str x;
+    int len;
 
     if (p == NULL)
 	return Strnew_size(n);
     x = GC_MALLOC(sizeof(struct _Str));
+    if (x == NULL)
+	exit(1);
     if (n < 0 || n >= STR_SIZE_MAX)
 	n = STR_SIZE_MAX - 1;
+    len = n;
+    if (n + 1 < INITIAL_STR_SIZE)
+	n = INITIAL_STR_SIZE - 1;
     x->ptr = GC_MALLOC_ATOMIC(n + 1);
+    if (x->ptr == NULL)
+	exit(1);
     x->area_size = n + 1;
-    x->length = n;
-    bcopy((void *)p, (void *)x->ptr, n);
-    x->ptr[n] = '\0';
+    x->length = len;
+    bcopy((void *)p, (void *)x->ptr, len);
+    x->ptr[x->length] = '\0';
     return x;
 }
 
@@ -140,8 +163,9 @@ Strcopy(Str x, Str y)
     STR_LENGTH_CHECK(x);
     STR_LENGTH_CHECK(y);
     if (x->area_size < y->length + 1) {
-	GC_free(x->ptr);
-	x->ptr = GC_MALLOC_ATOMIC(y->length + 1);
+	x->ptr = GC_REALLOC(x->ptr, y->length + 1);
+	if (x->ptr == NULL)
+	    exit(1);
 	x->area_size = y->length + 1;
     }
     bcopy((void *)y->ptr, (void *)x->ptr, y->length + 1);
@@ -163,8 +187,9 @@ Strcopy_charp(Str x, const char *y)
     if (len < 0 || len >= STR_SIZE_MAX)
 	len = STR_SIZE_MAX - 1;
     if (x->area_size < len + 1) {
-	GC_free(x->ptr);
-	x->ptr = GC_MALLOC_ATOMIC(len + 1);
+	x->ptr = GC_REALLOC(x->ptr, len + 1);
+	if (x->ptr == NULL)
+	    exit(1);
 	x->area_size = len + 1;
     }
     bcopy((void *)y, (void *)x->ptr, len);
@@ -186,8 +211,9 @@ Strcopy_charp_n(Str x, const char *y, int n)
     if (len < 0 || len >= STR_SIZE_MAX)
 	len = STR_SIZE_MAX - 1;
     if (x->area_size < len + 1) {
-	GC_free(x->ptr);
-	x->ptr = GC_MALLOC_ATOMIC(len + 1);
+	x->ptr = GC_REALLOC(x->ptr, len + 1);
+	if (x->ptr == NULL)
+	    exit(1);
 	x->area_size = len + 1;
     }
     bcopy((void *)y, (void *)x->ptr, len);
@@ -201,7 +227,7 @@ Strcat_charp_n(Str x, const char *y, int n)
     int newlen;
 
     STR_LENGTH_CHECK(x);
-    if (y == NULL)
+    if (y == NULL || n == 0)
 	return;
     if (n < 0)
 	n = STR_SIZE_MAX - 1;
@@ -209,16 +235,17 @@ Strcat_charp_n(Str x, const char *y, int n)
     if (newlen <= 0 || newlen > STR_SIZE_MAX) {
 	newlen = STR_SIZE_MAX;
 	n = newlen - x->length - 1;
+	if (n <= 0)
+	    return;
     }
     if (x->area_size < newlen) {
-	char *old = x->ptr;
 	newlen += newlen / 2;
 	if (newlen <= 0 || newlen > STR_SIZE_MAX)
 	    newlen = STR_SIZE_MAX;
-	x->ptr = GC_MALLOC_ATOMIC(newlen);
+	x->ptr = GC_REALLOC(x->ptr, newlen);
+	if (x->ptr == NULL)
+	    exit(1);
 	x->area_size = newlen;
-	bcopy((void *)old, (void *)x->ptr, x->length);
-	GC_free(old);
     }
     bcopy((void *)y, (void *)&x->ptr[x->length], n);
     x->length += n;
@@ -254,21 +281,27 @@ Strcat_m_charp(Str x, ...)
 void
 Strgrow(Str x)
 {
-    char *old = x->ptr;
-    int newlen;
-    newlen = x->area_size + x->area_size / 5;
-    if (newlen == x->area_size)
-	newlen += 2;
+    int newlen, addlen;
+
+    if (x->area_size < 8192)
+	addlen = x->area_size;
+    else
+	addlen = x->area_size / 2;
+    if (addlen < INITIAL_STR_SIZE)
+	addlen = INITIAL_STR_SIZE;
+    newlen = x->area_size + addlen;
     if (newlen <= 0 || newlen > STR_SIZE_MAX) {
 	newlen = STR_SIZE_MAX;
 	if (x->length + 1 >= newlen)
 	    x->length = newlen - 2;
     }
-    x->ptr = GC_MALLOC_ATOMIC(newlen);
-    x->area_size = newlen;
-    bcopy((void *)old, (void *)x->ptr, x->length);
+    if (x->area_size < newlen) {
+	x->ptr = GC_REALLOC(x->ptr, newlen);
+	if (x->ptr == NULL)
+	    exit(1);
+	x->area_size = newlen;
+    }
     x->ptr[x->length] = '\0';
-    GC_free(old);
 }
 
 Str
@@ -324,6 +357,8 @@ Strinsert_char(Str s, int pos, char c)
 	return;
     if (s->length + 2 > s->area_size)
 	Strgrow(s);
+    if (s->length < pos)
+	return;
     for (i = s->length; i > pos; i--)
 	s->ptr[i] = s->ptr[i - 1];
     s->ptr[++s->length] = '\0';
