@@ -6103,7 +6103,7 @@ deleteFiles()
 #ifdef HAVE_MKDTEMP
 	// remove any user-created files in the tempdir
 	if (tmp_dir != config_dir && tmp_dir != data_home)
-		if (remove_dir(tmp_dir, ZeroTempfiles) == -1) {
+		if (remove_dir(tmp_dir, strlen(tmp_dir), ZeroTempfiles) == -1) {
 			fprintf(stderr, "ERROR: could not remove temp dir (%s)!\n\r", tmp_dir);
 			exit(1);
 		}

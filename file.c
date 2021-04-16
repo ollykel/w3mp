@@ -8919,7 +8919,7 @@ zero_file(const char *filename)
 }// end zero_file
 
 int
-remove_dir(const char *dirname, int should_zero_files)
+remove_dir(const char *dirname, size_t min_len, int should_zero_files)
 {
 	DIR			*dir;
 	struct dirent		*file;
@@ -8927,6 +8927,10 @@ remove_dir(const char *dirname, int should_zero_files)
 	char			*fname_dest;
 	size_t			fname_space;
 
+	if (strlen(dirname) < min_len) {
+	    fprintf(stderr, "ERROR: directory name too short (%s) should be at least %zu long\n\r", dirname, min_len);
+	    return -1;
+	}
 	fname_dest = fname_full + snprintf(fname_full, PATH_MAX, "%s/", dirname);
 	fname_space = (size_t)(PATH_MAX - (fname_dest - fname_full));
 	if (!fname_space || fname_space > PATH_MAX) {
@@ -8943,7 +8947,7 @@ remove_dir(const char *dirname, int should_zero_files)
 	    if (!strcmp(file->d_name, ".") || !strcmp(file->d_name, ".."))
 		continue;
 	    strncpy(fname_dest, file->d_name, fname_space);
-	    if (file->d_type == DT_DIR && remove_dir(fname_full, should_zero_files) == -1)
+	    if (file->d_type == DT_DIR && remove_dir(fname_full, min_len, should_zero_files) == -1)
 		return -1;
 	    else {
 		if (should_zero_files)
