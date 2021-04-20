@@ -7,6 +7,9 @@ import urllib
 import urllib3
 import shlex
 
+# constants
+PROC_TIMEOUT = (lambda e: int(e) if e.isdigit() else 30)(os.getenv('W3M_CMD_TIMEOUT', ''))
+
 if __name__ == '__main__':
     try:
         if os.getenv('PATH_INFO', '') == '/prompt':
@@ -18,7 +21,7 @@ if __name__ == '__main__':
             with open(os.path.join(os.getenv('W3M_TEMP'), 'commands.txt'), 'a') as f:
                 f.write(os.getenv('QUERY_STRING', '') + os.linesep)
                 # end with f
-        command_args = shlex.split(os.path.expandvars(os.path.expanduser(urllib.parse.unquote_plus(os.getenv('QUERY_STRING', '')))))
+        command_args = [os.path.expanduser(arg) for arg in shlex.split(os.path.expandvars(urllib.parse.unquote_plus(os.getenv('QUERY_STRING', ''))))]
         if len(command_args) < 1:
             print(os.linesep.join((
                 'w3m-control: BACK',
@@ -42,21 +45,25 @@ if __name__ == '__main__':
             exit(0)
         if os.getenv('W3M_URL', '')[:7] == 'file://' and os.path.isdir(os.getenv('W3M_URL', '')[7:]):
             os.chdir(os.getenv('W3M_URL', '')[7:])
-        proc = subprocess.Popen([command, *command_args[1:]], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        os.chdir(os.getenv('OLDPWD', os.getenv('W3M_DATA_HOME', os.getenv('W3M_TEMP', ''))))
+        proc = subprocess.Popen([command, *command_args[1:]],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+            )
+        (proc_output, proc_err) = proc.communicate(timeout=PROC_TIMEOUT)
         proc_status = proc.wait()
-        if proc_status != 0:
+        if proc_status != 0 or len(proc_output) < 1:
             print(os.linesep.join([
                 'HTTP/2 404 ERROR',
                 'Content-Type: text/plain; charset=utf-8',
                 '',
                 'ERROR ({})'.format(proc_status),
                 '',
-                *[line.decode().rstrip() for line in proc.stderr.readlines()]
+                *[line.rstrip() for line in proc_err.split(os.linesep)]
             ]))
         else:
-            print(proc.stdout.read().decode())
-        proc.stdout.close()
-        proc.stderr.close()
+            print(proc_output)
     except Exception as err:
         print(os.linesep.join([
             'HTTP/2 404 ERROR',
