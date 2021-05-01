@@ -1,0 +1,104 @@
+#!/bin/bash
+
+mark_file="${W3M_DATA_HOME}/marks.csv"
+
+if [[ ! -f "${mark_file}" || ! -r "${mark_file}" ]]; then
+	echo "\
+w3m-control: BACK
+w3m-control: MESSAGE ERROR: could not find or read ${mark_file}
+"
+	exit 0
+fi
+
+function list_marks() {
+	read -d '' marks < "${mark_file}"
+	echo "\
+HTTP/2 200
+Content-Type: text/plain; charset=utf-8
+
+Current Marks:
+
+${marks}"
+}
+
+# defaults
+read -d '#' target_url <<< "${W3M_URL}"
+target_label='default'
+goto_cmd="NULL"
+goto_url=f
+new_tab=f
+unset lines
+unset target_lnum
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+		--list|-L)
+			list_marks
+			exit 0
+			;;
+		--curr-url|-C)
+			read -d '#' target_url <<< "${W3M_URL}"
+			goto_url=f
+			;;
+		--link|-l)
+			read -d '#' target_url <<< "${W3M_CURRENT_LINK}"
+			goto_url=t
+			;;
+		--curr-tab|-c)
+			new_tab=f
+			;;
+		--tab|-t)
+			new_tab=t
+			;;
+		*) break ;;
+	esac
+	shift
+done
+
+if [[ ! ${target_url} ]]; then
+	echo "\
+w3m-control: BACK
+w3m-control: MESSAGE ERROR: No url given
+"
+	exit 0
+fi
+
+if [[ $1 ]]; then
+	target_label="$1"
+fi
+
+if [[ ${goto_url} = t ]]; then
+	if [[ ${new_tab} = t ]]; then
+		goto_cmd='TAB_GOTO'
+	else
+		goto_cmd='GOTO'
+	fi
+else
+	if [[ ${new_tab} = t ]]; then
+		goto_cmd='NEW_TAB'
+	else
+		goto_cmd='NULL'
+	fi
+fi
+
+IFS=', '
+while read url label lnum; do
+	if [[ ${url} = "${target_url}" && ${label} = "${target_label}" ]]; then
+		target_lnum=${lnum}
+		break
+	fi
+done < "${mark_file}"
+
+if [[ ! ${target_lnum} ]]; then
+	echo "\
+w3m-control: BACK
+w3m-control: MESSAGE ERROR: No mark found for ${target_url}, label \"${target_label}\"
+"
+	exit 0
+fi
+
+echo "\
+w3m-control: BACK
+w3m-control: ${goto_cmd} ${target_url}
+w3m-control: GOTO_LINE ${target_lnum}
+"
