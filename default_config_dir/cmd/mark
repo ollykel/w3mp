@@ -1,0 +1,32 @@
+#!/bin/bash
+
+mark_file="${W3M_DATA_HOME}/marks.csv"
+read -d '#' target_url <<< "${W3M_URL}"
+mark_added=f
+target_label='default'
+if [[ $1 ]]; then
+	target_label="$1"
+fi
+
+IFS=$'\n\r'
+if [[ -f "${mark_file}" ]]; then
+	IFS=$'\n\r' read -d '' -a lines < "${mark_file}"
+	for line in ${lines[*]}; do
+		IFS=', ' read url label lnum <<< "${line}"
+		if [[ ${mark_added} = f && "${url}" = "${target_url}" && "${label}" = "${target_label}" ]]; then
+			echo "${target_url}, ${target_label}, ${W3M_CURRENT_LINE}"
+			mark_added=t
+		else
+			echo "${line}"
+		fi
+	done > "${mark_file}"
+fi
+
+if [[ ${mark_added} = f ]]; then
+	echo "${target_url}, ${target_label}, ${W3M_CURRENT_LINE}" >> "${mark_file}"
+fi
+
+echo "\
+w3m-control: BACK
+w3m-control: MESSAGE Marked url ${target_url} at line ${W3M_CURRENT_LINE} (label: ${target_label})
+"
