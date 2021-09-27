@@ -4154,14 +4154,62 @@ DEFUN(backBf, BACK, "Close current buffer and return to the one below in stack")
     Buffer *buf = Currentbuf->linkBuffer[LB_N_FRAME];
 
     if (!checkBackBuffer(Currentbuf)) {
-	if (close_tab_back && nTab >= 1) {
-	    deleteTab(CurrentTab);
-	    displayBuffer(Currentbuf, B_FORCE_REDRAW);
+		if (close_tab_back && nTab >= 1) {
+			deleteTab(CurrentTab);
+			displayBuffer(Currentbuf, B_FORCE_REDRAW);
+		}
+		else
+			/* FIXME: gettextize? */
+			disp_message("Can't go back...", TRUE);
+		return;
+    }
+
+    delBuffer(Currentbuf);
+
+    if (buf) {
+	if (buf->frameQ) {
+	    struct frameset *fs;
+	    long linenumber = buf->frameQ->linenumber;
+	    long top = buf->frameQ->top_linenumber;
+	    int pos = buf->frameQ->pos;
+	    int currentColumn = buf->frameQ->currentColumn;
+	    AnchorList *formitem = buf->frameQ->formitem;
+
+	    fs = popFrameTree(&(buf->frameQ));
+	    deleteFrameSet(buf->frameset);
+	    buf->frameset = fs;
+
+	    if (buf == Currentbuf) {
+		rFrame();
+		Currentbuf->topLine = lineSkip(Currentbuf,
+					       Currentbuf->firstLine, top - 1,
+					       FALSE);
+		gotoLine(Currentbuf, linenumber);
+		Currentbuf->pos = pos;
+		Currentbuf->currentColumn = currentColumn;
+		arrangeCursor(Currentbuf);
+		formResetBuffer(Currentbuf, formitem);
+	    }
 	}
-	else
-	    /* FIXME: gettextize? */
-	    disp_message("Can't go back...", TRUE);
-	return;
+	else if (RenderFrame && buf == Currentbuf) {
+	    delBuffer(Currentbuf);
+	}
+    }
+    displayBuffer(Currentbuf, B_FORCE_REDRAW);
+}
+
+// delete current buffer and back to the previous buffer
+// if no previous buffer, do not display message
+DEFUN(backBfSl, BACK_SILENT, "Close current buffer and return to the one below in stack, without error message")
+{
+    Buffer *buf = Currentbuf->linkBuffer[LB_N_FRAME];
+
+    if (!checkBackBuffer(Currentbuf)) {
+		if (close_tab_back && nTab >= 1) {
+			deleteTab(CurrentTab);
+			displayBuffer(Currentbuf, B_FORCE_REDRAW);
+		}
+		return;
     }
 
     delBuffer(Currentbuf);

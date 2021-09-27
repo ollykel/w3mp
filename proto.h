@@ -79,6 +79,7 @@ extern void nextU(void);
 extern void nextBf(void);
 extern void prevBf(void);
 extern void backBf(void);
+extern void backBfSl(void);
 extern void deletePrevBuf(void);
 extern void goURL(void);
 extern void goHome(void);
