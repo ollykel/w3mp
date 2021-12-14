@@ -6341,7 +6341,6 @@ DEFUN(reinit, REINIT, "Reload configuration file")
     if (resource == NULL) {
 	init_rc();
 	init_data_home();
-	init_tmp();
 	sync_with_option();
 #ifdef USE_COOKIE
 	initCookie();
