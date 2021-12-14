@@ -1413,9 +1413,9 @@ init_data_home()
     if (stat(data_home, &st) < 0) {
 		if (errno == ENOENT) {	/* no directory */
 			if (do_mkdir(data_home, 0700) < 0)
-				fprintf(stderr, "Can't create config directory (%s)!\n", data_home);
+				fprintf(stderr, "Can't create data directory (%s)!\n", data_home);
 		} else {
-			fprintf(stderr, "Can't create config directory (%s)!\n", data_home);
+			fprintf(stderr, "Can't create data directory (%s)!\n", data_home);
 		}
     }
 	data_home_initialized = 1;
