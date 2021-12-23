@@ -6030,7 +6030,7 @@ set_buffer_environ(Buffer *buf)
 		set_environ("W3M_KEYNUM", "");
 	}
     if (buf != prev_buf) {
-	set_environ("W3M_CONFIG_ROOT", ETC_DIR);
+	set_environ("W3M_CONFIG_ROOT", CONF_DIR);
 	set_environ("W3M_CONFIG_HOME", config_dir);
 	set_environ("W3M_DATA_HOME", data_home);
 	set_environ("W3M_TEMP", tmp_dir);
