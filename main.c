@@ -522,15 +522,15 @@ main(int argc, char **argv, char **envp)
 
     /* initializations */
     init_rc();
-	init_data_home();
-	init_tmp();
+    init_data_home();
+    init_tmp();
 
     LoadHist = newHist();
     SaveHist = newHist();
     ShellHist = newHist();
     TextHist = newHist();
     URLHist = newHist();
-	SearchHist = newHist();
+    SearchHist = newHist();
 
 #ifdef USE_M17N
     if (FollowLocale && Locale) {
@@ -6243,10 +6243,10 @@ DEFUN(sourceSh, SOURCE_SHELL, "Execute shell command and interpret output as a s
     const size_t source_read_increment = 4096;
     size_t source_read_count = 0;
     FILE *source_file = NULL;
-    char *source_data = NULL;
+    char *data = NULL, *source_data = NULL;
     size_t source_read_amt = 0;
     char *cmd, *p;
-    size_t cmd_idx;
+    int cmd_idx;
 
     MySignalHandler(*prevtrap) ();
 
@@ -6272,20 +6272,21 @@ DEFUN(sourceSh, SOURCE_SHELL, "Execute shell command and interpret output as a s
 	  source_read_count += source_read_amt;
 	  source_data = realloc(source_data, source_read_count + source_read_increment + 1);
     } while (source_read_amt == source_read_increment);
-    fprintf(stderr, "source read count: %04zu\n", source_read_count);
     fclose(source_file);
+    // TODO: remove debug
     source_data[source_read_count] = '\0';
-    while (*source_data) {
-	SKIP_BLANKS(source_data);
-	if (*source_data == ';' || *source_data == '\n' || *source_data == '\r') {
-	    source_data++;
+    data = source_data;
+    while (*data) {
+	SKIP_BLANKS(data);
+	if (*data == ';' || *data == '\n' || *data == '\r') {
+	    data++;
 	    continue;
 	}
-	p = getWord(&source_data);
+	p = getWord(&data);
 	cmd_idx = getFuncList(p);
 	if (cmd_idx < 0)
 	    break;
-	p = getQWord(&source_data);
+	p = getQWord(&data);
 	CurrentKey = -1;
 	CurrentKeyData = NULL;
 	CurrentCmdData = *p ? p : NULL;
