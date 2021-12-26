@@ -114,6 +114,7 @@ extern void extbrz(void);
 extern void linkbrz(void);
 extern void curlno(void);
 extern void execCmd(void);
+extern void sourceSh(void);
 extern void printMsg(void);
 #ifdef USE_IMAGE
 extern void dispI(void);

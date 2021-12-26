@@ -6237,6 +6237,73 @@ DEFUN(execCmd, COMMAND, "Invoke w3m function(s)")
     displayBuffer(Currentbuf, B_NORMAL);
 }
 
+/* Execute shell command and interpret the output as a series of commands */
+DEFUN(sourceSh, SOURCE_SHELL, "Execute shell command and interpret output as a series of commands")
+{
+    const size_t source_read_increment = 4096;
+    size_t source_read_count = 0;
+    FILE *source_file = NULL;
+    char *source_data = NULL;
+    size_t source_read_amt = 0;
+    char *cmd, *p;
+    size_t cmd_idx;
+
+    MySignalHandler(*prevtrap) ();
+
+    CurrentKeyData = NULL;	/* not allowed in w3m-control: */
+    cmd = searchKeyData();
+    if (cmd == NULL || *cmd == '\0') {
+	cmd = inputLineHist("(source shell)!", "", IN_COMMAND, ShellHist);
+    }
+    if (cmd != NULL)
+	cmd = conv_to_system(cmd);
+    if (cmd == NULL || *cmd == '\0') {
+	displayBuffer(Currentbuf, B_NORMAL);
+	return;
+    }
+    prevtrap = mySignal(SIGINT, intTrap);
+    crmode();
+    source_file = popen(cmd, "r");
+    mySignal(SIGINT, prevtrap);
+    term_raw();
+    source_data = calloc(source_read_increment + 1, 1);
+    do {
+	  source_read_amt = fread(source_data + source_read_count, 1, source_read_increment, source_file);
+	  source_read_count += source_read_amt;
+	  source_data = realloc(source_data, source_read_count + source_read_increment + 1);
+    } while (source_read_amt == source_read_increment);
+    fprintf(stderr, "source read count: %04zu\n", source_read_count);
+    fclose(source_file);
+    source_data[source_read_count] = '\0';
+    while (*source_data) {
+	SKIP_BLANKS(source_data);
+	if (*source_data == ';' || *source_data == '\n' || *source_data == '\r') {
+	    source_data++;
+	    continue;
+	}
+	p = getWord(&source_data);
+	cmd_idx = getFuncList(p);
+	if (cmd_idx < 0)
+	    break;
+	p = getQWord(&source_data);
+	CurrentKey = -1;
+	CurrentKeyData = NULL;
+	CurrentCmdData = *p ? p : NULL;
+#ifdef USE_MOUSE
+	if (use_mouse)
+	    mouse_inactive();
+#endif
+	w3mFuncList[cmd_idx].func();
+#ifdef USE_MOUSE
+	if (use_mouse)
+	    mouse_active();
+#endif
+	CurrentCmdData = NULL;
+    }
+    free(source_data);
+    displayBuffer(Currentbuf, B_NORMAL);
+}
+
 #ifdef USE_ALARM
 static MySignalHandler
 SigAlarm(SIGNAL_ARG)
