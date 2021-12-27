@@ -294,5 +294,13 @@ typedef void MySignalHandler;
 #define BROTLI_NAME "brotli"
 
 #endif /* makefile_parameter */
+
+// determine directory separator (i.e. / on *nix, \ on Windows)
+#ifdef _WIN32
+#define DSEP "\\"
+#else
+#define DSEP "/"
+#endif
+
 #endif /* _CONFIGURED_ */
 
