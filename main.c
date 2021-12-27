@@ -5382,7 +5382,12 @@ DEFUN(sourceSh, SOURCE_SHELL, "Execute shell command and interpret output as a s
     data = source_data;
     while (*data) {
 	SKIP_BLANKS(data);
-	if (*data == ';' || *data == '\n' || *data == '\r') {
+	if (*data == '#') {
+		while (*data && *data != '\n' && *data != '\r')
+			data++;
+		continue;
+	}
+	if (*data == ';') {
 	    data++;
 	    continue;
 	}
