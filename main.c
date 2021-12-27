@@ -1274,33 +1274,30 @@ DEFUN(pipeBuf, PIPE_BUF, "Pipe current buffer through a shell command and displa
     displayBuffer(Currentbuf, B_FORCE_REDRAW);
 }
 
-/* Execute shell command and read output ac pipe. */
-DEFUN(pipesh, PIPE_SHELL, "Execute shell command and display output")
+/* Pipe current buffer to shell command, display output in terminal. */
+DEFUN(pipesh, PIPE_SHELL, "Pipe current buffer to shell command and display output in terminal.")
 {
-    Buffer *buf;
     char *cmd;
+    FILE *input;
 
     CurrentKeyData = NULL;	/* not allowed in w3m-control: */
     cmd = searchKeyData();
     if (cmd == NULL || *cmd == '\0') {
-	cmd = inputLineHist("(read shell[pipe])!", "", IN_COMMAND, ShellHist);
+	cmd = inputLineHist("(exec shell[pipe])!", "", IN_COMMAND, ShellHist);
     }
     if (cmd != NULL)
 	cmd = conv_to_system(cmd);
-    if (cmd == NULL || *cmd == '\0') {
-	displayBuffer(Currentbuf, B_NORMAL);
-	return;
-    }
-    buf = getpipe(cmd);
-    if (buf == NULL) {
-	disp_message("Execution failed", TRUE);
-	return;
-    }
-    else {
-	buf->bufferprop |= (BP_INTERNAL | BP_NO_URL);
-	if (buf->type == NULL)
-	    buf->type = "text/plain";
-	pushBuffer(buf);
+    if (cmd != NULL && *cmd != '\0') {
+	fmTerm();
+	fputs("\n", stdout);
+	input = popen(cmd, "w");
+	saveBuffer(Currentbuf, input, TRUE);
+	fclose(input);
+	/* FIXME: gettextize? */
+	fputs("\n[Hit any key]", stdout);
+	fflush(stdout);
+	fmInit();
+	getch();
     }
     displayBuffer(Currentbuf, B_FORCE_REDRAW);
 }
