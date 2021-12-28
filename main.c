@@ -1271,6 +1271,8 @@ DEFUN(pipeBuf, PIPE_BUF, "Pipe current buffer through a shell command and displa
 	buf->currentURL.file = "-";
 	pushBuffer(buf);
     }
+    clear();
+    arrangeCursor(Currentbuf);
     displayBuffer(Currentbuf, B_FORCE_REDRAW);
 }
 
@@ -1336,6 +1338,9 @@ DEFUN(readsh, READ_SHELL, "Execute shell command and display output")
 	    buf->type = "text/plain";
 	pushBuffer(buf);
     }
+    // redraw screen
+    clear();
+    arrangeCursor(Currentbuf);
     displayBuffer(Currentbuf, B_FORCE_REDRAW);
 }
 
@@ -5411,6 +5416,9 @@ DEFUN(sourceSh, SOURCE_SHELL, "Execute shell command and interpret output as a s
 	CurrentCmdData = NULL;
     }
     free(source_data);
+    // redraw screen
+    clear();
+    arrangeCursor(Currentbuf);
     displayBuffer(Currentbuf, B_NORMAL);
 }
 
