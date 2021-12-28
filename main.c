@@ -1276,6 +1276,53 @@ DEFUN(pipeBuf, PIPE_BUF, "Pipe current buffer through a shell command and displa
     displayBuffer(Currentbuf, B_FORCE_REDRAW);
 }
 
+DEFUN(pipeBufHtml, PIPE_BUF_HTML, "Pipe current buffer through a shell command and display output as html document")
+{
+    Buffer *buf;
+    char *cmd, *tmpf;
+    FILE *f;
+
+    CurrentKeyData = NULL;	/* not allowed in w3m-control: */
+    cmd = searchKeyData();
+    if (cmd == NULL || *cmd == '\0') {
+	/* FIXME: gettextize? */
+	cmd = inputLineHist("(pipe buffer[html])!", "", IN_COMMAND, ShellHist);
+    }
+    if (cmd != NULL)
+	cmd = conv_to_system(cmd);
+    if (cmd == NULL || *cmd == '\0') {
+	displayBuffer(Currentbuf, B_NORMAL);
+	return;
+    }
+    tmpf = tmpfname(TMPF_DFL, NULL)->ptr;
+    f = fopen(tmpf, "w");
+    if (f == NULL) {
+	/* FIXME: gettextize? */
+	disp_message(Sprintf("Can't save buffer to %s", cmd)->ptr, TRUE);
+	return;
+    }
+    saveBuffer(Currentbuf, f, TRUE);
+    fclose(f);
+    buf = getpipe(myExtCommand(cmd, shell_quote(tmpf), TRUE)->ptr);
+    if (buf == NULL) {
+	disp_message("Execution failed", TRUE);
+	return;
+    }
+    else {
+	buf->filename = cmd;
+	buf->buffername = Sprintf("%s %s", PIPEBUFFERNAME,
+				  conv_from_system(cmd))->ptr;
+	buf->bufferprop |= (BP_INTERNAL | BP_NO_URL);
+	if (buf->type == NULL)
+	    buf->type = "text/html";
+	buf->currentURL.file = "-";
+	pushBuffer(buf);
+    }
+    clear();
+    arrangeCursor(Currentbuf);
+    displayBuffer(Currentbuf, B_FORCE_REDRAW);
+}
+
 /* Pipe current buffer to shell command, display output in terminal. */
 DEFUN(pipesh, PIPE_SHELL, "Pipe current buffer to shell command and display output in terminal.")
 {

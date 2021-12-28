@@ -30,6 +30,7 @@ extern void col1R(void);
 extern void col1L(void);
 extern void setEnv(void);
 extern void pipeBuf(void);
+extern void pipeBufHtml(void);
 extern void pipesh(void);
 extern void readsh(void);
 extern void readShHtml(void);
