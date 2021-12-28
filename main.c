@@ -1344,6 +1344,46 @@ DEFUN(readsh, READ_SHELL, "Execute shell command and display output")
     displayBuffer(Currentbuf, B_FORCE_REDRAW);
 }
 
+/* Execute shell command and load entire output to buffer; interpret as html */
+DEFUN(readShHtml, READ_SHELL_HTML, "Execute shell command and display output as html document.")
+{
+    Buffer *buf;
+    MySignalHandler(*prevtrap) ();
+    char *cmd;
+
+    CurrentKeyData = NULL;	/* not allowed in w3m-control: */
+    cmd = searchKeyData();
+    if (cmd == NULL || *cmd == '\0') {
+	cmd = inputLineHist("(read shell[html])!", "", IN_COMMAND, ShellHist);
+    }
+    if (cmd != NULL)
+	cmd = conv_to_system(cmd);
+    if (cmd == NULL || *cmd == '\0') {
+	displayBuffer(Currentbuf, B_NORMAL);
+	return;
+    }
+    prevtrap = mySignal(SIGINT, intTrap);
+    crmode();
+    buf = getshell(cmd);
+    mySignal(SIGINT, prevtrap);
+    term_raw();
+    if (buf == NULL) {
+	/* FIXME: gettextize? */
+	disp_message("Execution failed", TRUE);
+	return;
+    }
+    else {
+	buf->bufferprop |= (BP_INTERNAL | BP_NO_URL);
+	if (buf->type == NULL)
+	    buf->type = "text/html";
+	pushBuffer(buf);
+    }
+    // redraw screen
+    clear();
+    arrangeCursor(Currentbuf);
+    displayBuffer(Currentbuf, B_FORCE_REDRAW);
+}
+
 /* Execute shell command */
 DEFUN(execsh, EXEC_SHELL SHELL, "Execute shell command and display output")
 {

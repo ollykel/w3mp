@@ -32,6 +32,7 @@ extern void setEnv(void);
 extern void pipeBuf(void);
 extern void pipesh(void);
 extern void readsh(void);
+extern void readShHtml(void);
 extern void execsh(void);
 extern void ldfile(void);
 extern void ldhelp(void);
