@@ -796,8 +796,10 @@ nscroll(int n, int mode)
 		cursorUp0(buf, 1);
 	}
     }
-    clear();
-    arrangeCursor(buf);
+    if (mode & B_SCROLL) {
+	clear();
+	arrangeCursor(buf);
+    }
     displayBuffer(buf, mode);
 }
 
