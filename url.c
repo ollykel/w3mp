@@ -1640,7 +1640,7 @@ HTTPrequest(ParsedURL *pu, ParsedURL *current, HRequest *hr, TextList *extra)
 }
 
 void
-init_stregam(URLFile *uf, int scheme, InputStream stream)
+init_stream(URLFile *uf, int scheme, InputStream stream)
 {
     memset(uf, 0, sizeof(URLFile));
     uf->stream = stream;
@@ -1698,7 +1698,6 @@ openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
     // set up curl handle
     curl_handle = curl_easy_init();
     if (!curl_handle) {
-	sock_log("Can't open socket\n");
 	return url_file;
     }
     curl_easy_setopt(curl_handle, CURLOPT_HEADER, 1L);// output response header
@@ -1746,6 +1745,7 @@ openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
     }
     // misc. standard headers (i.e. User-Agent)
     struct curl_slist *curl_extra_headers = NULL;
+    // TODO: fix custom headers
     Str tmp = Strnew();
     if (hr->referer == NO_REFERER)
 	Strcat_charp(tmp, otherinfo(pu, NULL, NULL));
@@ -1753,10 +1753,11 @@ openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
 	Strcat_charp(tmp, otherinfo(pu, current, hr->referer));
     for (char *curr_header = tmp->ptr, *c = tmp->ptr; *c; c++) {
 	if (*c == '\n' || *c == '\r') {
-	    if (*curr_header)
-		curl_extra_headers = curl_slist_append(curl_extra_headers, curr_header);
-	    curr_header = c;
 	    *c = '\0';
+	    if (*curr_header) {
+		curl_extra_headers = curl_slist_append(curl_extra_headers, curr_header);
+	    }
+	    curr_header = c;
 	}
 	else if (!*curr_header) {
 	    curr_header = c;
@@ -1764,7 +1765,7 @@ openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
     }
     // other header info from extra_header
     if (extra_header) {
-	for (i = extra_header->first; i != NULL; i = i->next) {
+	for (TextListItem *i = extra_header->first; i != NULL; i = i->next) {
 	    if (strncasecmp(i->ptr, "Authorization:",
 			    sizeof("Authorization:") - 1) == 0) {
 #ifdef USE_SSL
@@ -1782,8 +1783,8 @@ openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
 	    }
 	    curl_extra_headers = curl_slist_append(curl_extra_headers, i->ptr);
 	}
-	curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, curl_extra_headers);
     }
+    curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, curl_extra_headers);
 #ifdef USE_COOKIE
     if (hr->command != HR_COMMAND_CONNECT &&
 	    use_cookie && (cookie = find_cookie(pu))) {
@@ -1795,7 +1796,7 @@ openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
     if(w3m_reqlog){
 	FILE *ff = fopen(w3m_reqlog, "a");
 	if (!ff)
-	    return uf;
+	    return url_file;
 	if (use_ssl)
 	    fputs("HTTPS: request via SSL\n", ff);
 	else
@@ -1964,131 +1965,8 @@ openURL(char *url, ParsedURL *pu, ParsedURL *current,
 #ifdef USE_SSL
     case SCM_HTTPS:
 #endif				/* USE_SSL */
-	if (pu->file == NULL)
-	    pu->file = allocStr("/", -1);
-	if (request && request->method == FORM_METHOD_POST && request->body)
-	    hr->command = HR_COMMAND_POST;
-	if (request && request->method == FORM_METHOD_HEAD)
-	    hr->command = HR_COMMAND_HEAD;
-	if ((
-#ifdef USE_SSL
-		(pu->scheme == SCM_HTTPS) ? non_null(HTTPS_proxy) :
-#endif				/* USE_SSL */
-		non_null(HTTP_proxy)) && !Do_not_use_proxy &&
-	    pu->host != NULL && !check_no_proxy(pu->host)) {
-	    hr->flag |= HR_FLAG_PROXY;
-#ifdef USE_SSL
-	    if (pu->scheme == SCM_HTTPS && *status == HTST_CONNECT) {
-		sock = ssl_socket_of(ouf->stream);
-		if (!(sslh = openSSLHandle(sock, pu->host,
-					   &uf.ssl_certificate))) {
-		    *status = HTST_MISSING;
-		    return uf;
-		}
-	    }
-	    else if (pu->scheme == SCM_HTTPS) {
-		sock = openSocket(HTTPS_proxy_parsed.host,
-				  schemeNumToName(HTTPS_proxy_parsed.scheme),
-				  HTTPS_proxy_parsed.port);
-		sslh = NULL;
-	    }
-	    else {
-#endif				/* USE_SSL */
-		sock = openSocket(HTTP_proxy_parsed.host,
-				  schemeNumToName(HTTP_proxy_parsed.scheme),
-				  HTTP_proxy_parsed.port);
-#ifdef USE_SSL
-		sslh = NULL;
-	    }
-#endif				/* USE_SSL */
-	    if (sock < 0) {
-#ifdef SOCK_DEBUG
-		sock_log("Can't open socket\n");
-#endif
-		return uf;
-	    }
-#ifdef USE_SSL
-	    if (pu->scheme == SCM_HTTPS) {
-		if (*status == HTST_NORMAL) {
-		    hr->command = HR_COMMAND_CONNECT;
-		    tmp = HTTPrequest(pu, current, hr, extra_header);
-		    *status = HTST_CONNECT;
-		}
-		else {
-		    hr->flag |= HR_FLAG_LOCAL;
-		    tmp = HTTPrequest(pu, current, hr, extra_header);
-		    *status = HTST_NORMAL;
-		}
-	    }
-	    else
-#endif				/* USE_SSL */
-	    {
-		tmp = HTTPrequest(pu, current, hr, extra_header);
-		*status = HTST_NORMAL;
-	    }
-	}
-	else {
-	    sock = openSocket(pu->host, schemeNumToName(pu->scheme), pu->port);
-	    if (sock < 0) {
-		*status = HTST_MISSING;
-		return uf;
-	    }
-#ifdef USE_SSL
-	    if (pu->scheme == SCM_HTTPS) {
-		if (!(sslh = openSSLHandle(sock, pu->host,
-					   &uf.ssl_certificate))) {
-		    *status = HTST_MISSING;
-		    return uf;
-		}
-	    }
-#endif				/* USE_SSL */
-	    hr->flag |= HR_FLAG_LOCAL;
-	    tmp = HTTPrequest(pu, current, hr, extra_header);
-	    *status = HTST_NORMAL;
-	}
-#ifdef USE_SSL
-	if (pu->scheme == SCM_HTTPS) {
-	    uf.stream = newSSLStream(sslh, sock);
-	    if (sslh)
-		SSL_write(sslh, tmp->ptr, tmp->length);
-	    else
-		write(sock, tmp->ptr, tmp->length);
-	    if(w3m_reqlog){
-		FILE *ff = fopen(w3m_reqlog, "a");
-		if (ff == NULL)
-		    return uf;
-		if (sslh)
-		    fputs("HTTPS: request via SSL\n", ff);
-		else
-		    fputs("HTTPS: request without SSL\n", ff);
-		fwrite(tmp->ptr, sizeof(char), tmp->length, ff);
-		fclose(ff);
-	    }
-	    if (hr->command == HR_COMMAND_POST &&
-		request->enctype == FORM_ENCTYPE_MULTIPART) {
-		if (sslh)
-		    SSL_write_from_file(sslh, request->body);
-		else
-		    write_from_file(sock, request->body);
-	    }
-	    return uf;
-	}
-	else
-#endif				/* USE_SSL */
-	{
-	    write(sock, tmp->ptr, tmp->length);
-	    if(w3m_reqlog){
-		FILE *ff = fopen(w3m_reqlog, "a");
-		if (ff == NULL)
-		    return uf;
-		fwrite(tmp->ptr, sizeof(char), tmp->length, ff);
-		fclose(ff);
-	    }
-	    if (hr->command == HR_COMMAND_POST &&
-		request->enctype == FORM_ENCTYPE_MULTIPART)
-		write_from_file(sock, request->body);
-	}
-	break;
+	return openURLCurl(url, pu, current, option, request, extra_header,
+	    ouf, hr, status);
 #ifdef USE_GOPHER
     case SCM_GOPHER:
 	p = pu->file;

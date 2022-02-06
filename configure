@@ -630,6 +630,7 @@ RETSIGTYPE
 HAVE_SIGSETJMP
 USE_BINMODE_STREAM
 LIBGC
+LIBCURL
 AUXBIN_TARGETS
 USE_SYSMOUSE
 USE_W3M
@@ -9029,6 +9030,11 @@ $as_echo "$ac_cv_lib_gc_GC_init" >&6; }
 if test "x$ac_cv_lib_gc_GC_init" = xyes; then :
   LIBGC="-lgc"
 fi
+
+LIBCURL="-lcurl"
+
+# maybe this is a good place to add libcurl?
+LIBS="$LIBCURL $LIBS"
 
  if test x"$ac_cv_lib_gc_GC_init" = xno; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking GC library location" >&5
