@@ -1718,6 +1718,9 @@ openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
     if (pu->scheme == SCM_HTTPS) {
 	use_ssl = 1;
 	curl_easy_setopt(curl_handle, CURLOPT_USE_SSL, CURLUSESSL_TRY);
+	if (SSL_CTX_use_PrivateKey_file && ssl_key_file && *ssl_key_file) {
+	    curl_easy_setopt(curl_handle, CURLOPT_SSLKEY, ssl_key_file);
+	}
 	curl_easy_setopt(curl_handle, CURLOPT_CAINFO, url_file.ssl_certificate);
     }
     #endif
