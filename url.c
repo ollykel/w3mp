@@ -1673,15 +1673,11 @@ openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
     Str		response = Strnew();
     Str		cookie;
     Str		url_final;
-    char	*url_exact;
     int		scheme;
     int		use_ssl = 0;
     URLFile	url_file;
     CURL	*curl_handle = NULL;
 
-#ifdef USE_SSL
-    SSL *sslh = NULL;
-#endif				/* USE_SSL */
     if (ouf) {
 	url_file = *ouf;
     }
@@ -1689,13 +1685,7 @@ openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
 	init_stream(&url_file, SCM_MISSING, NULL);
     }
     // get exact url
-    url_exact = url;
-    scheme = getURLScheme(&url_exact);
-    if (current == NULL && scheme == SCM_MISSING && !ArgvIsURL)
-	url_exact = file_to_url(url);	/* force to local file */
-    else
-	url_exact = url;
-    parseURL2(url_exact, pu, current);
+    parseURL2(url, pu, current);
     url_final = parsedURL2Str(pu);
     // set up curl handle
     curl_handle = curl_easy_init();
@@ -1811,6 +1801,10 @@ openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
     if (curl_extra_headers)
 	curl_slist_free_all(curl_extra_headers);
     curl_easy_cleanup(curl_handle);
+    if (use_ssl)
+	url_file.scheme = SCM_HTTPS;
+    else
+	url_file.scheme = SCM_HTTP;
     url_file.stream = newStrStream(response);
     return url_file;
 }// end openURLCurl
