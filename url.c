@@ -20,6 +20,8 @@
 #include <io.h>			/* ?? */
 #endif				/* __EMX__ */
 
+#include <curl/curl.h>
+
 #include "html.h"
 #include "Str.h"
 #include "myctype.h"
@@ -1638,7 +1640,7 @@ HTTPrequest(ParsedURL *pu, ParsedURL *current, HRequest *hr, TextList *extra)
 }
 
 void
-init_stream(URLFile *uf, int scheme, InputStream stream)
+init_stregam(URLFile *uf, int scheme, InputStream stream)
 {
     memset(uf, 0, sizeof(URLFile));
     uf->stream = stream;
@@ -1651,6 +1653,164 @@ init_stream(URLFile *uf, int scheme, InputStream stream)
     uf->ext = NULL;
     uf->modtime = -1;
 }
+
+size_t curl_write_cb(char *src, size_t size, size_t nmemb, void *str)
+{
+    Str response		= (Str) str;
+    size_t chunk_size		= size * nmemb;
+
+    if (!chunk_size)
+	return 0;
+    Strcat_charp_n(response, src, (int) chunk_size);
+    return chunk_size;
+}// end size_t curl_write_cb
+
+URLFile
+openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
+	URLOption *option, FormList *request, TextList *extra_header,
+	URLFile *ouf, HRequest *hr, unsigned char *status)
+{
+    Str		response = Strnew();
+    Str		cookie;
+    char	*url_exact;
+    int		scheme;
+    int		use_ssl = 0;
+    URLFile	url_file;
+    CURL	*curl_handle = NULL;
+
+#ifdef USE_SSL
+    SSL *sslh = NULL;
+#endif				/* USE_SSL */
+    if (ouf) {
+	url_file = *ouf;
+    }
+    else {
+	init_stream(&url_file, SCM_MISSING, NULL);
+    }
+    // get exact url
+    url_exact = url;
+    scheme = getURLScheme(&url_exact);
+    if (current == NULL && scheme == SCM_MISSING && !ArgvIsURL)
+	url_exact = file_to_url(url);	/* force to local file */
+    else
+	url_exact = url;
+    parseURL2(url_exact, pu, current);
+    // set up curl handle
+    curl_handle = curl_easy_init();
+    if (!curl_handle) {
+	sock_log("Can't open socket\n");
+	return url_file;
+    }
+    curl_easy_setopt(curl_handle, CURLOPT_HEADER, 1L);// output response header
+    curl_easy_setopt(curl_handle, CURLOPT_URL, url_exact);// set url
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, curl_write_cb);
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) response);
+    if (request) {
+	// set request method; defaults to GET
+	switch (request->method) {
+	    case FORM_METHOD_POST:
+		if (request->body)
+		    curl_easy_setopt(curl_handle, CURLOPT_POST, 1L);
+		    curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, request->body);
+		    const size_t form_size = strlen(request->body);
+		    if (form_size >= 2000000000)
+			curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDSIZE_LARGE, form_size);
+		    else
+			curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDSIZE, form_size);
+		break;
+	    case FORM_METHOD_HEAD:
+		curl_easy_setopt(curl_handle, CURLOPT_CUSTOMREQUEST, "HEAD");
+		break;
+	}// end switch (request)
+    }
+    #ifdef USE_SSL
+    if (pu->scheme == SCM_HTTPS) {
+	use_ssl = 1;
+	curl_easy_setopt(curl_handle, CURLOPT_USE_SSL, CURLUSESSL_TRY);
+	curl_easy_setopt(curl_handle, CURLOPT_CAINFO, url_file.ssl_certificate);
+    }
+    #endif
+    // proxy settings
+    if (!Do_not_use_proxy && !check_no_proxy(pu->host)) {
+	#ifdef USE_SSL
+	if (use_ssl && !non_null(HTTPS_proxy)) {
+	    curl_easy_setopt(curl_handle, CURLOPT_PROXY, HTTPS_proxy);
+	    curl_easy_setopt(curl_handle, CURLOPT_PROXYPORT, HTTPS_proxy_parsed.port);
+	}
+	else
+	#endif
+	if (!non_null(HTTP_proxy)) {
+	    curl_easy_setopt(curl_handle, CURLOPT_PROXY, HTTP_proxy);
+	    curl_easy_setopt(curl_handle, CURLOPT_PROXYPORT, HTTP_proxy_parsed.port);
+	}
+    }
+    // misc. standard headers (i.e. User-Agent)
+    struct curl_slist *curl_extra_headers = NULL;
+    Str tmp = Strnew();
+    if (hr->referer == NO_REFERER)
+	Strcat_charp(tmp, otherinfo(pu, NULL, NULL));
+    else
+	Strcat_charp(tmp, otherinfo(pu, current, hr->referer));
+    for (char *curr_header = tmp->ptr, *c = tmp->ptr; *c; c++) {
+	if (*c == '\n' || *c == '\r') {
+	    if (*curr_header)
+		curl_extra_headers = curl_slist_append(curl_extra_headers, curr_header);
+	    curr_header = c;
+	    *c = '\0';
+	}
+	else if (!*curr_header) {
+	    curr_header = c;
+	}
+    }
+    // other header info from extra_header
+    if (extra_header) {
+	for (i = extra_header->first; i != NULL; i = i->next) {
+	    if (strncasecmp(i->ptr, "Authorization:",
+			    sizeof("Authorization:") - 1) == 0) {
+#ifdef USE_SSL
+		if (hr->command == HR_COMMAND_CONNECT)
+		    continue;
+#endif
+	    }
+	    if (strncasecmp(i->ptr, "Proxy-Authorization:",
+			    sizeof("Proxy-Authorization:") - 1) == 0) {
+#ifdef USE_SSL
+		if (pu->scheme == SCM_HTTPS
+		    && hr->command != HR_COMMAND_CONNECT)
+		    continue;
+#endif
+	    }
+	    curl_extra_headers = curl_slist_append(curl_extra_headers, i->ptr);
+	}
+	curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, curl_extra_headers);
+    }
+#ifdef USE_COOKIE
+    if (hr->command != HR_COMMAND_CONNECT &&
+	    use_cookie && (cookie = find_cookie(pu))) {
+	curl_easy_setopt(curl_handle, CURLOPT_COOKIE, cookie->ptr);
+    }
+#endif				/* USE_COOKIE */
+    *status = HTST_NORMAL;
+    #ifdef USE_SSL
+    if(w3m_reqlog){
+	FILE *ff = fopen(w3m_reqlog, "a");
+	if (!ff)
+	    return uf;
+	if (use_ssl)
+	    fputs("HTTPS: request via SSL\n", ff);
+	else
+	    fputs("HTTPS: request without SSL\n", ff);
+	fclose(ff);
+    }
+    #endif
+    // perform request, return output as string stream
+    curl_easy_perform(curl_handle);
+    if (curl_extra_headers)
+	curl_slist_free_all(curl_extra_headers);
+    curl_easy_cleanup(curl_handle);
+    url_file.stream = newStrStream(response);
+    return url_file;
+}// end openURLCurl
 
 URLFile
 openURL(char *url, ParsedURL *pu, ParsedURL *current,
