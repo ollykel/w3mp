@@ -1737,7 +1737,6 @@ openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
     }
     // misc. standard headers (i.e. User-Agent)
     struct curl_slist *curl_extra_headers = NULL;
-    // TODO: fix custom headers
     Str tmp = Strnew();
     if (hr->referer == NO_REFERER)
 	Strcat_charp(tmp, otherinfo(pu, NULL, NULL));
