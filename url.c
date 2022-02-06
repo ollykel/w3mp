@@ -1672,6 +1672,7 @@ openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
 {
     Str		response = Strnew();
     Str		cookie;
+    Str		url_final;
     char	*url_exact;
     int		scheme;
     int		use_ssl = 0;
@@ -1695,13 +1696,14 @@ openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
     else
 	url_exact = url;
     parseURL2(url_exact, pu, current);
+    url_final = parsedURL2Str(pu);
     // set up curl handle
     curl_handle = curl_easy_init();
     if (!curl_handle) {
 	return url_file;
     }
     curl_easy_setopt(curl_handle, CURLOPT_HEADER, 1L);// output response header
-    curl_easy_setopt(curl_handle, CURLOPT_URL, url_exact);// set url
+    curl_easy_setopt(curl_handle, CURLOPT_URL, url_final->ptr);// set url
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, curl_write_cb);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) response);
     if (request) {
