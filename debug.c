@@ -12,7 +12,7 @@ void init_debugger(Debugger *debugger, const char *filename, const char *prefix,
     debugger->current_debug_level = current_debug_level;
 }// end void init_debugger
 
-void debug(const Debugger *debugger, const char *fmt, ...)
+void debugf(const Debugger *debugger, const char *fmt, ...)
 {
     if (*(debugger->current_debug_level) < debugger->minimum_debug_level)
 	return;

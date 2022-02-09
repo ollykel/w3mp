@@ -18,6 +18,6 @@ extern void init_debugger(
     const int *current_debug_level
 );
 
-extern void debug(const Debugger *debugger, const char *fmt, ...);
+extern void debugf(const Debugger *debugger, const char *fmt, ...);
 
 #endif
