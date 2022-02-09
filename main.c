@@ -18,6 +18,7 @@
 #include "terms.h"
 #include "myctype.h"
 #include "regex.h"
+#include "debug.h"
 #ifdef USE_M17N
 #include "wc.h"
 #include "wtf.h"
@@ -6437,9 +6438,17 @@ DEFUN(changeCwd, CHDIR, "Change the current working directory (./)")
     	displayBuffer(Currentbuf, B_NORMAL);
 }
 
+static int DEBUG_LEVEL = 0;
+static Debugger DEBUG_STD;
+
 int
 main(int argc, char **argv, char **envp)
 {
+    // set up debugger(s)
+    if (getenv("W3M_DEBUG_LEVEL"))
+	sscanf(getenv("W3M_DEBUG_LEVEL"), "%d", &DEBUG_LEVEL);
+    init_debugger(&DEBUG_STD, "/tmp/w3m.log", "[w3m]:", 1, &DEBUG_LEVEL);
+    // start program logic
     Buffer *newbuf = NULL;
     char *p;
     int c, i;
