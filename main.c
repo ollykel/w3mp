@@ -44,6 +44,10 @@ WSADATA WSAData;
 
 #define DSTR_LEN	256
 
+// debuggers, debug level, to be set in int main()
+static int DEBUG_LEVEL = 0;
+static Debugger DEBUG_STD;
+
 Hist *LoadHist;
 Hist *SaveHist;
 Hist *URLHist;
@@ -6437,9 +6441,6 @@ DEFUN(changeCwd, CHDIR, "Change the current working directory (./)")
 	else
     	displayBuffer(Currentbuf, B_NORMAL);
 }
-
-static int DEBUG_LEVEL = 0;
-static Debugger DEBUG_STD;
 
 int
 main(int argc, char **argv, char **envp)
