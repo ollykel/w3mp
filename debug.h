@@ -4,11 +4,10 @@
 #include <stdarg.h>
 
 typedef struct _Debugger {
-    int		fd;
+    char	*filename;
     int		minimum_debug_level;
     int		*current_debug_level;
     char	*prefix;
-    size_t	prefix_length;
 } Debugger;
 
 extern void init_debugger(
