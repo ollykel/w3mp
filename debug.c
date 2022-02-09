@@ -20,7 +20,7 @@ void debugf(const Debugger *debugger, const char *fmt, ...)
     fputs(debugger->prefix, f);
     va_list argptr;
     va_start(argptr, fmt);
-    fprintf(f, fmt, argptr);
+    vfprintf(f, fmt, argptr);
     va_end(argptr);
     fputc('\n', f);
     fclose(f);
