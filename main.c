@@ -45,8 +45,7 @@ WSADATA WSAData;
 #define DSTR_LEN	256
 
 // debuggers, debug level, to be set in int main()
-static int DEBUG_LEVEL = 0;
-static Debugger DEBUG_STD;
+Debugger DEBUG_STD;
 
 Hist *LoadHist;
 Hist *SaveHist;
@@ -6446,9 +6445,10 @@ int
 main(int argc, char **argv, char **envp)
 {
     // set up debugger(s)
+    int debug_level = 0;
     if (getenv("W3M_DEBUG_LEVEL"))
-	sscanf(getenv("W3M_DEBUG_LEVEL"), "%d", &DEBUG_LEVEL);
-    init_debugger(&DEBUG_STD, "/tmp/w3m.log", "[w3m]:", 1, &DEBUG_LEVEL);
+	sscanf(getenv("W3M_DEBUG_LEVEL"), "%d", &debug_level);
+    init_debugger(&DEBUG_STD, "/tmp/w3m.log", "[w3m]:", debug_level);
     // start program logic
     Buffer *newbuf = NULL;
     char *p;
