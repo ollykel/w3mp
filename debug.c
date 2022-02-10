@@ -4,17 +4,16 @@
 #include "debug.h"
 
 void init_debugger(Debugger *debugger, const char *filename, const char *prefix,
-    const int minimum_debug_level, const int *current_debug_level) 
+    const int debug_level) 
 {
     debugger->filename = filename;
     debugger->prefix = prefix;
-    debugger->minimum_debug_level = minimum_debug_level;
-    debugger->current_debug_level = current_debug_level;
+    debugger->debug_level = debug_level;
 }// end void init_debugger
 
-void debugf(const Debugger *debugger, const char *fmt, ...)
+void debugf(const Debugger *debugger, const int debug_threshold, const char *fmt, ...)
 {
-    if (*(debugger->current_debug_level) < debugger->minimum_debug_level)
+    if (debugger->debug_level < debug_threshold)
 	return;
     FILE *f = fopen(debugger->filename, "a");
     fputs(debugger->prefix, f);
