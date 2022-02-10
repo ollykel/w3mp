@@ -26,6 +26,7 @@
 #include "Str.h"
 #include "myctype.h"
 #include "regex.h"
+#include "debug.h"
 
 #ifdef USE_SSL
 #ifndef SSLEAY_VERSION_NUMBER
@@ -42,6 +43,8 @@
 #define	write(a,b,c)	send(a,b,c, 0)
 #define close(fd)	closesocket(fd)
 #endif
+
+extern Debugger DEBUG_STD;
 
 #ifdef INET6
 /* see rc.c, "dns_order" and dnsorders[] */
@@ -1679,21 +1682,19 @@ openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
     CURL	*curl_handle = NULL;
 
     if (ouf) {
+	if (ouf->url)
+	    url = ouf->url;
 	url_file = *ouf;
     }
     else {
 	init_stream(&url_file, SCM_MISSING, NULL);
     }
-    // get exact url
-    parseURL2(url, pu, current);
-    url_final = parsedURL2Str(pu);
     // set up curl handle
     curl_handle = curl_easy_init();
     if (!curl_handle) {
 	return url_file;
     }
     curl_easy_setopt(curl_handle, CURLOPT_HEADER, 1L);// output response header
-    curl_easy_setopt(curl_handle, CURLOPT_URL, url_final->ptr);// set url
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, curl_write_cb);
     curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *) response);
     if (request) {
@@ -1798,15 +1799,20 @@ openURLCurl(char *url, ParsedURL *pu, ParsedURL *current,
 	fclose(ff);
     }
     #endif
+    // identify scheme, final url
+    if (use_ssl)
+	url_file.scheme = SCM_HTTPS;
+    else
+	url_file.scheme = SCM_HTTP;
+    pu->scheme = url_file.scheme;
+    parseURL2(url, pu, current);
+    url_final = parsedURL2Str(pu);
+    curl_easy_setopt(curl_handle, CURLOPT_URL, url_final->ptr);// set url
     // perform request, return output as string stream
     curl_easy_perform(curl_handle);
     if (curl_extra_headers)
 	curl_slist_free_all(curl_extra_headers);
     curl_easy_cleanup(curl_handle);
-    if (use_ssl)
-	url_file.scheme = SCM_HTTPS;
-    else
-	url_file.scheme = SCM_HTTP;
     url_file.stream = newStrStream(response);
     return url_file;
 }// end openURLCurl
@@ -1964,7 +1970,7 @@ openURL(char *url, ParsedURL *pu, ParsedURL *current,
     case SCM_HTTPS:
 #endif				/* USE_SSL */
 	return openURLCurl(url, pu, current, option, request, extra_header,
-	    ouf, hr, status);
+	    &uf, hr, status);
 #ifdef USE_GOPHER
     case SCM_GOPHER:
 	p = pu->file;
