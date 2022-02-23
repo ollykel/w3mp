@@ -7798,130 +7798,149 @@ main(int argc, char **argv, char **envp)
     {
         _goLine(line_str);
     }
-    for (;;)
+    // fork into subprocess here
+    // if subprocess fails, we can perform emergency cleanup later
+    pid_t child_process = fork();
+    int child_status = 0;
+    switch (child_process)
     {
-        if (add_download_list)
-        {
-            add_download_list = FALSE;
-            ldDL();
-        }
-        if (Currentbuf->submit)
-        {
-            Anchor *a = Currentbuf->submit;
-            Currentbuf->submit = NULL;
-            gotoLine(Currentbuf, a->start.line);
-            Currentbuf->pos = a->start.pos;
-            _followForm(TRUE);
-            continue;
-        }
-        /* event processing */
-        if (CurrentEvent)
-        {
-            CurrentKey = -1;
-            CurrentKeyData = NULL;
-            CurrentCmdData = (char *) CurrentEvent->data;
-            w3mFuncList[CurrentEvent->cmd].func();
-            CurrentCmdData = NULL;
-            CurrentEvent = CurrentEvent->next;
-            continue;
-        }
-        /* get keypress event */
-#ifdef USE_ALARM
-        if (Currentbuf->event)
-        {
-            if (Currentbuf->event->status != AL_UNSET)
+        case 0:
+            for (;;)
             {
-                CurrentAlarm = Currentbuf->event;
-                if (CurrentAlarm->sec == 0)
-                {               /* refresh (0sec) */
-                    Currentbuf->event = NULL;
-                    CurrentKey = -1;
-                    CurrentKeyData = NULL;
-                    CurrentCmdData = (char *) CurrentAlarm->data;
-                    w3mFuncList[CurrentAlarm->cmd].func();
-                    CurrentCmdData = NULL;
+                if (add_download_list)
+                {
+                    add_download_list = FALSE;
+                    ldDL();
+                }
+                if (Currentbuf->submit)
+                {
+                    Anchor *a = Currentbuf->submit;
+                    Currentbuf->submit = NULL;
+                    gotoLine(Currentbuf, a->start.line);
+                    Currentbuf->pos = a->start.pos;
+                    _followForm(TRUE);
                     continue;
                 }
-            }
-            else
-                Currentbuf->event = NULL;
-        }
-        if (!Currentbuf->event)
-            CurrentAlarm = &DefaultAlarm;
-#endif
-#ifdef USE_MOUSE
-        mouse_action.in_action = FALSE;
-        if (use_mouse)
-            mouse_active();
-#endif /* USE_MOUSE */
-#ifdef USE_ALARM
-        if (CurrentAlarm->sec > 0)
-        {
-            mySignal(SIGALRM, SigAlarm);
-            alarm(CurrentAlarm->sec);
-        }
-#endif
-#ifdef SIGWINCH
-        mySignal(SIGWINCH, resize_hook);
-#endif
-#ifdef USE_IMAGE
-        if (activeImage && displayImage && Currentbuf->img &&
-            !Currentbuf->image_loaded)
-        {
-            do
-            {
-#ifdef SIGWINCH
-                if (need_resize_screen)
-                    resize_screen();
-#endif
-                loadImage(Currentbuf, IMG_FLAG_NEXT);
-            }
-            while (sleep_till_anykey(1, 0) <= 0);
-        }
-#ifdef SIGWINCH
-        else
-#endif
-#endif
-#ifdef SIGWINCH
-        {
-            do
-            {
-                if (need_resize_screen)
-                    resize_screen();
-            }
-            while (sleep_till_anykey(1, 0) <= 0);
-        }
-#endif
-        c = getch();
-#ifdef USE_ALARM
-        if (CurrentAlarm->sec > 0)
-        {
-            alarm(0);
-        }
-#endif
-#ifdef USE_MOUSE
-        if (use_mouse)
-            mouse_inactive();
-#endif /* USE_MOUSE */
-        if (IS_ASCII(c))
-        {                       /* Ascii */
-            if (('0' <= c) && (c <= '9') &&
-                (prec_num || (GlobalKeymap[c] == FUNCNAME_nulcmd)))
-            {
-                prec_num = prec_num * 10 + (int) (c - '0');
-                if (prec_num > PREC_LIMIT)
-                    prec_num = PREC_LIMIT;
-            }
-            else
-            {
-                set_buffer_environ(Currentbuf);
-                save_buffer_position(Currentbuf);
-                keyPressEventProc((int) c);
-                prec_num = 0;
-            }
-        }
-        prev_key = CurrentKey;
-        CurrentKey = -1;
-        CurrentKeyData = NULL;
-    }
+                /* event processing */
+                if (CurrentEvent)
+                {
+                    CurrentKey = -1;
+                    CurrentKeyData = NULL;
+                    CurrentCmdData = (char *) CurrentEvent->data;
+                    w3mFuncList[CurrentEvent->cmd].func();
+                    CurrentCmdData = NULL;
+                    CurrentEvent = CurrentEvent->next;
+                    continue;
+                }
+                /* get keypress event */
+        #ifdef USE_ALARM
+                if (Currentbuf->event)
+                {
+                    if (Currentbuf->event->status != AL_UNSET)
+                    {
+                        CurrentAlarm = Currentbuf->event;
+                        if (CurrentAlarm->sec == 0)
+                        {               /* refresh (0sec) */
+                            Currentbuf->event = NULL;
+                            CurrentKey = -1;
+                            CurrentKeyData = NULL;
+                            CurrentCmdData = (char *) CurrentAlarm->data;
+                            w3mFuncList[CurrentAlarm->cmd].func();
+                            CurrentCmdData = NULL;
+                            continue;
+                        }
+                    }
+                    else
+                        Currentbuf->event = NULL;
+                }
+                if (!Currentbuf->event)
+                    CurrentAlarm = &DefaultAlarm;
+        #endif
+        #ifdef USE_MOUSE
+                mouse_action.in_action = FALSE;
+                if (use_mouse)
+                    mouse_active();
+        #endif /* USE_MOUSE */
+        #ifdef USE_ALARM
+                if (CurrentAlarm->sec > 0)
+                {
+                    mySignal(SIGALRM, SigAlarm);
+                    alarm(CurrentAlarm->sec);
+                }
+        #endif
+        #ifdef SIGWINCH
+                mySignal(SIGWINCH, resize_hook);
+        #endif
+        #ifdef USE_IMAGE
+                if (activeImage && displayImage && Currentbuf->img &&
+                    !Currentbuf->image_loaded)
+                {
+                    do
+                    {
+        #ifdef SIGWINCH
+                        if (need_resize_screen)
+                            resize_screen();
+        #endif
+                        loadImage(Currentbuf, IMG_FLAG_NEXT);
+                    }
+                    while (sleep_till_anykey(1, 0) <= 0);
+                }
+        #ifdef SIGWINCH
+                else
+        #endif
+        #endif
+        #ifdef SIGWINCH
+                {
+                    do
+                    {
+                        if (need_resize_screen)
+                            resize_screen();
+                    }
+                    while (sleep_till_anykey(1, 0) <= 0);
+                }
+        #endif
+                c = getch();
+        #ifdef USE_ALARM
+                if (CurrentAlarm->sec > 0)
+                {
+                    alarm(0);
+                }
+        #endif
+        #ifdef USE_MOUSE
+                if (use_mouse)
+                    mouse_inactive();
+        #endif /* USE_MOUSE */
+                if (IS_ASCII(c))
+                {                       /* Ascii */
+                    if (('0' <= c) && (c <= '9') &&
+                        (prec_num || (GlobalKeymap[c] == FUNCNAME_nulcmd)))
+                    {
+                        prec_num = prec_num * 10 + (int) (c - '0');
+                        if (prec_num > PREC_LIMIT)
+                            prec_num = PREC_LIMIT;
+                    }
+                    else
+                    {
+                        set_buffer_environ(Currentbuf);
+                        save_buffer_position(Currentbuf);
+                        keyPressEventProc((int) c);
+                        prec_num = 0;
+                    }
+                }
+                prev_key = CurrentKey;
+                CurrentKey = -1;
+                CurrentKeyData = NULL;
+            }// end for (;;)
+            break;
+        case -1:
+            break;
+        default:
+            waitpid(child_process, &child_status, 0);
+            w3m_exit(child_status);
+            break;
+    }// end switch (child_process)
+
+    // if we reach here, something went wrong
+    // perform cleanup, exit with status one
+    w3m_exit(1);
 }
