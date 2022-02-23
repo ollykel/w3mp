@@ -15,12 +15,14 @@
  * Types.
  */
 
-struct matrix {
+struct matrix
+{
     double *me;
     int dim;
 };
 
-struct vector {
+struct vector
+{
     double *ve;
     int dim;
 };
@@ -66,4 +68,4 @@ extern Matrix new_matrix(int);
 extern Vector new_vector(int);
 
 #define _MATRIX_H
-#endif				/* _MATRIX_H */
+#endif /* _MATRIX_H */

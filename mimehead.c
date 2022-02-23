@@ -18,44 +18,42 @@
 
 #define BAD_BASE64 255
 
-static
-    unsigned char
+static unsigned char
 c2e(char x)
 {
     if ('A' <= x && x <= 'Z')
-	return (x) - 'A';
+        return (x) - 'A';
     if ('a' <= x && x <= 'z')
-	return (x) - 'a' + 26;
+        return (x) - 'a' + 26;
     if ('0' <= x && x <= '9')
-	return (x) - '0' + 52;
+        return (x) - '0' + 52;
     if (x == '+')
-	return 62;
+        return 62;
     if (x == '/')
-	return 63;
+        return 63;
     return BAD_BASE64;
 }
 
-static
-    int
+static int
 ha2d(char x, char y)
 {
     int r = 0;
 
     if ('0' <= x && x <= '9')
-	r = x - '0';
+        r = x - '0';
     else if ('A' <= x && x <= 'F')
-	r = x - 'A' + 10;
+        r = x - 'A' + 10;
     else if ('a' <= x && x <= 'f')
-	r = x - 'a' + 10;
+        r = x - 'a' + 10;
 
     r <<= 4;
 
     if ('0' <= y && y <= '9')
-	r += y - '0';
+        r += y - '0';
     else if ('A' <= y && y <= 'F')
-	r += y - 'A' + 10;
+        r += y - 'A' + 10;
     else if ('a' <= y && y <= 'f')
-	r += y - 'a' + 10;
+        r += y - 'a' + 10;
 
     return r;
 
@@ -81,41 +79,50 @@ decodeB_to_growbuf(struct growbuf *gb, char **ww)
 
     growbuf_reserve(gb, strlen(wp) + 1);
     n_pad = 0;
-    while (1) {
-	for (i = 0; i < 4; i++) {
-	    c[i] = *(wp++);
-	    if (*wp == '\0' || *wp == '?') {
-		i++;
-		for (; i < 4; i++) {
-		    c[i] = '=';
-		}
-		break;
-	    }
-	}
-	if (c[3] == '=') {
-	    n_pad++;
-	    c[3] = 'A';
-	    if (c[2] == '=') {
-		n_pad++;
-		c[2] = 'A';
-	    }
-	}
-	for (i = 0; i < 4; i++) {
-	    c[i] = c2e(c[i]);
-	    if (c[i] == BAD_BASE64) {
-		goto last;
-	    }
-	}
-	d[0] = ((c[0] << 2) | (c[1] >> 4));
-	d[1] = ((c[1] << 4) | (c[2] >> 2));
-	d[2] = ((c[2] << 6) | c[3]);
-	for (i = 0; i < 3 - n_pad; i++) {
-	    GROWBUF_ADD_CHAR(gb, d[i]);
-	}
-	if (n_pad || *wp == '\0' || *wp == '?')
-	    break;
+    while (1)
+    {
+        for (i = 0; i < 4; i++)
+        {
+            c[i] = *(wp++);
+            if (*wp == '\0' || *wp == '?')
+            {
+                i++;
+                for (; i < 4; i++)
+                {
+                    c[i] = '=';
+                }
+                break;
+            }
+        }
+        if (c[3] == '=')
+        {
+            n_pad++;
+            c[3] = 'A';
+            if (c[2] == '=')
+            {
+                n_pad++;
+                c[2] = 'A';
+            }
+        }
+        for (i = 0; i < 4; i++)
+        {
+            c[i] = c2e(c[i]);
+            if (c[i] == BAD_BASE64)
+            {
+                goto last;
+            }
+        }
+        d[0] = ((c[0] << 2) | (c[1] >> 4));
+        d[1] = ((c[1] << 4) | (c[2] >> 2));
+        d[2] = ((c[2] << 6) | c[3]);
+        for (i = 0; i < 3 - n_pad; i++)
+        {
+            GROWBUF_ADD_CHAR(gb, d[i]);
+        }
+        if (n_pad || *wp == '\0' || *wp == '?')
+            break;
     }
-last:
+  last:
     growbuf_reserve(gb, gb->length + 1);
     gb->ptr[gb->length] = '\0';
     *ww = wp;
@@ -140,21 +147,24 @@ decodeU_to_growbuf(struct growbuf *gb, char **ww)
     int n, i;
 
     if (*w <= 0x20 || *w >= 0x60)
-	return;
+        return;
     n = *w - 0x20;
     growbuf_reserve(gb, n + 1);
-    for (w++, i = 2; *w != '\0' && n; n--) {
-	c1 = (w[0] - 0x20) % 0x40;
-	c2 = (w[1] - 0x20) % 0x40;
-	gb->ptr[gb->length++] = (c1 << i) | (c2 >> (6 - i));
-	if (i == 6) {
-	    w += 2;
-	    i = 2;
-	}
-	else {
-	    w++;
-	    i += 2;
-	}
+    for (w++, i = 2; *w != '\0' && n; n--)
+    {
+        c1 = (w[0] - 0x20) % 0x40;
+        c2 = (w[1] - 0x20) % 0x40;
+        gb->ptr[gb->length++] = (c1 << i) | (c2 >> (6 - i));
+        if (i == 6)
+        {
+            w += 2;
+            i = 2;
+        }
+        else
+        {
+            w++;
+            i += 2;
+        }
     }
     gb->ptr[gb->length] = '\0';
     return;
@@ -167,17 +177,20 @@ decodeQ(char **ww)
     char *w = *ww;
     Str a = Strnew_size(strlen(w));
 
-    for (; *w != '\0' && *w != '?'; w++) {
-	if (*w == '=') {
-	    w++;
-	    Strcat_char(a, ha2d(*w, *(w + 1)));
-	    w++;
-	}
-	else if (*w == '_') {
-	    Strcat_char(a, ' ');
-	}
-	else
-	    Strcat_char(a, *w);
+    for (; *w != '\0' && *w != '?'; w++)
+    {
+        if (*w == '=')
+        {
+            w++;
+            Strcat_char(a, ha2d(*w, *(w + 1)));
+            w++;
+        }
+        else if (*w == '_')
+        {
+            Strcat_char(a, ' ');
+        }
+        else
+            Strcat_char(a, *w);
     }
     *ww = w;
     return a;
@@ -200,24 +213,28 @@ decodeQP_to_growbuf(struct growbuf *gb, char **ww)
     char *w = *ww;
 
     growbuf_reserve(gb, strlen(w) + 1);
-    for (; *w != '\0'; w++) {
-	if (*w == '=') {
-	    w++;
-	    if (*w == '\n' || *w == '\r' || *w == ' ' || *w == '\t') {
-		while (*w != '\n' && *w != '\0')
-		    w++;
-		if (*w == '\0')
-		    break;
-	    }
-	    else {
-		if (*w == '\0' || *(w + 1) == '\0')
-		    break;
-		gb->ptr[gb->length++] = ha2d(*w, *(w + 1));
-		w++;
-	    }
-	}
-	else
-	    gb->ptr[gb->length++] = *w;
+    for (; *w != '\0'; w++)
+    {
+        if (*w == '=')
+        {
+            w++;
+            if (*w == '\n' || *w == '\r' || *w == ' ' || *w == '\t')
+            {
+                while (*w != '\n' && *w != '\0')
+                    w++;
+                if (*w == '\0')
+                    break;
+            }
+            else
+            {
+                if (*w == '\0' || *(w + 1) == '\0')
+                    break;
+                gb->ptr[gb->length++] = ha2d(*w, *(w + 1));
+                w++;
+            }
+        }
+        else
+            gb->ptr[gb->length++] = *w;
     }
     gb->ptr[gb->length] = '\0';
     *ww = w;
@@ -241,44 +258,48 @@ decodeWord0(char **ow)
     Str tmp = Strnew();
 
     if (*w != '=' || *(w + 1) != '?')
-	goto convert_fail;
+        goto convert_fail;
     w += 2;
-    for (; *w != '?'; w++) {
-	if (*w == '\0')
-	    goto convert_fail;
-	Strcat_char(tmp, *w);
+    for (; *w != '?'; w++)
+    {
+        if (*w == '\0')
+            goto convert_fail;
+        Strcat_char(tmp, *w);
     }
 #ifdef USE_M17N
     c = wc_guess_charset(tmp->ptr, 0);
     if (!c)
-	goto convert_fail;
+        goto convert_fail;
 #else
-    if (strcasecmp(tmp->ptr, "ISO-8859-1") != 0 && strcasecmp(tmp->ptr, "US_ASCII") != 0)
-	/* NOT ISO-8859-1 encoding ... don't convert */
-	goto convert_fail;
+    if (strcasecmp(tmp->ptr, "ISO-8859-1") != 0
+        && strcasecmp(tmp->ptr, "US_ASCII") != 0)
+        /* NOT ISO-8859-1 encoding ... don't convert */
+        goto convert_fail;
 #endif
     w++;
     method = *(w++);
     if (*w != '?')
-	goto convert_fail;
+        goto convert_fail;
     w++;
     p = w;
-    switch (TOUPPER(method)) {
+    switch (TOUPPER(method))
+    {
     case 'B':
-	a = decodeB(&w);
-	break;
+        a = decodeB(&w);
+        break;
     case 'Q':
-	a = decodeQ(&w);
-	break;
+        a = decodeQ(&w);
+        break;
     default:
-	goto convert_fail;
+        goto convert_fail;
     }
     if (p == w)
-	goto convert_fail;
-    if (*w == '?') {
-	w++;
-	if (*w == '=')
-	    w++;
+        goto convert_fail;
+    if (*w == '?')
+    {
+        w++;
+        if (*w == '=')
+            w++;
     }
     *ow = w;
 #ifdef USE_M17N
@@ -308,45 +329,51 @@ decodeMIME0(Str orgstr)
 #ifdef USE_M17N
     *charset = 0;
 #endif
-    while (org < endp) {
-	if (*org == '=' && *(org + 1) == '?') {
-	    if (cnv == NULL) {
-		cnv = Strnew_size(orgstr->length);
-		Strcat_charp_n(cnv, orgstr->ptr, org - orgstr->ptr);
-	    }
-	  nextEncodeWord:
-	    p = org;
-	    Strcat(cnv, decodeWord(&org, charset));
-	    if (org == p) {	/* Convert failure */
-		Strcat_charp(cnv, org);
-		return cnv;
-	    }
-	    org0 = org;
-	  SPCRLoop:
-	    switch (*org0) {
-	    case ' ':
-	    case '\t':
-	    case '\n':
-	    case '\r':
-		org0++;
-		goto SPCRLoop;
-	    case '=':
-		if (org0[1] == '?') {
-		    org = org0;
-		    goto nextEncodeWord;
-		}
-	    default:
-		break;
-	    }
-	}
-	else {
-	    if (cnv != NULL)
-		Strcat_char(cnv, *org);
-	    org++;
-	}
+    while (org < endp)
+    {
+        if (*org == '=' && *(org + 1) == '?')
+        {
+            if (cnv == NULL)
+            {
+                cnv = Strnew_size(orgstr->length);
+                Strcat_charp_n(cnv, orgstr->ptr, org - orgstr->ptr);
+            }
+          nextEncodeWord:
+            p = org;
+            Strcat(cnv, decodeWord(&org, charset));
+            if (org == p)
+            {                   /* Convert failure */
+                Strcat_charp(cnv, org);
+                return cnv;
+            }
+            org0 = org;
+          SPCRLoop:
+            switch (*org0)
+            {
+            case ' ':
+            case '\t':
+            case '\n':
+            case '\r':
+                org0++;
+                goto SPCRLoop;
+            case '=':
+                if (org0[1] == '?')
+                {
+                    org = org0;
+                    goto nextEncodeWord;
+                }
+            default:
+                break;
+            }
+        }
+        else
+        {
+            if (cnv != NULL)
+                Strcat_char(cnv, *org);
+            org++;
+        }
     }
     if (cnv == NULL)
-	return orgstr;
+        return orgstr;
     return cnv;
 }
-

@@ -25,7 +25,7 @@
 #ifdef USE_MOUSE
 #ifdef USE_GPM
 #include <gpm.h>
-#endif				/* USE_GPM */
+#endif /* USE_GPM */
 #ifdef USE_SYSMOUSE
 #include <osreldate.h>
 #if (__FreeBSD_version >= 400017) || (__FreeBSD_kernel_version >= 400017)
@@ -34,16 +34,16 @@
 #else
 #include <machine/console.h>
 #endif
-int (*sysm_handler) (int x, int y, int nbs, int obs);
+int (*sysm_handler)(int x, int y, int nbs, int obs);
 static int cwidth = 8, cheight = 16;
 static int xpix, ypix, nbs, obs = 0;
-#endif				/* use_SYSMOUSE */
+#endif /* use_SYSMOUSE */
 
 static int is_xterm = 0;
 
 void mouse_init(), mouse_end();
 int mouseActive = 0;
-#endif				/* USE_MOUSE */
+#endif /* USE_MOUSE */
 
 static char *title_str = NULL;
 
@@ -56,7 +56,7 @@ static int tty;
 #ifdef __EMX__
 #define INCL_DOSNLS
 #include <os2.h>
-#endif				/* __EMX__ */
+#endif /* __EMX__ */
 
 #if defined(__CYGWIN__)
 #include <windows.h>
@@ -82,15 +82,18 @@ check_win9x(void)
     OSVERSIONINFO winVersionInfo;
 
     winVersionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-    if (GetVersionEx(&winVersionInfo) == 0) {
-	fprintf(stderr, "can't get Windows version information.\n");
-	exit(1);
+    if (GetVersionEx(&winVersionInfo) == 0)
+    {
+        fprintf(stderr, "can't get Windows version information.\n");
+        exit(1);
     }
-    if (winVersionInfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
-	isWin95 = 1;
+    if (winVersionInfo.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
+    {
+        isWin95 = 1;
     }
-    else {
-	isWin95 = 0;
+    else
+    {
+        isWin95 = 0;
     }
 }
 
@@ -98,35 +101,39 @@ void
 enable_win9x_console_input(void)
 {
     if (isWin95 && isWinConsole && isLocalConsole &&
-	hConIn == INVALID_HANDLE_VALUE) {
-	hConIn = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE,
-			    FILE_SHARE_READ | FILE_SHARE_WRITE,
-			    NULL, OPEN_EXISTING, 0, NULL);
-	if (hConIn != INVALID_HANDLE_VALUE) {
-	    getch();
-	}
+        hConIn == INVALID_HANDLE_VALUE)
+    {
+        hConIn = CreateFile("CONIN$", GENERIC_READ | GENERIC_WRITE,
+                            FILE_SHARE_READ | FILE_SHARE_WRITE,
+                            NULL, OPEN_EXISTING, 0, NULL);
+        if (hConIn != INVALID_HANDLE_VALUE)
+        {
+            getch();
+        }
     }
 }
 
 void
 disable_win9x_console_input(void)
 {
-    if (hConIn != INVALID_HANDLE_VALUE) {
-	CloseHandle(hConIn);
-	hConIn = INVALID_HANDLE_VALUE;
+    if (hConIn != INVALID_HANDLE_VALUE)
+    {
+        CloseHandle(hConIn);
+        hConIn = INVALID_HANDLE_VALUE;
     }
 }
 
 static void
 expand_win32_console_input_buffer(int n)
 {
-    if (nConIn + n >= nConInMax) {
-	char *oldv;
+    if (nConIn + n >= nConInMax)
+    {
+        char *oldv;
 
-	nConInMax = ((nConIn + n) / 2 + 1) * 3;
-	oldv = ConInV;
-	ConInV = GC_MALLOC_ATOMIC(nConInMax);
-	memcpy(ConInV, oldv, nConIn);
+        nConInMax = ((nConIn + n) / 2 + 1) * 3;
+        oldv = ConInV;
+        ConInV = GC_MALLOC_ATOMIC(nConInMax);
+        memcpy(ConInV, oldv, nConIn);
     }
 }
 
@@ -136,22 +143,25 @@ read_win32_console_input(void)
     INPUT_RECORD rec;
     DWORD nevents;
 
-    if (PeekConsoleInput(hConIn, &rec, 1, &nevents) && nevents) {
-	switch (rec.EventType) {
-	case KEY_EVENT:
-	    expand_win32_console_input_buffer(3);
+    if (PeekConsoleInput(hConIn, &rec, 1, &nevents) && nevents)
+    {
+        switch (rec.EventType)
+        {
+        case KEY_EVENT:
+            expand_win32_console_input_buffer(3);
 
-	    if (ReadConsole(hConIn, &ConInV[nConIn], 1, &nevents, NULL)) {
-		nConIn += nevents;
-		return nevents;
-	    }
+            if (ReadConsole(hConIn, &ConInV[nConIn], 1, &nevents, NULL))
+            {
+                nConIn += nevents;
+                return nevents;
+            }
 
-	    break;
-	default:
-	    break;
-	}
+            break;
+        default:
+            break;
+        }
 
-	ReadConsoleInput(hConIn, &rec, 1, &nevents);
+        ReadConsoleInput(hConIn, &rec, 1, &nevents);
     }
     return 0;
 }
@@ -162,31 +172,33 @@ read_win32_console(char *s, int n)
     KEY_EVENT_RECORD *ker;
 
     if (hConIn == INVALID_HANDLE_VALUE)
-	return read(tty, s, n);
+        return read(tty, s, n);
 
     if (n > 0)
-	for (;;) {
-	    if (iConIn < nConIn) {
-		if (n > nConIn - iConIn)
-		    n = nConIn - iConIn;
+        for (;;)
+        {
+            if (iConIn < nConIn)
+            {
+                if (n > nConIn - iConIn)
+                    n = nConIn - iConIn;
 
-		memcpy(s, ConInV, n);
+                memcpy(s, ConInV, n);
 
-		if ((iConIn += n) >= nConIn)
-		    iConIn = nConIn = 0;
+                if ((iConIn += n) >= nConIn)
+                    iConIn = nConIn = 0;
 
-		break;
-	    }
+                break;
+            }
 
-	    iConIn = nConIn = 0;
+            iConIn = nConIn = 0;
 
-	    while (!read_win32_console_input()) ;
-	}
+            while (!read_win32_console_input());
+        }
 
     return n;
 }
 
-#endif				/* SUPPORT_WIN9X_CONSOLE_MBCS */
+#endif /* SUPPORT_WIN9X_CONSOLE_MBCS */
 
 static HWND
 GetConsoleHwnd(void)
@@ -197,8 +209,7 @@ GetConsoleHwnd(void)
     char pszOldWindowTitle[MY_BUFSIZE];
 
     GetConsoleTitle(pszOldWindowTitle, MY_BUFSIZE);
-    wsprintf(pszNewWindowTitle, "%d/%d",
-	     GetTickCount(), GetCurrentProcessId());
+    wsprintf(pszNewWindowTitle, "%d/%d", GetTickCount(), GetCurrentProcessId());
     SetConsoleTitle(pszNewWindowTitle);
     Sleep(40);
     hwndFound = FindWindow(NULL, pszNewWindowTitle);
@@ -212,9 +223,10 @@ cygwin_version(void)
 {
     struct per_process *p;
 
-    p = (struct per_process *)cygwin_internal(CW_USER_DATA);
-    if (p != NULL) {
-	return (p->dll_major * 1000) + p->dll_minor;
+    p = (struct per_process *) cygwin_internal(CW_USER_DATA);
+    if (p != NULL)
+    {
+        return (p->dll_major * 1000) + p->dll_minor;
     }
     return 0;
 }
@@ -228,46 +240,54 @@ check_cygwin_console(void)
     HANDLE hWnd;
 
     if (term == NULL)
-	term = DEFAULT_TERM;
-    if (term && strncmp(term, "cygwin", 6) == 0) {
-	isWinConsole = TERM_CYGWIN;
+        term = DEFAULT_TERM;
+    if (term && strncmp(term, "cygwin", 6) == 0)
+    {
+        isWinConsole = TERM_CYGWIN;
     }
-    if (isWinConsole) {
-	hWnd = GetConsoleHwnd();
-	if (hWnd != INVALID_HANDLE_VALUE) {
-	    if (IsWindowVisible(hWnd)) {
-		isLocalConsole = 1;
-	    }
-	}
-	if (((ctype = getenv("LC_ALL")) ||
-	     (ctype = getenv("LC_CTYPE")) ||
-	     (ctype = getenv("LANG"))) && strncmp(ctype, "ja", 2) == 0) {
-	    isWinConsole = TERM_CYGWIN_RESERVE_IME;
-	}
+    if (isWinConsole)
+    {
+        hWnd = GetConsoleHwnd();
+        if (hWnd != INVALID_HANDLE_VALUE)
+        {
+            if (IsWindowVisible(hWnd))
+            {
+                isLocalConsole = 1;
+            }
+        }
+        if (((ctype = getenv("LC_ALL")) ||
+             (ctype = getenv("LC_CTYPE")) ||
+             (ctype = getenv("LANG"))) && strncmp(ctype, "ja", 2) == 0)
+        {
+            isWinConsole = TERM_CYGWIN_RESERVE_IME;
+        }
 #ifdef SUPPORT_WIN9X_CONSOLE_MBCS
-	check_win9x();
-	if (isWin95 && ttyslot() != -1) {
-	    isLocalConsole = 0;
-	}
+        check_win9x();
+        if (isWin95 && ttyslot() != -1)
+        {
+            isLocalConsole = 0;
+        }
 #endif
     }
 #if CYGWIN_VERSION_DLL_MAJOR < 1005 && defined(USE_MOUSE)
-    if (cygwin_version() <= 1003015) {
-	/* cygwin DLL 1.3.15 or earler */
-	cygwin_mouse_btn_swapped = 1;
+    if (cygwin_version() <= 1003015)
+    {
+        /* cygwin DLL 1.3.15 or earler */
+        cygwin_mouse_btn_swapped = 1;
     }
 #endif
 }
-#endif				/* __CYGWIN__ */
+#endif /* __CYGWIN__ */
 
 char *getenv(const char *);
-MySignalHandler reset_exit(SIGNAL_ARG), reset_error_exit(SIGNAL_ARG), error_dump(SIGNAL_ARG);
+MySignalHandler reset_exit(SIGNAL_ARG), reset_error_exit(SIGNAL_ARG),
+error_dump(SIGNAL_ARG);
 void setlinescols(void);
 void flush_tty();
 
 #ifndef SIGIOT
 #define SIGIOT SIGABRT
-#endif				/* not SIGIOT */
+#endif /* not SIGIOT */
 
 #ifdef HAVE_TERMIO_H
 #include <termio.h>
@@ -276,7 +296,7 @@ typedef struct termio TerminalMode;
 #define TerminalGet(fd,x)       ioctl(fd,TCGETA,x)
 #define MODEFLAG(d)     ((d).c_lflag)
 #define IMODEFLAG(d)    ((d).c_iflag)
-#endif				/* HAVE_TERMIO_H */
+#endif /* HAVE_TERMIO_H */
 
 #ifdef HAVE_TERMIOS_H
 #include <termios.h>
@@ -286,7 +306,7 @@ typedef struct termios TerminalMode;
 #define TerminalGet(fd,x)       tcgetattr(fd,x)
 #define MODEFLAG(d)     ((d).c_lflag)
 #define IMODEFLAG(d)    ((d).c_iflag)
-#endif				/* HAVE_TERMIOS_H */
+#endif /* HAVE_TERMIOS_H */
 
 #ifdef HAVE_SGTTY_H
 #include <sgtty.h>
@@ -294,26 +314,26 @@ typedef struct sgttyb TerminalMode;
 #define TerminalSet(fd,x)       ioctl(fd,TIOCSETP,x)
 #define TerminalGet(fd,x)       ioctl(fd,TIOCGETP,x)
 #define MODEFLAG(d)     ((d).sg_flags)
-#endif				/* HAVE_SGTTY_H */
+#endif /* HAVE_SGTTY_H */
 
 #ifdef __MINGW32_VERSION
 /* dummy struct */
-typedef unsigned char   cc_t;
-typedef unsigned int    speed_t;
-typedef unsigned int    tcflag_t;
+typedef unsigned char cc_t;
+typedef unsigned int speed_t;
+typedef unsigned int tcflag_t;
 
 #define NCCS 32
 struct termios
-  {
+{
     tcflag_t c_iflag;           /* input mode flags */
     tcflag_t c_oflag;           /* output mode flags */
     tcflag_t c_cflag;           /* control mode flags */
     tcflag_t c_lflag;           /* local mode flags */
-    cc_t c_line;                        /* line discipline */
+    cc_t c_line;                /* line discipline */
     cc_t c_cc[NCCS];            /* control characters */
     speed_t c_ispeed;           /* input speed */
     speed_t c_ospeed;           /* output speed */
-  };
+};
 typedef struct termios TerminalMode;
 #define TerminalSet(fd,x)       (0)
 #define TerminalGet(fd,x)       (0)
@@ -389,7 +409,7 @@ char *ttyname(int);
 #define COL_BTERM       0x0000
 
 #define S_BCOLORED      0xf000
-#endif				/* USE_BG_COLOR */
+#endif /* USE_BG_COLOR */
 
 
 #define S_GRAPHICS      0x10
@@ -410,7 +430,8 @@ char *ttyname(int);
 
 typedef unsigned short l_prop;
 
-typedef struct scline {
+typedef struct scline
+{
 #ifdef USE_M17N
     char **lineimage;
 #else
@@ -425,8 +446,7 @@ static TerminalMode d_ioval;
 static int tty = -1;
 static FILE *ttyf = NULL;
 
-static
-char bp[1024], funcstr[256];
+static char bp[1024], funcstr[256];
 
 char *T_cd, *T_ce, *T_kr, *T_kl, *T_cr, *T_bt, *T_ta, *T_sc, *T_rc,
     *T_so, *T_se, *T_us, *T_ue, *T_cl, *T_cm, *T_al, *T_sr, *T_md, *T_me,
@@ -435,7 +455,7 @@ char *T_cd, *T_ce, *T_kr, *T_kl, *T_cr, *T_bt, *T_ta, *T_sc, *T_rc,
 int LINES, COLS;
 #if defined(__CYGWIN__)
 int LASTLINE;
-#endif				/* defined(__CYGWIN__) */
+#endif /* defined(__CYGWIN__) */
 
 static int max_LINES = 0, max_COLS = 0;
 static int tab_step = 8;
@@ -456,7 +476,7 @@ void clear(), wrap(), touch_line(), touch_column(int);
 #if 0
 void need_clrtoeol(void);
 #endif
-void clrtoeol(void);		/* conflicts with curs_clear(3)? */
+void clrtoeol(void);            /* conflicts with curs_clear(3)? */
 
 static int write1(char);
 
@@ -470,20 +490,23 @@ writestr(char *s)
 
 #ifdef USE_IMAGE
 void
-put_image_osc5379(char *url, int x, int y, int w, int h, int sx, int sy, int sw, int sh)
+put_image_osc5379(char *url, int x, int y, int w, int h, int sx, int sy, int sw,
+                  int sh)
 {
     Str buf;
-    char *size ;
+    char *size;
 
     if (w > 0 && h > 0)
-	size = Sprintf("%dx%d",w,h)->ptr;
+        size = Sprintf("%dx%d", w, h)->ptr;
     else
-	size = "";
+        size = "";
 
-    MOVE(y,x);
-    buf = Sprintf("\x1b]5379;show_picture %s %s %dx%d+%d+%d\x07",url,size,sw,sh,sx,sy);
+    MOVE(y, x);
+    buf =
+        Sprintf("\x1b]5379;show_picture %s %s %dx%d+%d+%d\x07", url, size, sw,
+                sh, sx, sy);
     writestr(buf->ptr);
-    MOVE(Currentbuf->cursorY,Currentbuf->cursorX);
+    MOVE(Currentbuf->cursorY, Currentbuf->cursorX);
 }
 
 
@@ -497,48 +520,50 @@ put_image_iterm2(char *url, int x, int y, int w, int h)
     struct stat st;
 
     if (stat(url, &st))
-	return;
+        return;
 
     fp = fopen(url, "r");
     if (!fp)
-	return;
+        return;
 
     buf = Sprintf("\x1b]1337;"
-      "File="
-      "name=%s;"
-      "size=%d;"
-      "width=%d;"
-      "height=%d;"
-      "preserveAspectRatio=0;"
-      "inline=1"
-      ":", url, st.st_size, w, h);
+                  "File="
+                  "name=%s;"
+                  "size=%d;"
+                  "width=%d;"
+                  "height=%d;"
+                  "preserveAspectRatio=0;"
+                  "inline=1" ":", url, st.st_size, w, h);
 
-    MOVE(y,x);
+    MOVE(y, x);
 
     writestr(buf->ptr);
 
     cbuf = GC_MALLOC_ATOMIC(3072);
     if (!cbuf)
-	goto cleanup;
+        goto cleanup;
     i = 0;
-    while ((c = fgetc(fp)) != EOF) {
-	cbuf[i++] = c;
-	if (i == 3072) {
-	    buf = base64_encode(cbuf, i);
-	    writestr(buf->ptr);
-	    i = 0;
-	}
+    while ((c = fgetc(fp)) != EOF)
+    {
+        cbuf[i++] = c;
+        if (i == 3072)
+        {
+            buf = base64_encode(cbuf, i);
+            writestr(buf->ptr);
+            i = 0;
+        }
     }
 
-    if (i) {
-	buf = base64_encode(cbuf, i);
-	writestr(buf->ptr);
+    if (i)
+    {
+        buf = base64_encode(cbuf, i);
+        writestr(buf->ptr);
     }
 
-cleanup:
+  cleanup:
     fclose(fp);
     writestr("\a");
-    MOVE(Currentbuf->cursorY,Currentbuf->cursorX);
+    MOVE(Currentbuf->cursorY, Currentbuf->cursorX);
 }
 
 void ttymode_set(int mode, int imode);
@@ -546,7 +571,7 @@ void ttymode_reset(int mode, int imode);
 
 void
 put_image_kitty(char *url, int x, int y, int w, int h, int sx, int sy, int sw,
-    int sh, int cols, int rows)
+                int sh, int cols, int rows)
 {
     Str buf, base64;
     char *cbuf, *type, *tmpf;
@@ -560,145 +585,163 @@ put_image_kitty(char *url, int x, int y, int w, int h, int sx, int sy, int sw,
     MySignalHandler(*volatile prevstop) (SIGNAL_ARG);
 
     if (!url)
-	return;
+        return;
 
     type = guessContentType(url);
-    t = 100; /* always convert to png for now. */
+    t = 100;                    /* always convert to png for now. */
 
-    if(!(type && !strcasecmp(type, "image/png"))) {
-	tmpf = Sprintf("%s/%s.png", tmp_dir, mybasename(url))->ptr;
+    if (!(type && !strcasecmp(type, "image/png")))
+    {
+        tmpf = Sprintf("%s/%s.png", tmp_dir, mybasename(url))->ptr;
 
-	if (type && !strcasecmp(type, "image/gif")) {
-	    is_anim = 1;
-	} else {
-	    is_anim = 0;
-	}
+        if (type && !strcasecmp(type, "image/gif"))
+        {
+            is_anim = 1;
+        }
+        else
+        {
+            is_anim = 0;
+        }
 
-	/* convert only if png doesn't exist yet. */
+        /* convert only if png doesn't exist yet. */
 
-	if (stat(tmpf, &st)) {
-	    if (stat(url, &st))
-		return;
+        if (stat(tmpf, &st))
+        {
+            if (stat(url, &st))
+                return;
 
-	    flush_tty();
+            flush_tty();
 
-	    previntr = mySignal(SIGINT, SIG_IGN);
-	    prevquit = mySignal(SIGQUIT, SIG_IGN);
-	    prevstop = mySignal(SIGTSTP, SIG_IGN);
+            previntr = mySignal(SIGINT, SIG_IGN);
+            prevquit = mySignal(SIGQUIT, SIG_IGN);
+            prevstop = mySignal(SIGTSTP, SIG_IGN);
 
-	    if ((pid = fork()) == 0) {
-		i = 0;
+            if ((pid = fork()) == 0)
+            {
+                i = 0;
 
-		close(STDERR_FILENO);	/* Don't output error message. */
-		ttymode_set(ISIG, 0);
+                close(STDERR_FILENO);   /* Don't output error message. */
+                ttymode_set(ISIG, 0);
 
-		if ((cbuf = getenv("W3M_KITTY_TO_PNG")))
-		    argv[i++] = cbuf;
-		else
-		    argv[i++] = "convert";
+                if ((cbuf = getenv("W3M_KITTY_TO_PNG")))
+                    argv[i++] = cbuf;
+                else
+                    argv[i++] = "convert";
 
-		if (is_anim) {
-		    buf = Strnew_charp(url);
-		    Strcat_charp(buf, "[0]");
-		    argv[i++] = buf->ptr;
-		} else {
-		    argv[i++] = url;
-		}
-		argv[i++] = tmpf;
-		argv[i++] = NULL;
-		execvp(argv[0],argv);
-		exit(0);
-	    }
-	    else if (pid > 0) {
-		waitpid(pid, &i, 0);
-		ttymode_reset(ISIG, 0);
-		mySignal(SIGINT, previntr);
-		mySignal(SIGQUIT, prevquit);
-		mySignal(SIGTSTP, prevstop);
-	    }
+                if (is_anim)
+                {
+                    buf = Strnew_charp(url);
+                    Strcat_charp(buf, "[0]");
+                    argv[i++] = buf->ptr;
+                }
+                else
+                {
+                    argv[i++] = url;
+                }
+                argv[i++] = tmpf;
+                argv[i++] = NULL;
+                execvp(argv[0], argv);
+                exit(0);
+            }
+            else if (pid > 0)
+            {
+                waitpid(pid, &i, 0);
+                ttymode_reset(ISIG, 0);
+                mySignal(SIGINT, previntr);
+                mySignal(SIGQUIT, prevquit);
+                mySignal(SIGTSTP, prevstop);
+            }
 
-	    pushText(fileToDelete, tmpf);
-	}
-	url = tmpf;
+            pushText(fileToDelete, tmpf);
+        }
+        url = tmpf;
     }
 
     if (stat(url, &st))
-	return;
+        return;
 
     fp = fopen(url, "r");
     if (!fp)
-	return;
+        return;
 
     MOVE(y, x);
 
 
-    cbuf = GC_MALLOC_ATOMIC(3072); /* base64-encoded chunks of 4096 bytes */
+    cbuf = GC_MALLOC_ATOMIC(3072);      /* base64-encoded chunks of 4096 bytes */
     if (!cbuf)
-	goto cleanup;
+        goto cleanup;
     i = 0;
 
     while (i < 3072 && (c = fgetc(fp)) != EOF)
-	cbuf[i++] = c;
+        cbuf[i++] = c;
 
 
     base64 = base64_encode(cbuf, i);
 
     if (c == EOF)
-	m = 0;
+        m = 0;
     else
-	m = 1;
+        m = 1;
     buf = Sprintf("\x1b_Gf=%d,s=%d,v=%d,a=T,m=%d,x=%d,y=%d,w=%d,h=%d,c=%d,r=%d;"
-	  "%s\x1b\\", t, w, h, m, sx, sy, sw, sh, cols, rows, base64->ptr);
+                  "%s\x1b\\", t, w, h, m, sx, sy, sw, sh, cols, rows,
+                  base64->ptr);
     writestr(buf->ptr);
 
-    if (m) {
-	i = 0;
-	j = 0;
-	while ((c = fgetc(fp)) != EOF) {
-	    if (j) {
-		base64 = base64_encode(cbuf, i);
-		buf = Sprintf("\x1b_Gm=1;%s\x1b\\", base64->ptr);
-		writestr(buf->ptr);
-		i = 0;
-		j = 0;
-	    }
-	    cbuf[i++] = c;
-	    if (i == 3072)
-		j = 1;
-	}
+    if (m)
+    {
+        i = 0;
+        j = 0;
+        while ((c = fgetc(fp)) != EOF)
+        {
+            if (j)
+            {
+                base64 = base64_encode(cbuf, i);
+                buf = Sprintf("\x1b_Gm=1;%s\x1b\\", base64->ptr);
+                writestr(buf->ptr);
+                i = 0;
+                j = 0;
+            }
+            cbuf[i++] = c;
+            if (i == 3072)
+                j = 1;
+        }
 
-	if (i) {
-	    base64 = base64_encode(cbuf, i);
-	    buf = Sprintf("\x1b_Gm=0;%s\x1b\\", base64->ptr);
-	    writestr(buf->ptr);
-	}
+        if (i)
+        {
+            base64 = base64_encode(cbuf, i);
+            buf = Sprintf("\x1b_Gm=0;%s\x1b\\", base64->ptr);
+            writestr(buf->ptr);
+        }
     }
-cleanup:
+  cleanup:
     fclose(fp);
     MOVE(Currentbuf->cursorY, Currentbuf->cursorX);
 }
 
 static void
-save_gif(const char *path, u_char *header, size_t  header_size, u_char *body, size_t body_size)
+save_gif(const char *path, u_char * header, size_t header_size, u_char * body,
+         size_t body_size)
 {
-    int	fd;
+    int fd;
 
-    if ((fd = open(path, O_WRONLY|O_CREAT, 0600)) >= 0) {
-	write(fd, header, header_size) ;
-	write(fd, body, body_size) ;
-	write(fd, "\x3b" , 1) ;
-	close(fd) ;
+    if ((fd = open(path, O_WRONLY | O_CREAT, 0600)) >= 0)
+    {
+        write(fd, header, header_size);
+        write(fd, body, body_size);
+        write(fd, "\x3b", 1);
+        close(fd);
     }
 }
 
 static u_char *
-skip_gif_header(u_char *p)
+skip_gif_header(u_char * p)
 {
     /* Header */
     p += 10;
 
-    if (*(p) & 0x80) {
-	p += (3 * (2 << ((*p) & 0x7)));
+    if (*(p) & 0x80)
+    {
+        p += (3 * (2 << ((*p) & 0x7)));
     }
     p += 3;
 
@@ -708,8 +751,8 @@ skip_gif_header(u_char *p)
 static Str
 save_first_animation_frame(const char *path)
 {
-    int	fd;
-    struct stat	st;
+    int fd;
+    struct stat st;
     u_char *header;
     size_t header_size;
     u_char *body;
@@ -719,17 +762,20 @@ save_first_animation_frame(const char *path)
 
     new_path = Strnew_charp(path);
     Strcat_charp(new_path, "-1");
-    if (stat(new_path->ptr, &st) == 0) {
-	return new_path;
+    if (stat(new_path->ptr, &st) == 0)
+    {
+        return new_path;
     }
 
-    if ((fd = open( path, O_RDONLY)) < 0) {
-	return NULL;
+    if ((fd = open(path, O_RDONLY)) < 0)
+    {
+        return NULL;
     }
 
-    if (fstat( fd, &st) != 0 || ! (header = GC_malloc( st.st_size))){
-	close( fd);
-	return NULL;
+    if (fstat(fd, &st) != 0 || !(header = GC_malloc(st.st_size)))
+    {
+        close(fd);
+        return NULL;
     }
 
     len = read(fd, header, st.st_size);
@@ -737,39 +783,47 @@ save_first_animation_frame(const char *path)
 
     /* Header */
 
-    if (len != st.st_size || strncmp(header, "GIF89a", 6) != 0) {
-	return NULL;
+    if (len != st.st_size || strncmp(header, "GIF89a", 6) != 0)
+    {
+        return NULL;
     }
 
     p = skip_gif_header(header);
     header_size = p - header;
 
     /* Application Extension */
-    if (p[0] == 0x21 && p[1] == 0xff) {
-	p += 19;
+    if (p[0] == 0x21 && p[1] == 0xff)
+    {
+        p += 19;
     }
 
     /* Other blocks */
     body = NULL;
-    while (p + 2 < header + st.st_size) {
-	if (*(p++) == 0x21 && *(p++) == 0xf9 && *(p++) == 0x04) {
-	    if( body) {
-		/* Graphic Control Extension */
-		save_gif(new_path->ptr, header, header_size, body, p - 3 - body);
-		return new_path;
-	    }
-	    else {
-		/* skip the first frame. */
-	    }
-	    body = p - 3;
-	}
+    while (p + 2 < header + st.st_size)
+    {
+        if (*(p++) == 0x21 && *(p++) == 0xf9 && *(p++) == 0x04)
+        {
+            if (body)
+            {
+                /* Graphic Control Extension */
+                save_gif(new_path->ptr, header, header_size, body,
+                         p - 3 - body);
+                return new_path;
+            }
+            else
+            {
+                /* skip the first frame. */
+            }
+            body = p - 3;
+        }
     }
 
     return NULL;
 }
 
 void
-put_image_sixel(char *url, int x, int y, int w, int h, int sx, int sy, int sw, int sh, int n_terminal_image)
+put_image_sixel(char *url, int x, int y, int w, int h, int sx, int sy, int sw,
+                int sh, int n_terminal_image)
 {
     pid_t pid;
     int do_anim;
@@ -777,7 +831,7 @@ put_image_sixel(char *url, int x, int y, int w, int h, int sx, int sy, int sw, i
     MySignalHandler(*volatile prevquit) (SIGNAL_ARG);
     MySignalHandler(*volatile prevstop) (SIGNAL_ARG);
 
-    MOVE(y,x);
+    MOVE(y, x);
     flush_tty();
 
     do_anim = (n_terminal_image == 1 && x == 0 && y == 0 && sx == 0 && sy == 0);
@@ -786,132 +840,153 @@ put_image_sixel(char *url, int x, int y, int w, int h, int sx, int sy, int sw, i
     prevquit = mySignal(SIGQUIT, SIG_IGN);
     prevstop = mySignal(SIGTSTP, SIG_IGN);
 
-    if ((pid = fork()) == 0) {
-	char *env;
-	int n = 0;
-	char *argv[20];
-	char digit[2][11+1];
-	char clip[44+3+1];
-	Str str_url;
+    if ((pid = fork()) == 0)
+    {
+        char *env;
+        int n = 0;
+        char *argv[20];
+        char digit[2][11 + 1];
+        char clip[44 + 3 + 1];
+        Str str_url;
 
-	close(STDERR_FILENO);	/* Don't output error message. */
-	if (do_anim) {
-	    writestr("\x1b[?80h");
-	}
-	else if (!strstr(url, "://") && strcmp(url+strlen(url)-4, ".gif") == 0 &&
-                 (str_url = save_first_animation_frame(url))) {
-	    url = str_url->ptr;
-	}
-	ttymode_set(ISIG, 0);
+        close(STDERR_FILENO);   /* Don't output error message. */
+        if (do_anim)
+        {
+            writestr("\x1b[?80h");
+        }
+        else if (!strstr(url, "://")
+                 && strcmp(url + strlen(url) - 4, ".gif") == 0
+                 && (str_url = save_first_animation_frame(url)))
+        {
+            url = str_url->ptr;
+        }
+        ttymode_set(ISIG, 0);
 
-	if ((env = getenv("W3M_IMG2SIXEL"))) {
-	    char *p;
-	    env = Strnew_charp(env)->ptr;
-	    while (n < 8 && (p = strchr(env, ' '))) {
-		*p = '\0';
-		if (*env != '\0') {
-		    argv[n++] = env;
-		}
-		env = p+1;
-	    }
-	    if (*env != '\0') {
-		argv[n++] = env;
-	    }
-	}
-	else {
-		argv[n++] = "img2sixel";
-	}
-	argv[n++] = "-l";
-	argv[n++] = do_anim ? "auto" : "disable";
-	argv[n++] = "-w";
-	sprintf(digit[0], "%d", w*pixel_per_char_i);
-	argv[n++] = digit[0];
-	argv[n++] = "-h";
-	sprintf(digit[1], "%d", h*pixel_per_line_i);
-	argv[n++] = digit[1];
-	argv[n++] = "-c";
-	sprintf(clip, "%dx%d+%d+%d", sw*pixel_per_char_i, sh*pixel_per_line_i,
-			sx*pixel_per_char_i, sy*pixel_per_line_i);
-	argv[n++] = clip;
-	argv[n++] = url;
-	if (getenv("TERM") && strcmp(getenv("TERM"), "screen") == 0 &&
-	    (!getenv("SCREEN_VARIANT") || strcmp(getenv("SCREEN_VARIANT"), "sixel") != 0)) {
-	    argv[n++] = "-P";
-	}
-	argv[n++] = NULL;
-	execvp(argv[0],argv);
-	exit(0);
+        if ((env = getenv("W3M_IMG2SIXEL")))
+        {
+            char *p;
+            env = Strnew_charp(env)->ptr;
+            while (n < 8 && (p = strchr(env, ' ')))
+            {
+                *p = '\0';
+                if (*env != '\0')
+                {
+                    argv[n++] = env;
+                }
+                env = p + 1;
+            }
+            if (*env != '\0')
+            {
+                argv[n++] = env;
+            }
+        }
+        else
+        {
+            argv[n++] = "img2sixel";
+        }
+        argv[n++] = "-l";
+        argv[n++] = do_anim ? "auto" : "disable";
+        argv[n++] = "-w";
+        sprintf(digit[0], "%d", w * pixel_per_char_i);
+        argv[n++] = digit[0];
+        argv[n++] = "-h";
+        sprintf(digit[1], "%d", h * pixel_per_line_i);
+        argv[n++] = digit[1];
+        argv[n++] = "-c";
+        sprintf(clip, "%dx%d+%d+%d", sw * pixel_per_char_i,
+                sh * pixel_per_line_i, sx * pixel_per_char_i,
+                sy * pixel_per_line_i);
+        argv[n++] = clip;
+        argv[n++] = url;
+        if (getenv("TERM") && strcmp(getenv("TERM"), "screen") == 0 &&
+            (!getenv("SCREEN_VARIANT")
+             || strcmp(getenv("SCREEN_VARIANT"), "sixel") != 0))
+        {
+            argv[n++] = "-P";
+        }
+        argv[n++] = NULL;
+        execvp(argv[0], argv);
+        exit(0);
     }
-    else if (pid > 0) {
-	int status;
-	waitpid(pid, &status, 0);
-	ttymode_reset(ISIG, 0);
-	mySignal(SIGINT, previntr);
-	mySignal(SIGQUIT, prevquit);
-	mySignal(SIGTSTP, prevstop);
-	if (do_anim) {
-	    writestr("\x1b[?80l");
-	}
+    else if (pid > 0)
+    {
+        int status;
+        waitpid(pid, &status, 0);
+        ttymode_reset(ISIG, 0);
+        mySignal(SIGINT, previntr);
+        mySignal(SIGQUIT, prevquit);
+        mySignal(SIGTSTP, prevstop);
+        if (do_anim)
+        {
+            writestr("\x1b[?80l");
+        }
     }
 
-    MOVE(Currentbuf->cursorY,Currentbuf->cursorX);
+    MOVE(Currentbuf->cursorY, Currentbuf->cursorX);
 }
 
 int
 get_pixel_per_cell(int *ppc, int *ppl)
 {
-    fd_set  rfd;
+    fd_set rfd;
     struct timeval tval;
     char buf[100];
     char *p;
     ssize_t len;
     ssize_t left;
-    int wp,hp,wc,hc;
+    int wp, hp, wc, hc;
     int i;
 
 #ifdef  TIOCGWINSZ
     struct winsize ws;
     if (ioctl(tty, TIOCGWINSZ, &ws) == 0 && ws.ws_ypixel > 0 && ws.ws_row > 0 &&
-        ws.ws_xpixel > 0 && ws.ws_col > 0) {
-	*ppc = ws.ws_xpixel / ws.ws_col;
-	*ppl = ws.ws_ypixel / ws.ws_row;
-	return 1;
+        ws.ws_xpixel > 0 && ws.ws_col > 0)
+    {
+        *ppc = ws.ws_xpixel / ws.ws_col;
+        *ppl = ws.ws_ypixel / ws.ws_row;
+        return 1;
     }
 #endif
 
-    fputs("\x1b[14t\x1b[18t",ttyf); flush_tty();
+    fputs("\x1b[14t\x1b[18t", ttyf);
+    flush_tty();
 
     p = buf;
     left = sizeof(buf) - 1;
-    for (i = 0; i < 10; i++) {
-	tval.tv_usec = 200000;	/* 0.2 sec * 10 */
-	tval.tv_sec = 0;
-	FD_ZERO(&rfd);
-	FD_SET(tty,&rfd);
-	if (select(tty+1,&rfd,NULL,NULL,&tval) <= 0 || ! FD_ISSET(tty,&rfd))
-	    continue;
+    for (i = 0; i < 10; i++)
+    {
+        tval.tv_usec = 200000;  /* 0.2 sec * 10 */
+        tval.tv_sec = 0;
+        FD_ZERO(&rfd);
+        FD_SET(tty, &rfd);
+        if (select(tty + 1, &rfd, NULL, NULL, &tval) <= 0
+            || !FD_ISSET(tty, &rfd))
+            continue;
 
-	if ((len = read(tty,p,left)) <= 0)
-	    continue;
-	p[len] = '\0';
+        if ((len = read(tty, p, left)) <= 0)
+            continue;
+        p[len] = '\0';
 
-	if (sscanf(buf,"\x1b[4;%d;%dt\x1b[8;%d;%dt",&hp,&wp,&hc,&wc) == 4) {
-	    if (wp > 0 && wc > 0 && hp > 0 && hc > 0) {
-		*ppc = wp / wc;
-		*ppl = hp / hc;
-		return 1;
-	    }
-	    else {
-		return 0;
-	    }
-	}
-	p += len;
-	left -= len;
+        if (sscanf(buf, "\x1b[4;%d;%dt\x1b[8;%d;%dt", &hp, &wp, &hc, &wc) == 4)
+        {
+            if (wp > 0 && wc > 0 && hp > 0 && hc > 0)
+            {
+                *ppc = wp / wc;
+                *ppl = hp / hc;
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        p += len;
+        left -= len;
     }
 
     return 0;
 }
-#endif				/* USE_IMAGE */
+#endif /* USE_IMAGE */
 
 #ifdef USE_MOUSE
 #define W3M_TERM_INFO(name, title, mouse)	name, title, mouse

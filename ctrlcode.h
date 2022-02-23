@@ -130,8 +130,8 @@
 #define yUML_CODE	255
 
 /* internally used characters  */
-#define ANSP_CODE	0x9e	/* use for empty anchor */
-#define IMSP_CODE	0x9f	/* blank around image */
+#define ANSP_CODE	0x9e    /* use for empty anchor */
+#define IMSP_CODE	0x9f    /* blank around image */
 
 #define NBSP		"\xa0"
 #define ANSP		"\x9e"

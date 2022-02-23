@@ -30,4 +30,4 @@ extern void disable_win9x_console_input(void);
 #endif
 #endif
 
-#endif				/* not TERMS_H */
+#endif /* not TERMS_H */

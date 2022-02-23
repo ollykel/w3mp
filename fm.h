@@ -12,7 +12,7 @@
 
 
 #ifndef _GNU_SOURCE
-#define _GNU_SOURCE		/* strcasestr() */
+#define _GNU_SOURCE             /* strcasestr() */
 #endif
 
 #include <stdio.h>
@@ -29,7 +29,7 @@
 #ifdef USE_MENU
 #define MENU_SELECT
 #define MENU_MAP
-#endif				/* USE_MENU */
+#endif /* USE_MENU */
 
 #ifndef USE_COLOR
 #undef USE_ANSI_COLOR
@@ -44,14 +44,14 @@
 #include "wc.h"
 #include "wtf.h"
 #else
-typedef int wc_ces;	/* XXX: not used */
+typedef int wc_ces;             /* XXX: not used */
 #endif
 
 #ifdef HAVE_LOCALE_H
 #include <locale.h>
 #endif
 #if !HAVE_SETLOCALE
-#define setlocale(category, locale)	/* empty */
+#define setlocale(category, locale)     /* empty */
 #endif
 
 #ifdef ENABLE_NLS
@@ -59,13 +59,13 @@ typedef int wc_ces;	/* XXX: not used */
 #define _(String) gettext (String)
 #define N_(String) (String)
 #else
-# undef bindtextdomain
-# define bindtextdomain(Domain, Directory)	/* empty */
-# undef textdomain
-# define textdomain(Domain)	/* empty */
-# define _(Text) Text
-# define N_(Text) Text
-# define gettext(Text) Text
+#undef bindtextdomain
+#define bindtextdomain(Domain, Directory)       /* empty */
+#undef textdomain
+#define textdomain(Domain)      /* empty */
+#define _(Text) Text
+#define N_(Text) Text
+#define gettext(Text) Text
 #endif
 
 #include "form.h"
@@ -82,26 +82,26 @@ typedef int wc_ces;	/* XXX: not used */
 #ifndef HAVE_BCOPY
 void bcopy(const void *, void *, int);
 void bzero(void *, int);
-#endif				/* HAVE_BCOPY */
+#endif /* HAVE_BCOPY */
 #ifdef __EMX__
-#include <strings.h>		/* for bzero() and bcopy() */
+#include <strings.h>            /* for bzero() and bcopy() */
 #endif
 
 #ifdef MAINPROGRAM
 #define global
 #define init(x) =(x)
-#else				/* not MAINPROGRAM */
+#else /* not MAINPROGRAM */
 #define global extern
 #define init(x)
-#endif				/* not MAINPROGRAM */
+#endif /* not MAINPROGRAM */
 
 #define DEFUN(funcname, macroname, docstring) void funcname(void)
 
 /* 
  * Constants.
  */
-#define LINELEN	256		/* Initial line length */
-#define PAGER_MAX_LINE	10000	/* Maximum line kept as pager */
+#define LINELEN	256             /* Initial line length */
+#define PAGER_MAX_LINE	10000   /* Maximum line kept as pager */
 
 #define MAXIMUM_COLS 1024
 #define DEFAULT_COLS 80
@@ -110,10 +110,10 @@ void bzero(void *, int);
 #define MAX_IMAGE 1000
 #define MAX_IMAGE_SIZE 2048
 
-#define DEFAULT_PIXEL_PER_CHAR  7.0	/* arbitrary */
-#define DEFAULT_PIXEL_PER_LINE  14.0	/* arbitrary */
+#define DEFAULT_PIXEL_PER_CHAR  7.0     /* arbitrary */
+#define DEFAULT_PIXEL_PER_LINE  14.0    /* arbitrary */
 #else
-#define DEFAULT_PIXEL_PER_CHAR  8.0	/* arbitrary */
+#define DEFAULT_PIXEL_PER_CHAR  8.0     /* arbitrary */
 #endif
 #define MINIMUM_PIXEL_PER_CHAR  4.0
 #define MAXIMUM_PIXEL_PER_CHAR  32.0
@@ -134,7 +134,7 @@ void bzero(void *, int);
 #define CPIPEBUFFERNAME	"*stream(closed)*"
 #ifdef USE_DICT
 #define DICTBUFFERNAME "*dictionary*"
-#endif				/* USE_DICT */
+#endif /* USE_DICT */
 
 #ifndef HOST_NAME_MAX
 #define HOST_NAME_MAX 255
@@ -209,11 +209,11 @@ void bzero(void *, int);
 
 /* Link Buffer */
 #define LB_NOLINK	-1
-#define LB_FRAME	0	/* rFrame() */
+#define LB_FRAME	0       /* rFrame() */
 #define LB_N_FRAME	1
-#define LB_INFO		2	/* pginfo() */
+#define LB_INFO		2       /* pginfo() */
 #define LB_N_INFO	3
-#define LB_SOURCE	4	/* vwSrc() */
+#define LB_SOURCE	4       /* vwSrc() */
 #define LB_N_SOURCE	LB_SOURCE
 #define MAX_LB		5
 
@@ -226,9 +226,9 @@ void bzero(void *, int);
 int REV_LB[MAX_LB] = {
     LB_N_FRAME, LB_FRAME, LB_N_INFO, LB_INFO, LB_N_SOURCE,
 };
-#else				/* not MAINPROGRAM */
+#else /* not MAINPROGRAM */
 extern int REV_LB[];
-#endif				/* not MAINPROGRAM */
+#endif /* not MAINPROGRAM */
 
 /* mark URL, Message-ID */
 #define CHK_URL                1
@@ -302,7 +302,7 @@ extern int REV_LB[];
 #define HAVE_STRCASECMP
 #define strcasecmp	stricmp
 #define strncasecmp	strnicmp
-#endif				/* __EMX__ */
+#endif /* __EMX__ */
 
 
 #define SKIP_BLANKS(p) {while(*(p)&&IS_SPACE(*(p)))(p)++;}
@@ -334,7 +334,8 @@ typedef unsigned short Lineprop;
 typedef unsigned char Linecolor;
 #endif
 
-typedef struct _MapArea {
+typedef struct _MapArea
+{
     char *url;
     char *target;
     char *alt;
@@ -347,13 +348,15 @@ typedef struct _MapArea {
 #endif
 } MapArea;
 
-typedef struct _MapList {
+typedef struct _MapList
+{
     Str name;
     GeneralList *area;
     struct _MapList *next;
 } MapList;
 
-typedef struct _Line {
+typedef struct _Line
+{
     char *lineBuf;
     Lineprop *propBuf;
 #ifdef USE_ANSI_COLOR
@@ -363,22 +366,24 @@ typedef struct _Line {
     struct _Line *prev;
     int len;
     int width;
-    long linenumber;		/* on buffer */
-    long real_linenumber;	/* on file */
+    long linenumber;            /* on buffer */
+    long real_linenumber;       /* on file */
     unsigned short usrflags;
     int size;
     int bpos;
     int bwidth;
 } Line;
 
-typedef struct {
+typedef struct
+{
     int line;
     int pos;
     int invalid;
 } BufferPoint;
 
 #ifdef USE_IMAGE
-typedef struct _imageCache {
+typedef struct _imageCache
+{
     char *url;
     ParsedURL *current;
     char *file;
@@ -392,7 +397,8 @@ typedef struct _imageCache {
     short a_height;
 } ImageCache;
 
-typedef struct _image {
+typedef struct _image
+{
     char *url;
     char *ext;
     short width;
@@ -408,7 +414,8 @@ typedef struct _image {
 } Image;
 #endif
 
-typedef struct _anchor {
+typedef struct _anchor
+{
     char *url;
     char *target;
     char *referer;
@@ -427,14 +434,16 @@ typedef struct _anchor {
 
 #define NO_REFERER ((char*)-1)
 
-typedef struct _anchorList {
+typedef struct _anchorList
+{
     Anchor *anchors;
     int nanchor;
     int anchormax;
     int acache;
 } AnchorList;
 
-typedef struct {
+typedef struct
+{
     BufferPoint *marks;
     int nmark;
     int markmax;
@@ -444,15 +453,17 @@ typedef struct {
 #define LINK_TYPE_NONE 0
 #define LINK_TYPE_REL  1
 #define LINK_TYPE_REV  2
-typedef struct _LinkList {
+typedef struct _LinkList
+{
     char *url;
-    char *title;		/* Next, Contents, ... */
-    char *ctype;		/* Content-Type */
-    char type;			/* Rel, Rev */
+    char *title;                /* Next, Contents, ... */
+    char *ctype;                /* Content-Type */
+    char type;                  /* Rel, Rev */
     struct _LinkList *next;
 } LinkList;
 
-typedef struct _Buffer {
+typedef struct _Buffer
+{
     char *filename;
     char *buffername;
     Line *firstLine;
@@ -521,7 +532,8 @@ typedef struct _Buffer {
 #endif
 } Buffer;
 
-typedef struct _BufferPos {
+typedef struct _BufferPos
+{
     long top_linenumber;
     long cur_linenumber;
     int currentColumn;
@@ -531,7 +543,8 @@ typedef struct _BufferPos {
     struct _BufferPos *prev;
 } BufferPos;
 
-typedef struct _TabBuffer {
+typedef struct _TabBuffer
+{
     struct _TabBuffer *nextTab;
     struct _TabBuffer *prevTab;
     Buffer *currentBuffer;
@@ -541,7 +554,8 @@ typedef struct _TabBuffer {
     short y;
 } TabBuffer;
 
-typedef struct _DownloadList {
+typedef struct _DownloadList
+{
     pid_t pid;
     char *url;
     char *save;
@@ -591,14 +605,16 @@ typedef struct _DownloadList {
 #define INIT_BUFFER_WIDTH ((_INIT_BUFFER_WIDTH > 0) ? _INIT_BUFFER_WIDTH : 0)
 #define FOLD_BUFFER_WIDTH (FoldLine ? (INIT_BUFFER_WIDTH + 1) : -1)
 
-struct input_alt_attr {
-  int hseq;
-  int fid;
-  int in;
-  Str type, name, value;
+struct input_alt_attr
+{
+    int hseq;
+    int fid;
+    int in;
+    Str type, name, value;
 };
 
-typedef struct {
+typedef struct
+{
     int pos;
     int len;
     int tlen;
@@ -614,7 +630,8 @@ typedef struct {
     short bottom_margin;
 } Breakpoint;
 
-struct readbuffer {
+struct readbuffer
+{
     Str line;
     Lineprop cprop;
     short pos;
@@ -673,7 +690,7 @@ struct readbuffer {
 
 #ifdef FORMAT_NICE
 #define RB_FILL		0x80000
-#endif				/* FORMAT_NICE */
+#endif /* FORMAT_NICE */
 #define RB_DEL		0x100000
 #define RB_S		0x200000
 #define RB_HTML5	0x400000
@@ -690,22 +707,22 @@ struct readbuffer {
 }
 
 /* state of token scanning finite state machine */
-#define R_ST_NORMAL 0		/* normal */
-#define R_ST_TAG0   1		/* within tag, just after < */
-#define R_ST_TAG    2		/* within tag */
-#define R_ST_QUOTE  3		/* within single quote */
-#define R_ST_DQUOTE 4		/* within double quote */
-#define R_ST_EQL    5		/* = */
-#define R_ST_AMP    6		/* within ampersand quote */
-#define R_ST_EOL    7		/* end of file */
-#define R_ST_CMNT1  8		/* <!  */
-#define R_ST_CMNT2  9		/* <!- */
-#define R_ST_CMNT   10		/* within comment */
-#define R_ST_NCMNT1 11		/* comment - */
-#define R_ST_NCMNT2 12		/* comment -- */
-#define R_ST_NCMNT3 13		/* comment -- space */
-#define R_ST_IRRTAG 14		/* within irregular tag */
-#define R_ST_VALUE  15		/* within tag attribule value */
+#define R_ST_NORMAL 0           /* normal */
+#define R_ST_TAG0   1           /* within tag, just after < */
+#define R_ST_TAG    2           /* within tag */
+#define R_ST_QUOTE  3           /* within single quote */
+#define R_ST_DQUOTE 4           /* within double quote */
+#define R_ST_EQL    5           /* = */
+#define R_ST_AMP    6           /* within ampersand quote */
+#define R_ST_EOL    7           /* end of file */
+#define R_ST_CMNT1  8           /* <!  */
+#define R_ST_CMNT2  9           /* <!- */
+#define R_ST_CMNT   10          /* within comment */
+#define R_ST_NCMNT1 11          /* comment - */
+#define R_ST_NCMNT2 12          /* comment -- */
+#define R_ST_NCMNT3 13          /* comment -- space */
+#define R_ST_IRRTAG 14          /* within irregular tag */
+#define R_ST_VALUE  15          /* within tag attribule value */
 
 #define ST_IS_REAL_TAG(s)   ((s)==R_ST_TAG||(s)==R_ST_TAG0||(s)==R_ST_EQL||(s)==R_ST_VALUE)
 
@@ -718,7 +735,8 @@ struct readbuffer {
 #define RG_FRAME     2
 #define RG_FRAME_SRC 4
 
-struct html_feed_environ {
+struct html_feed_environ
+{
     struct readbuffer *obuf;
     TextLineList *buf;
     FILE *f;
@@ -734,12 +752,14 @@ struct html_feed_environ {
 };
 
 #ifdef USE_COOKIE
-struct portlist {
+struct portlist
+{
     unsigned short port;
     struct portlist *next;
 };
 
-struct cookie {
+struct cookie
+{
     ParsedURL url;
     Str name;
     Str value;
@@ -758,23 +778,23 @@ struct cookie {
 #define COO_DOMAIN	4
 #define COO_PATH	8
 #define COO_DISCARD	16
-#define COO_OVERRIDE	32	/* user chose to override security checks */
+#define COO_OVERRIDE	32      /* user chose to override security checks */
 
-#define COO_OVERRIDE_OK	32	/* flag to specify that an error is overridable */
-						/* version 0 refers to the original cookie_spec.html */
-						/* version 1 refers to RFC 2109 */
-						/* version 1' refers to the Internet draft to obsolete RFC 2109 */
-#define COO_EINTERNAL	(1)	/* unknown error; probably forgot to convert "return 1" in cookie.c */
-#define COO_ETAIL	(2 | COO_OVERRIDE_OK)	/* tail match failed (version 0) */
-#define COO_ESPECIAL	(3)	/* special domain check failed (version 0) */
-#define COO_EPATH	(4)	/* Path attribute mismatch (version 1 case 1) */
-#define COO_ENODOT	(5 | COO_OVERRIDE_OK)	/* no embedded dots in Domain (version 1 case 2.1) */
-#define COO_ENOTV1DOM	(6 | COO_OVERRIDE_OK)	/* Domain does not start with a dot (version 1 case 2.2) */
-#define COO_EDOM	(7 | COO_OVERRIDE_OK)	/* domain-match failed (version 1 case 3) */
-#define COO_EBADHOST	(8 | COO_OVERRIDE_OK)	/* dot in matched host name in FQDN (version 1 case 4) */
-#define COO_EPORT	(9)	/* Port match failed (version 1' case 5) */
+#define COO_OVERRIDE_OK	32      /* flag to specify that an error is overridable */
+                                                /* version 0 refers to the original cookie_spec.html */
+                                                /* version 1 refers to RFC 2109 */
+                                                /* version 1' refers to the Internet draft to obsolete RFC 2109 */
+#define COO_EINTERNAL	(1)     /* unknown error; probably forgot to convert "return 1" in cookie.c */
+#define COO_ETAIL	(2 | COO_OVERRIDE_OK)   /* tail match failed (version 0) */
+#define COO_ESPECIAL	(3)     /* special domain check failed (version 0) */
+#define COO_EPATH	(4)     /* Path attribute mismatch (version 1 case 1) */
+#define COO_ENODOT	(5 | COO_OVERRIDE_OK)   /* no embedded dots in Domain (version 1 case 2.1) */
+#define COO_ENOTV1DOM	(6 | COO_OVERRIDE_OK)   /* Domain does not start with a dot (version 1 case 2.2) */
+#define COO_EDOM	(7 | COO_OVERRIDE_OK)   /* domain-match failed (version 1 case 3) */
+#define COO_EBADHOST	(8 | COO_OVERRIDE_OK)   /* dot in matched host name in FQDN (version 1 case 4) */
+#define COO_EPORT	(9)     /* Port match failed (version 1' case 5) */
 #define COO_EMAX	COO_EPORT
-#endif				/* USE_COOKIE */
+#endif /* USE_COOKIE */
 
 /* modes for align() */
 
@@ -789,7 +809,8 @@ struct cookie {
 #define VALIGN_TOP    1
 #define VALIGN_BOTTOM 2
 
-typedef struct http_request {
+typedef struct http_request
+{
     char command;
     char flag;
     char *referer;
@@ -825,9 +846,9 @@ typedef struct http_request {
 extern int LINES, COLS;
 #if defined(__CYGWIN__)
 extern int LASTLINE;
-#else				/* not defined(__CYGWIN__) */
+#else /* not defined(__CYGWIN__) */
 #define LASTLINE (LINES-1)
-#endif				/* not defined(__CYGWIN__) */
+#endif /* not defined(__CYGWIN__) */
 
 global int Tabstop init(8);
 global int IndentIncr init(4);
@@ -846,7 +867,7 @@ global char ZeroTempfiles init(FALSE);
 global char ArgvIsURL init(TRUE);
 global char MetaRefresh init(FALSE);
 global char LocalhostOnly init(FALSE);
-global char* HostName init(NULL);
+global char *HostName init(NULL);
 
 global char fmInitialized init(FALSE);
 global char QuietMessage init(FALSE);
@@ -875,18 +896,18 @@ extern FuncList w3mFuncList[];
 global char *HTTP_proxy init(NULL);
 #ifdef USE_SSL
 global char *HTTPS_proxy init(NULL);
-#endif				/* USE_SSL */
+#endif /* USE_SSL */
 #ifdef USE_GOPHER
 global char *GOPHER_proxy init(NULL);
-#endif				/* USE_GOPHER */
+#endif /* USE_GOPHER */
 global char *FTP_proxy init(NULL);
 global ParsedURL HTTP_proxy_parsed;
 #ifdef USE_SSL
 global ParsedURL HTTPS_proxy_parsed;
-#endif				/* USE_SSL */
+#endif /* USE_SSL */
 #ifdef USE_GOPHER
 global ParsedURL GOPHER_proxy_parsed;
-#endif				/* USE_GOPHER */
+#endif /* USE_GOPHER */
 global ParsedURL FTP_proxy_parsed;
 global char *NO_proxy init(NULL);
 global int NOproxy_netaddr init(TRUE);
@@ -897,8 +918,8 @@ global int NOproxy_netaddr init(TRUE);
 #define DNS_ORDER_INET_ONLY  4
 #define DNS_ORDER_INET6_ONLY 6
 global int DNS_order init(DNS_ORDER_UNSPEC);
-extern int ai_family_order_table[7][3];	/* XXX */
-#endif				/* INET6 */
+extern int ai_family_order_table[7][3]; /* XXX */
+#endif /* INET6 */
 global TextList *NO_proxy_domains;
 global char NoCache init(FALSE);
 global char use_proxy init(TRUE);
@@ -961,19 +982,19 @@ global int override_user_agent init(FALSE);
 
 #ifdef USE_COLOR
 global int useColor init(TRUE);
-global int basic_color init(8);	/* don't change */
-global int anchor_color init(4);	/* blue  */
-global int image_color init(2);	/* green */
-global int form_color init(1);	/* red   */
+global int basic_color init(8); /* don't change */
+global int anchor_color init(4);        /* blue  */
+global int image_color init(2); /* green */
+global int form_color init(1);  /* red   */
 #ifdef USE_BG_COLOR
-global int bg_color init(8);	/* don't change */
-global int mark_color init(6);	/* cyan */
-#endif				/* USE_BG_COLOR */
+global int bg_color init(8);    /* don't change */
+global int mark_color init(6);  /* cyan */
+#endif /* USE_BG_COLOR */
 global int useActiveColor init(FALSE);
-global int active_color init(6);	/* cyan */
+global int active_color init(6);        /* cyan */
 global int useVisitedColor init(FALSE);
-global int visited_color init(5);	/* magenta  */
-#endif				/* USE_COLOR */
+global int visited_color init(5);       /* magenta  */
+#endif /* USE_COLOR */
 global int confirm_on_quit init(TRUE);
 #ifdef USE_MARK
 global int use_mark init(FALSE);
@@ -1000,7 +1021,7 @@ global int useExtImageViewer init(TRUE);
 global int maxLoadImage init(4);
 global int image_map_list init(TRUE);
 #else
-global int displayImage init(FALSE);	/* XXX: emacs-w3m use display_image=off */
+global int displayImage init(FALSE);    /* XXX: emacs-w3m use display_image=off */
 #endif
 global int pseudoInlines init(TRUE);
 global char *Editor init(DEF_EDITOR);
@@ -1052,7 +1073,7 @@ global char *DirBufferCommand init("file:///$LIB/dirlist" CGI_EXTENSION);
 #ifdef USE_DICT
 global int UseDictCommand init(TRUE);
 global char *DictCommand init("file:///$LIB/w3mdict" CGI_EXTENSION);
-#endif				/* USE_DICT */
+#endif /* USE_DICT */
 global int ignore_null_img_alt init(TRUE);
 #define DISPLAY_INS_DEL_SIMPLE	0
 #define DISPLAY_INS_DEL_NORMAL	1
@@ -1070,13 +1091,13 @@ global int MarkAllPages init(FALSE);
 global int use_migemo init(FALSE);
 global int migemo_active init(0);
 global char *migemo_command init(DEF_MIGEMO_COMMAND);
-#endif				/* USE_MIGEMO */
+#endif /* USE_MIGEMO */
 
 global struct auth_cookie *Auth_cookie init(NULL);
 #ifdef USE_COOKIE
 global char *cookie_file init(COOKIE_FILE);
 global struct cookie *First_cookie init(NULL);
-#endif				/* USE_COOKIE */
+#endif /* USE_COOKIE */
 
 global char *bin_dirs init(USER_BINDIR ", " SYS_BINDIR);
 global char *mailcap_files init(USER_MAILCAP ", " SYS_MAILCAP);
@@ -1096,11 +1117,11 @@ extern Hist *TextHist;
 global int UseHistory init(TRUE);
 global int URLHistSize init(100);
 global int SaveURLHist init(TRUE);
-#endif				/* USE_HISTORY */
+#endif /* USE_HISTORY */
 global int multicolList init(FALSE);
 
 #ifdef USE_M17N
-global wc_ces InnerCharset init(WC_CES_WTF);	/* Don't change */
+global wc_ces InnerCharset init(WC_CES_WTF);    /* Don't change */
 global wc_ces DisplayCharset init(DISPLAY_CHARSET);
 global wc_ces DocumentCharset init(DOCUMENT_CHARSET);
 global wc_ces SystemCharset init(SYSTEM_CHARSET);
@@ -1156,11 +1177,13 @@ global int reverse_mouse init(FALSE);
 global int relative_wheel_scroll init(FALSE);
 global int fixed_wheel_scroll_count init(5);
 global int relative_wheel_scroll_ratio init(30);
-typedef struct _MouseActionMap {
-    void (*func) ();
+typedef struct _MouseActionMap
+{
+    void (*func)();
     char *data;
 } MouseActionMap;
-typedef struct _MouseAction {
+typedef struct _MouseAction
+{
     char *menu_str;
     char *lastline_str;
     int menu_width;
@@ -1177,7 +1200,7 @@ typedef struct _MouseAction {
 } MouseAction;
 global MouseAction mouse_action;
 #define LIMIT_MOUSE_MENU 100
-#endif				/* USE_MOUSE */
+#endif /* USE_MOUSE */
 
 #ifdef USE_COOKIE
 global int default_use_cookie init(TRUE);
@@ -1194,7 +1217,7 @@ global char *cookie_avoid_wrong_number_of_dots init(NULL);
 global TextList *Cookie_reject_domains;
 global TextList *Cookie_accept_domains;
 global TextList *Cookie_avoid_wrong_number_of_dots_domains;
-#endif				/* USE_COOKIE */
+#endif /* USE_COOKIE */
 
 #ifdef USE_IMAGE
 global int view_unseenobject init(FALSE);
@@ -1210,8 +1233,8 @@ global char *ssl_ca_path init(NULL);
 global char *ssl_ca_file init(DEF_CAFILE);
 global int ssl_ca_default init(TRUE);
 global int ssl_path_modified init(FALSE);
-#endif				/* defined(USE_SSL) &&
-				 * defined(USE_SSL_VERIFY) */
+#endif /* defined(USE_SSL) &&
+        * defined(USE_SSL_VERIFY) */
 #ifdef USE_SSL
 global char *ssl_forbid_method init("2, 3, t, 5");
 #ifdef SSL_CTX_set_min_proto_version
@@ -1222,7 +1245,7 @@ global char *ssl_cipher init("DEFAULT:!LOW:!RC4:!EXP");
 #else
 global char *ssl_cipher init(NULL);
 #endif
-#endif				/* USE_SSL */
+#endif /* USE_SSL */
 
 global int is_redisplay init(FALSE);
 global int clear_buffer init(TRUE);
@@ -1268,7 +1291,8 @@ void w3m_exit(int i);
 #define AL_IMPLICIT      2
 #define AL_IMPLICIT_ONCE 3
 
-typedef struct _AlarmEvent {
+typedef struct _AlarmEvent
+{
     int sec;
     short status;
     int cmd;
@@ -1283,4 +1307,4 @@ typedef struct _AlarmEvent {
 #include "table.h"
 #include "proto.h"
 
-#endif				/* not FM_H */
+#endif /* not FM_H */

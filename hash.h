@@ -138,4 +138,4 @@ getHash_##sym(Hash_##sym *t, keytype key, type failval)\
     return failval;\
   return hi->value;\
 }
-#endif				/* not HASH_H */
+#endif                          /* not HASH_H */

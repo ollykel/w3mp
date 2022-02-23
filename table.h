@@ -1,21 +1,21 @@
 /* $Id: table.h,v 1.12 2003/09/22 21:02:21 ukai Exp $ */
 #if (defined(MESCHACH) && !defined(MATRIX))
 #define MATRIX
-#endif				/* (defined(MESCHACH) && !defined(MATRIX)) */
+#endif /* (defined(MESCHACH) && !defined(MATRIX)) */
 
 #ifdef MATRIX
 #ifdef MESCHACH
 #include <matrix2.h>
-#else				/* not MESCHACH */
+#else /* not MESCHACH */
 #include "matrix.h"
-#endif				/* not MESCHACH */
-#endif				/* MATRIX */
+#endif /* not MESCHACH */
+#endif /* MATRIX */
 
 #include "Str.h"
 
-#define MAX_TABLE 20		/* maximum nest level of table */
+#define MAX_TABLE 20            /* maximum nest level of table */
 #define MAX_TABLE_N_LIMIT 2000
-#define MAX_TABLE_N 20		/* maximum number of table in same level */
+#define MAX_TABLE_N 20          /* maximum number of table in same level */
 
 #define MAXROW_LIMIT 32767
 #define MAXROW 50
@@ -37,7 +37,8 @@ typedef unsigned short table_attr;
 
 #define MAXCELL 20
 #define MAXROWCELL 1000
-struct table_cell {
+struct table_cell
+{
     short col[MAXCELL];
     short colspan[MAXCELL];
     short index[MAXCELL];
@@ -46,13 +47,14 @@ struct table_cell {
 #ifdef MATRIX
     short eindex[MAXCELL];
     short necell;
-#endif				/* MATRIX */
+#endif                          /* MATRIX */
     short width[MAXCELL];
     short minimum_width[MAXCELL];
     short fixed_width[MAXCELL];
 };
 
-struct table_in {
+struct table_in
+{
     struct table *ptr;
     short col;
     short row;
@@ -61,14 +63,16 @@ struct table_in {
     TextLineList *buf;
 };
 
-struct table_linfo {
+struct table_linfo
+{
     Lineprop prev_ctype;
     signed char prev_spaces;
     Str prevchar;
     short length;
 };
 
-struct table {
+struct table
+{
     int row;
     int col;
     int maxrow;
@@ -86,7 +90,7 @@ struct table {
     int flag;
 #ifdef TABLE_EXPAND
     int real_width;
-#endif				/* TABLE_EXPAND */
+#endif                          /* TABLE_EXPAND */
     Str caption;
 #ifdef ID_EXT
     Str id;
@@ -112,7 +116,7 @@ struct table {
 #ifdef MATRIX
     MAT *matrix;
     VEC *vector;
-#endif				/* MATRIX */
+#endif                          /* MATRIX */
     int sloppy_width;
 };
 
@@ -130,7 +134,8 @@ struct table {
 #define TBLM_S		RB_S
 #define TBLM_ANCHOR	0x1000000
 
-struct table_mode {
+struct table_mode
+{
     unsigned int pre_mode;
     char indent_level;
     char caption;

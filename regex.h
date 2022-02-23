@@ -2,7 +2,8 @@
 #define REGEX_MAX	64
 #define STORAGE_MAX	256
 
-typedef struct {
+typedef struct
+{
     char type;
 #ifdef USE_M17N
     wc_wchar_t wch;
@@ -10,16 +11,19 @@ typedef struct {
     unsigned char ch;
 } longchar;
 
-typedef struct regexchar {
-    union {
-	longchar *pattern;
-	struct regex *sub;
+typedef struct regexchar
+{
+    union
+    {
+        longchar *pattern;
+        struct regex *sub;
     } p;
     unsigned char mode;
 } regexchar;
 
 
-typedef struct regex {
+typedef struct regex
+{
     regexchar re[REGEX_MAX];
     longchar storage[STORAGE_MAX];
     char *position;
@@ -28,11 +32,11 @@ typedef struct regex {
 } Regex;
 
 
-Regex *newRegex(char *ex, int igncase, Regex *regex, char **error_msg);
+Regex *newRegex(char *ex, int igncase, Regex * regex, char **error_msg);
 
-int RegexMatch(Regex *re, char *str, int len, int firstp);
+int RegexMatch(Regex * re, char *str, int len, int firstp);
 
-void MatchedPosition(Regex *re, char **first, char **last);
+void MatchedPosition(Regex * re, char **first, char **last);
 
 
 /* backward compatibility */

@@ -7,15 +7,17 @@ static unsigned int
 hashfunc(char *s)
 {
     unsigned int h = 0;
-    while (*s) {
-	if (h & 0x80000000) {
-	    h <<= 1;
-	    h |= 1;
-	}
-	else
-	    h <<= 1;
-	h += *s;
-	s++;
+    while (*s)
+    {
+        if (h & 0x80000000)
+        {
+            h <<= 1;
+            h |= 1;
+        }
+        else
+            h <<= 1;
+        h += *s;
+        s++;
     }
     return h;
 }

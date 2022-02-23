@@ -7,7 +7,8 @@
 
 /* Parsed Tag structure */
 
-struct parsed_tag {
+struct parsed_tag
+{
     unsigned char tagid;
     unsigned char *attrid;
     char **value;

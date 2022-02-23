@@ -4,7 +4,7 @@
 #define NBSP " "
 #define UseAltEntity 1
 #undef USE_M17N
-#else				/* DUMMY */
+#else /* DUMMY */
 #include "fm.h"
 #ifdef USE_M17N
 #ifdef USE_UNICODE
@@ -12,7 +12,7 @@
 #include "utf8.h"
 #endif
 #endif
-#endif				/* DUMMY */
+#endif /* DUMMY */
 
 /* *INDENT-OFF* */
 static char *alt_latin1[ 96 ] = {
@@ -36,45 +36,49 @@ conv_entity(unsigned int c)
 {
     char b = c & 0xff;
 
-    if (c < 0x20)		/* C0 */
-	return " ";
-    if (c < 0x7f)		/* ASCII */
-	return Strnew_charp_n(&b, 1)->ptr;
-    if (c < 0xa0)		/* DEL, C1 */
-	return " ";
+    if (c < 0x20)               /* C0 */
+        return " ";
+    if (c < 0x7f)               /* ASCII */
+        return Strnew_charp_n(&b, 1)->ptr;
+    if (c < 0xa0)               /* DEL, C1 */
+        return " ";
     if (c == 0xa0)
-	return NBSP;
-    if (c == 0xad)		/* SOFT HYPHEN */
+        return NBSP;
+    if (c == 0xad)              /* SOFT HYPHEN */
         return "";
-    if (c < 0x100) {		/* Latin1 (ISO 8859-1) */
-	if (UseAltEntity)
-	    return alt_latin1[c - 0xa0];
+    if (c < 0x100)
+    {                           /* Latin1 (ISO 8859-1) */
+        if (UseAltEntity)
+            return alt_latin1[c - 0xa0];
 #ifdef USE_M17N
-	return wc_conv_n(&b, 1, WC_CES_ISO_8859_1, InnerCharset)->ptr;
+        return wc_conv_n(&b, 1, WC_CES_ISO_8859_1, InnerCharset)->ptr;
 #else
-	return Strnew_charp_n(&b, 1)->ptr;
+        return Strnew_charp_n(&b, 1)->ptr;
 #endif
     }
 #ifdef USE_M17N
 #ifdef USE_UNICODE
-    if (c <= WC_C_UCS4_END) {	/* Unicode */
-	char *chk;
-	wc_uchar utf8[7];
-	wc_ucs_to_utf8(c, utf8);
-	/* we eventually need to display it so check DisplayCharset */
-	chk = wc_conv((char *)utf8, WC_CES_UTF_8, DisplayCharset ? DisplayCharset : WC_CES_US_ASCII)->ptr;
-	if (strcmp(chk, "?") != 0)
-	    return wc_conv((char *)utf8, WC_CES_UTF_8, InnerCharset)->ptr;
+    if (c <= WC_C_UCS4_END)
+    {                           /* Unicode */
+        char *chk;
+        wc_uchar utf8[7];
+        wc_ucs_to_utf8(c, utf8);
+        /* we eventually need to display it so check DisplayCharset */
+        chk =
+            wc_conv((char *) utf8, WC_CES_UTF_8,
+                    DisplayCharset ? DisplayCharset : WC_CES_US_ASCII)->ptr;
+        if (strcmp(chk, "?") != 0)
+            return wc_conv((char *) utf8, WC_CES_UTF_8, InnerCharset)->ptr;
     }
 #endif
 #endif
     if (c == 0x201c || c == 0x201f || c == 0x201d || c == 0x2033)
-	return "\"";
+        return "\"";
     if (c == 0x2018 || c == 0x201b || c == 0x2019 || c == 0x2032)
-	return "'";
+        return "'";
     if (c >= 0x2010 && c < 0x2014)
-	return "-";
+        return "-";
     if (c == 0x2014)
-	return "--";
+        return "--";
     return "?";
 }

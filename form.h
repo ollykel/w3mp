@@ -33,14 +33,15 @@
 #define FORM_ENCTYPE_URLENCODED 0
 #define FORM_ENCTYPE_MULTIPART  1
 
-#define MAX_TEXTAREA 10		/* max number of <textarea>..</textarea> 
-				 * within one document */
+#define MAX_TEXTAREA 10         /* max number of <textarea>..</textarea> 
+                                 * within one document */
 #ifdef MENU_SELECT
-#define MAX_SELECT 10		/* max number of <select>..</select>
-				 * within one document */
-#endif				/* MENU_SELECT */
+#define MAX_SELECT 10           /* max number of <select>..</select>
+                                 * within one document */
+#endif /* MENU_SELECT */
 
-typedef struct form_list {
+typedef struct form_list
+{
     struct form_item_list *item;
     struct form_item_list *lastitem;
     int method;
@@ -59,25 +60,28 @@ typedef struct form_list {
 } FormList;
 
 #ifdef MENU_SELECT
-typedef struct form_select_option_item {
+typedef struct form_select_option_item
+{
     Str value;
     Str label;
     int checked;
     struct form_select_option_item *next;
 } FormSelectOptionItem;
 
-typedef struct form_select_option {
+typedef struct form_select_option
+{
     FormSelectOptionItem *first;
     FormSelectOptionItem *last;
 } FormSelectOption;
 
-void addSelectOption(FormSelectOption *fso, Str value, Str label, int chk);
-void chooseSelectOption(struct form_item_list *fi, FormSelectOptionItem *item);
-void updateSelectOption(struct form_item_list *fi, FormSelectOptionItem *item);
+void addSelectOption(FormSelectOption * fso, Str value, Str label, int chk);
+void chooseSelectOption(struct form_item_list *fi, FormSelectOptionItem * item);
+void updateSelectOption(struct form_item_list *fi, FormSelectOptionItem * item);
 int formChooseOptionByMenu(struct form_item_list *fi, int x, int y);
-#endif				/* MENU_SELECT */
+#endif /* MENU_SELECT */
 
-typedef struct form_item_list {
+typedef struct form_item_list
+{
     int type;
     Str name;
     Str value, init_value;
@@ -91,9 +95,9 @@ typedef struct form_item_list {
     FormSelectOptionItem *select_option;
     Str label, init_label;
     int selected, init_selected;
-#endif				/* MENU_SELECT */
+#endif                          /* MENU_SELECT */
     struct form_list *parent;
     struct form_item_list *next;
 } FormItemList;
 
-#endif				/* not FORM_H */
+#endif /* not FORM_H */

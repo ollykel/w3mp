@@ -7,17 +7,18 @@
 
 #ifndef TRUE
 #define TRUE 1
-#endif				/* TRUE */
+#endif /* TRUE */
 #ifndef FALSE
 #define FALSE 0
-#endif				/* FALSE */
+#endif /* FALSE */
 
-struct growbuf {
+struct growbuf
+{
     char *ptr;
     int length;
     int area_size;
-    void *(*realloc_proc) (void *, size_t);
-    void (*free_proc) (void *);
+    void *(*realloc_proc)(void *, size_t);
+    void (*free_proc)(void *);
 };
 
 #define RAW_MODE	0
@@ -27,11 +28,11 @@ struct growbuf {
 
 extern unsigned char QUOTE_MAP[];
 extern char *HTML_QUOTE_MAP[];
-#define HTML_QUOTE_MASK   0x07	/* &, <, >, ", ' */
-#define SHELL_UNSAFE_MASK 0x08	/* [^A-Za-z0-9_./:\200-\377] */
-#define URL_QUOTE_MASK    0x10	/* [\0- \177-\377] */
-#define FILE_QUOTE_MASK   0x30	/* [\0- #%&+:?\177-\377] */
-#define URL_UNSAFE_MASK   0x70	/* [^A-Za-z0-9_$\-.] */
+#define HTML_QUOTE_MASK   0x07  /* &, <, >, ", ' */
+#define SHELL_UNSAFE_MASK 0x08  /* [^A-Za-z0-9_./:\200-\377] */
+#define URL_QUOTE_MASK    0x10  /* [\0- \177-\377] */
+#define FILE_QUOTE_MASK   0x30  /* [\0- #%&+:?\177-\377] */
+#define URL_UNSAFE_MASK   0x70  /* [^A-Za-z0-9_$\-.] */
 #define GET_QUOTE_TYPE(c) QUOTE_MAP[(int)(unsigned char)(c)]
 #define is_html_quote(c)   (GET_QUOTE_TYPE(c) & HTML_QUOTE_MASK)
 #define is_shell_unsafe(c) (GET_QUOTE_TYPE(c) & SHELL_UNSAFE_MASK)
@@ -51,11 +52,11 @@ extern char *cleanupName(char *name);
 extern char *expandPath(char *name);
 #ifndef HAVE_STRCHR
 extern char *strchr(const char *s, int c);
-#endif				/* not HAVE_STRCHR */
+#endif /* not HAVE_STRCHR */
 #ifndef HAVE_STRCASECMP
 extern int strcasecmp(const char *s1, const char *s2);
 extern int strncasecmp(const char *s1, const char *s2, size_t n);
-#endif				/* not HAVE_STRCASECMP */
+#endif /* not HAVE_STRCASECMP */
 #ifndef HAVE_STRCASESTR
 extern char *strcasestr(const char *s1, const char *s2);
 #endif
@@ -96,4 +97,4 @@ extern char *w3m_help_dir();
 #define NewWithoutGC_N(type,n)	((type*)xmalloc((n)*sizeof(type)))
 #define NewWithoutGC_Reuse(type,ptr,n)	((type*)xrealloc(ptr,(n)*sizeof(type)))
 
-#endif				/* INDEP_H */
+#endif /* INDEP_H */

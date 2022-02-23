@@ -23,7 +23,8 @@
 #define strncasecmp	strnicmp
 #endif
 
-typedef struct _Str {
+typedef struct _Str
+{
     char *ptr;
     int length;
     int area_size;
@@ -84,4 +85,4 @@ void Strgrow(Str s);
 #define Strinsert(s,n,p)             Strinsert_charp((s),(n),(p)->ptr)
 #define Strshrinkfirst(s,n)          Strdelete((s),0,(n))
 #define Strfputs(s,f)                fwrite((s)->ptr,1,(s)->length,(f))
-#endif				/* not GC_STR_H */
+#endif /* not GC_STR_H */

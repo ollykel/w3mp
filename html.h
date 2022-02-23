@@ -6,7 +6,7 @@
 #include <openssl/bio.h>
 #include <openssl/x509.h>
 #include <openssl/ssl.h>
-#endif				/* USE_SSL */
+#endif /* USE_SSL */
 
 #include <time.h>
 
@@ -17,12 +17,14 @@
 #define UFclose(f) if (ISclose((f)->stream) == 0) {(f)->stream = NULL ;}
 #define UFfileno(f) ISfileno((f)->stream)
 
-struct cmdtable {
+struct cmdtable
+{
     char *cmdname;
     int cmd;
 };
 
-struct mailcap {
+struct mailcap
+{
     char *type;
     char *viewer;
     int flags;
@@ -39,17 +41,20 @@ struct mailcap {
 #define MCSTAT_REPTYPE          0x02
 #define MCSTAT_REPPARAM         0x04
 
-struct table2 {
+struct table2
+{
     char *item1;
     char *item2;
 };
 
-typedef struct {
+typedef struct
+{
     char *referer;
     int flag;
 } URLOption;
 
-typedef struct _ParsedURL {
+typedef struct _ParsedURL
+{
     int scheme;
     char *user;
     char *pass;
@@ -63,7 +68,8 @@ typedef struct _ParsedURL {
 } ParsedURL;
 
 union input_stream;
-typedef struct {
+typedef struct
+{
     unsigned char scheme;
     char is_cgi;
     char encoding;
@@ -346,7 +352,8 @@ typedef struct {
 
 /* HTML Tag Information Table */
 
-typedef struct html_tag_info {
+typedef struct html_tag_info
+{
     char *name;
     unsigned char *accept_attribute;
     unsigned char max_attribute;
@@ -358,7 +365,8 @@ typedef struct html_tag_info {
 
 /* HTML Tag Attribute Information Table */
 
-typedef struct tag_attribute_info {
+typedef struct tag_attribute_info
+{
     char *name;
     unsigned char vtype;
     unsigned char flag;
@@ -387,7 +395,8 @@ typedef struct tag_attribute_info {
 extern TagInfo TagMAP[];
 extern TagAttrInfo AttrMAP[];
 
-struct environment {
+struct environment
+{
     unsigned char env;
     int type;
     int count;
@@ -416,6 +425,6 @@ struct environment {
 #define SCM_MAILTO      12
 #ifdef USE_SSL
 #define SCM_HTTPS       13
-#endif				/* USE_SSL */
+#endif /* USE_SSL */
 
-#endif				/* _HTML_H */
+#endif /* _HTML_H */
