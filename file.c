@@ -2,6 +2,7 @@
 /* vi: set sw=4 ts=8 ai sm noet : */
 #include "fm.h"
 #include <sys/types.h>
+#include <dirent.h>
 #include "myctype.h"
 #include <signal.h>
 #include <setjmp.h>

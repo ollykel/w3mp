@@ -6,6 +6,7 @@
 #include <setjmp.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
 #if defined(HAVE_WAITPID) || defined(HAVE_WAIT3)
@@ -5735,8 +5736,9 @@ getCodePage(void)
 void
 deleteFiles()
 {
-    Buffer *buf;
-    char *f;
+    Buffer          *buf;
+    char            *f;
+    struct stat     test_tmp_dir;
 
     for (CurrentTab = FirstTab; CurrentTab; CurrentTab = CurrentTab->nextTab)
     {
@@ -5764,7 +5766,7 @@ deleteFiles()
     }
 #ifdef HAVE_MKDTEMP
     // remove any user-created files in the tempdir
-    if (tmp_dir != config_dir && tmp_dir != data_home)
+    if (!stat(tmp_dir, &test_tmp_dir) && tmp_dir != config_dir && tmp_dir != data_home)
         if (remove_dir(tmp_dir, strlen(tmp_dir), ZeroTempfiles) == -1)
         {
             fprintf(stderr, "ERROR: could not remove temp dir (%s)!\n\r",
