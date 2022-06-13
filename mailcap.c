@@ -1,5 +1,6 @@
 /* $Id: mailcap.c,v 1.13 2006/08/07 03:10:26 ukai Exp $ */
 #include "fm.h"
+#include <string.h>
 #include "myctype.h"
 #include <stdio.h>
 #include <errno.h>
@@ -564,15 +565,15 @@ snformat(char *dest, char *fmt, size_t max_len, const char *keys,
         switch (*fmt)
         {
             case '%':
-                fmt++;
+                ++fmt;
                 if (!*fmt)
                     return;
                 if (*fmt == '%')
                 {
                     *dest = *fmt;
-                    dest++;
-                    num_written++;
-                    max_len--;
+                    ++dest;
+                    ++num_written;
+                    --max_len;
                 }
                 else if (!mapping[*fmt])
                 {
@@ -581,28 +582,33 @@ snformat(char *dest, char *fmt, size_t max_len, const char *keys,
                 else
                 {
                     for (match_src = mapping[*fmt]; max_len && *match_src;
-                         dest++, match_src++)
+                         ++dest, ++match_src)
                     {
-                        *dest = *match_src;
-                        num_written++;
-                        max_len--;
-                    }
+                        if (IS_ALNUM(*match_src))
+                        {
+                            *dest = *match_src;
+                            ++num_written;
+                            --max_len;
+                        }
+                        else
+                        {
+                            const size_t increm = max_len > 3 ? 3 : max_len;
+                            char        buf[4];
+
+                            snprintf(buf, 4, "%%%02x", (int) *match_src);
+                            memcpy(dest, buf, increm);
+                            dest += increm - 1;
+                            num_written += increm;
+                            max_len -= increm;
+                        }
+                    }// end for match_src
                 }
                 break;
             default:
-                if (IS_ALNUM(*fmt))
-                {
-                    *dest = *fmt;
-                    dest++;
-                    num_written++;
-                    max_len--;
-                }
-                else
-                {
-                    snprintf(dest, 3, "%%%02x", (int) *fmt);
-                    dest += 3;
-                    num_written += 3;
-                }
+                *dest = *fmt;
+                ++dest;
+                ++num_written;
+                --max_len;
         }// end switch (*fmt)
     }// end for (; max_len && *fmt; fmt++)
     return num_written;
