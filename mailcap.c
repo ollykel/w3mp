@@ -582,25 +582,12 @@ snformat(char *dest, char *fmt, size_t max_len, const char *keys,
                 else
                 {
                     for (match_src = mapping[*fmt]; max_len && *match_src;
-                         ++dest, ++match_src)
+                         ++match_src)
                     {
-                        if (IS_ALNUM(*match_src))
-                        {
-                            *dest = *match_src;
-                            ++num_written;
-                            --max_len;
-                        }
-                        else
-                        {
-                            const size_t increm = max_len > 3 ? 3 : max_len;
-                            char        buf[4];
-
-                            snprintf(buf, 4, "%%%02x", (int) *match_src);
-                            memcpy(dest, buf, increm);
-                            dest += increm - 1;
-                            num_written += increm;
-                            max_len -= increm;
-                        }
+                        *dest = *match_src;
+                        ++dest;
+                        ++num_written;
+                        --max_len;
                     }// end for match_src
                 }
                 break;
@@ -613,3 +600,33 @@ snformat(char *dest, char *fmt, size_t max_len, const char *keys,
     }// end for (; max_len && *fmt; fmt++)
     return num_written;
 }// end size_t snformat(...)
+
+size_t
+percent_encode(char *dest, char *src, size_t max_len)
+{
+    size_t      num_written     = 0;
+
+    for (; *src && max_len; ++src)
+    {
+        if (IS_ALNUM(*src))
+        {
+            *dest = *src;
+            ++dest;
+            ++num_written;
+            --max_len;
+        }
+        else
+        {
+            const size_t increm = max_len > 3 ? 3 : max_len;
+            char        buf[4];
+
+            snprintf(buf, 4, "%%%02x", (int) *src);
+            memcpy(dest, buf, increm);
+            dest += increm;
+            num_written += increm;
+            max_len -= increm;
+        }
+    }// end for (; *src && max_len; ++src)
+
+    return num_written;
+}// end size_t percent_encode

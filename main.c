@@ -2,6 +2,7 @@
 #define MAINPROGRAM
 #include "fm.h"
 #include <stdio.h>
+#include <string.h>
 #include <signal.h>
 #include <setjmp.h>
 #include <sys/stat.h>
@@ -5529,15 +5530,17 @@ DEFUN(dictwordat, DICT_WORD_AT, "Execute dictionary command for word at cursor")
 void
 _promptResponse(int use_newtab)
 {
-    char *data = NULL;
-    char *url_fmt = NULL;
-    size_t url_fmt_len = 0;
-    char *prompt = "(input):";
-    char *default_response = "";
-    char *input = NULL;
-    char *parsed_url = NULL;
-    size_t parsed_url_len_max = 0;
-    char *parsed_url_elems[2] = { NULL, NULL };
+    char        *data                   = NULL;
+    char        *url_fmt                = NULL;
+    size_t      url_fmt_len             = 0;
+    char        *prompt                 = "(input):";
+    char        *default_response       = "";
+    char        *input                  = NULL;
+    char        *input_encoded          = NULL;
+    size_t      input_len_max           = 0;
+    char        *parsed_url             = NULL;
+    size_t      parsed_url_len_max      = 0;
+    char        *parsed_url_elems[2]    = { NULL, NULL };
 
     data = searchKeyData();
     CurrentKeyData = NULL;
@@ -5556,18 +5559,22 @@ _promptResponse(int use_newtab)
     default_response = getQWord(&data);
   get_response:
     input = inputStrHist(prompt, default_response, TextHist);
+    input_len_max = strlen(input) * 3;
     if (!input || *input == '\0')
     {
         displayBuffer(Currentbuf, B_NORMAL);
         return;
     }
-    parsed_url_len_max = ((url_fmt_len >> 1) * strlen(input) * 3);
+    input_encoded = calloc(input_len_max + 1, 1);
+    percent_encode(input_encoded, input, input_len_max);
+    parsed_url_len_max = ((url_fmt_len / 2) * strlen(input));
     if (url_fmt_len > parsed_url_len_max)
         parsed_url_len_max = url_fmt_len + 1;
     parsed_url = calloc(parsed_url_len_max + 1, 1);
-    parsed_url_elems[0] = input;
+    parsed_url_elems[0] = input_encoded;
     snformat(parsed_url, url_fmt, parsed_url_len_max - 1, "s",
              parsed_url_elems);
+    free(input_encoded);
     if (!parsed_url || !*parsed_url)
     {
         free(parsed_url);
