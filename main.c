@@ -5559,12 +5559,12 @@ _promptResponse(int use_newtab)
     default_response = getQWord(&data);
   get_response:
     input = inputStrHist(prompt, default_response, TextHist);
-    input_len_max = strlen(input) * 3;
     if (!input || *input == '\0')
     {
         displayBuffer(Currentbuf, B_NORMAL);
         return;
     }
+    input_len_max = strlen(input) * 3;
     input_encoded = calloc(input_len_max + 1, 1);
     percent_encode(input_encoded, input, input_len_max);
     parsed_url_len_max = ((url_fmt_len / 2) * strlen(input));
