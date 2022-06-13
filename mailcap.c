@@ -558,44 +558,52 @@ snformat(char *dest, char *fmt, size_t max_len, const char *keys,
         mapping[*key] = *val;
         if (*(val + 1))
             val++;
-    }
+    }// end for (; *key; key++)
     for (; max_len && *fmt; fmt++)
     {
         switch (*fmt)
         {
-        case '%':
-            fmt++;
-            if (!*fmt)
-                return;
-            if (*fmt == '%')
-            {
-                *dest = *fmt;
-                dest++;
-                num_written++;
-                max_len--;
-            }
-            else if (!mapping[*fmt])
-            {
-                continue;
-            }
-            else
-            {
-                for (match_src = mapping[*fmt]; max_len && *match_src;
-                     dest++, match_src++)
+            case '%':
+                fmt++;
+                if (!*fmt)
+                    return;
+                if (*fmt == '%')
                 {
-                    *dest = *match_src;
+                    *dest = *fmt;
+                    dest++;
                     num_written++;
                     max_len--;
                 }
-            }
-            break;
-        default:
-            *dest = *fmt;
-            dest++;
-            num_written++;
-            max_len--;
-            break;
-        }
-    }
+                else if (!mapping[*fmt])
+                {
+                    continue;
+                }
+                else
+                {
+                    for (match_src = mapping[*fmt]; max_len && *match_src;
+                         dest++, match_src++)
+                    {
+                        *dest = *match_src;
+                        num_written++;
+                        max_len--;
+                    }
+                }
+                break;
+            default:
+                if (IS_ALNUM(*fmt))
+                {
+                    *dest = *fmt;
+                    dest++;
+                    num_written++;
+                    max_len--;
+                }
+                else
+                {
+                    snprintf(dest, 3, "%%%02x", (int) *fmt);
+                    dest += 3;
+                    num_written += 3;
+                }
+        }// end switch (*fmt)
+    }// end for (; max_len && *fmt; fmt++)
     return num_written;
-}
+}// end size_t snformat(...)
