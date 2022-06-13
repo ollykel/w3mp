@@ -5561,7 +5561,7 @@ _promptResponse(int use_newtab)
         displayBuffer(Currentbuf, B_NORMAL);
         return;
     }
-    parsed_url_len_max = ((url_fmt_len >> 1) * strlen(input)) + 1;
+    parsed_url_len_max = ((url_fmt_len >> 1) * strlen(input) * 3) + 1;
     if (url_fmt_len > parsed_url_len_max)
         parsed_url_len_max = url_fmt_len + 1;
     parsed_url = calloc(parsed_url_len_max, 1);
