@@ -5567,7 +5567,7 @@ _promptResponse(int use_newtab)
     input_len_max = strlen(input) * 3;
     input_encoded = calloc(input_len_max + 1, 1);
     percent_encode(input_encoded, input, input_len_max);
-    parsed_url_len_max = ((url_fmt_len / 2) * strlen(input));
+    parsed_url_len_max = (url_fmt_len * strlen(input));
     if (url_fmt_len > parsed_url_len_max)
         parsed_url_len_max = url_fmt_len + 1;
     parsed_url = calloc(parsed_url_len_max + 1, 1);

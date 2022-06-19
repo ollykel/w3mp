@@ -560,7 +560,7 @@ snformat(char *dest, char *fmt, size_t max_len, const char *keys,
         if (*(val + 1))
             val++;
     }// end for (; *key; key++)
-    for (; max_len && *fmt; fmt++)
+    for (; max_len && *fmt; ++fmt)
     {
         switch (*fmt)
         {
@@ -608,24 +608,56 @@ percent_encode(char *dest, char *src, size_t max_len)
 
     for (; *src && max_len; ++src)
     {
-        if (IS_ALNUM(*src))
+        switch (*src)
         {
-            *dest = *src;
-            ++dest;
-            ++num_written;
-            --max_len;
-        }
-        else
-        {
-            const size_t increm = max_len > 3 ? 3 : max_len;
-            char        buf[4];
+            case '+':
+            case '=':
+            case ' ':
+            case '\t':
+            case '!':
+            case '@':
+            case '#':
+            case '$':
+            case '^':
+            case '&':
+            case '*':
+            case '(':
+            case ')':
+            case '[':
+            case ']':
+            case '\\':
+            case '{':
+            case '}':
+            case '|':
+            case ';':
+            case ':':
+            case '\'':
+            case '"':
+            case ',':
+            case '<':
+            case '.':
+            case '>':
+            case '/':
+            case '?':
+            {
+                const size_t increm = max_len > 3 ? 3 : max_len;
+                char        buf[4];
 
-            snprintf(buf, 4, "%%%02x", (int) *src);
-            memcpy(dest, buf, increm);
-            dest += increm;
-            num_written += increm;
-            max_len -= increm;
-        }
+                snprintf(buf, 4, "%%%02x", (int) *src);
+                memcpy(dest, buf, increm);
+                dest += increm;
+                num_written += increm;
+                max_len -= increm;
+            }// end punctuation case
+            break;
+            default:
+            {
+                *dest = *src;
+                ++dest;
+                ++num_written;
+                --max_len;
+            }// end case default
+        }// end switch (*src)
     }// end for (; *src && max_len; ++src)
 
     return num_written;
